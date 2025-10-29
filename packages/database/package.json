@@ -1,0 +1,23 @@
+{
+  "name": "@rakshasetu/database",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "db:push": "dotenv -e ../../.env -- prisma db push",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:studio": "dotenv -e ../../.env -- prisma studio",
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules .turbo"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "dotenv-cli": "^7.4.4",
+    "prisma": "^5.20.0",
+    "typescript": "^5.3.3"
+  }
+}

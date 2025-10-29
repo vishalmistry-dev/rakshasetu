@@ -1,0 +1,21 @@
+{
+  "name": "rakshasetu",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:api": "pnpm --filter @rakshasetu/api dev",
+    "build": "turbo run build",
+    "db:generate": "pnpm --filter @rakshasetu/database db:generate",
+    "db:push": "pnpm --filter @rakshasetu/database db:push",
+    "db:studio": "pnpm --filter @rakshasetu/database db:studio",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
