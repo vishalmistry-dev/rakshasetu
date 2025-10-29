@@ -9,9 +9,14 @@
     "db:generate": "pnpm --filter @rakshasetu/database db:generate",
     "db:push": "pnpm --filter @rakshasetu/database db:push",
     "db:studio": "pnpm --filter @rakshasetu/database db:studio",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "prepare": "husky install"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/types": "^20.0.0",
+    "husky": "^8.0.0",
     "turbo": "^2.0.0"
   },
   "engines": {
