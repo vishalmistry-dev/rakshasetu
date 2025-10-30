@@ -1,0 +1,10 @@
+packages:
+  - apps/*
+  - packages/*
+  - apps/shopify-app/extensions/*
+
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
