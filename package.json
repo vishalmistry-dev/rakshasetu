@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:api": "pnpm --filter @rakshasetu/api dev",
+    "dev:web": "pnpm --filter @rakshasetu/website dev",
+    "dev:shopify": "pnpm --filter @rakshasetu/shopify-app dev",
     "build": "turbo run build",
     "db:generate": "pnpm --filter @rakshasetu/database db:generate",
     "db:push": "pnpm --filter @rakshasetu/database db:push",
@@ -16,6 +18,7 @@
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@commitlint/types": "^20.0.0",
+    "dotenv-cli": "^7.4.4",
     "husky": "^8.0.0",
     "turbo": "^2.0.0"
   },
