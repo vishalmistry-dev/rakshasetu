@@ -1,48 +1,121 @@
-import { useLoaderData } from "react-router";
-import { getUsers } from "../lib/db.server";
-import { authenticate } from "../shopify.server";
+import { BlockStack, InlineGrid, Layout, Page, Text } from '@shopify/polaris';
+import { useLoaderData } from 'react-router';
+import { DashboardLink } from '../components/shared/DashboardLink';
+import { OnboardingBanner } from '../components/shared/OnboardingBanner';
+import { StatsCard } from '../components/shared/StatsCard';
+import { Card } from '../components/ui/Card';
+import { merchantsApi } from '../lib/api/merchants';
+import { ordersApi } from '../lib/api/orders';
+import { formatCurrency } from '../lib/utils/format';
+import { authenticate } from '../shopify.server';
+import type { Route } from './+types/app._index';
 
-export async function loader({ request }: any) {
-  await authenticate.admin(request);
-  const users = await getUsers();
+export async function loader({ request }: Route.LoaderArgs) {
+  const { session } = await authenticate.admin(request);
 
-  return { users, dbConnected: true };
+  const merchant = await merchantsApi.get(session.shop);
+  const stats = await ordersApi.getStats(session.shop);
+
+  return { merchant, stats, shop: session.shop };
 }
 
-export default function Index() {
-  const { users, dbConnected } = useLoaderData() as any;
+export default function AppIndex() {
+  const { merchant, stats, shop } = useLoaderData<typeof loader>();
+
+  const handleStartOnboarding = () => {
+    window.location.href = '/app/onboarding';
+  };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>
-        🚀 Rakshasetu Shopify App
-      </h1>
+    <Page title="Dashboard">
+      <BlockStack gap="500">
+        <OnboardingBanner
+          status={merchant.profile.onboardingStatus}
+          onStartOnboarding={handleStartOnboarding}
+        />
 
-      <div style={{
-        background: '#1a1a1a',
-        padding: '16px',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        color: '#00ff00',
-        marginBottom: '20px'
-      }}>
-        <div>✅ Database Connected: {dbConnected ? 'Yes' : 'No'}</div>
-        <div>✅ Users in DB: {users?.length || 0}</div>
-        <div>✅ Prisma Client: Working</div>
-        <div>✅ Types: Imported from @rakshasetu/database</div>
-      </div>
+        <Layout>
+          <Layout.Section>
+            <BlockStack gap="400">
+              <Text as="h2" variant="headingMd">
+                Today&apos;s Overview
+              </Text>
 
-      {users && users.length > 0 && (
-        <div style={{ marginTop: '16px' }}>
-          <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>Recent Users:</h3>
-          {users.slice(0, 3).map((user: any) => (
-            <div key={user.id} style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
-              <p>{user.email}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+              <InlineGrid columns={{ xs: 1, sm: 2, md: 4 }} gap="400">
+                <StatsCard
+                  title="Orders"
+                  value={stats.today.orders}
+                />
+                <StatsCard
+                  title="Revenue"
+                  value={formatCurrency(stats.today.revenue)}
+                />
+                <StatsCard
+                  title="Delivered"
+                  value={stats.today.delivered}
+                />
+                <StatsCard
+                  title="Pending"
+                  value={stats.today.pending}
+                />
+              </InlineGrid>
+            </BlockStack>
+          </Layout.Section>
+
+          <Layout.Section>
+            <Card>
+              <BlockStack gap="400">
+                <Text as="h2" variant="headingMd">
+                  Recent Orders
+                </Text>
+
+                <BlockStack gap="300">
+                  {stats.recent.map((order: { id: string; number: string; amount: number; method: string; status: string }) => (
+                    <div
+                      key={order.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '12px',
+                        borderBottom: '1px solid #e1e3e5',
+                      }}
+                    >
+                      <div>
+                        <Text as="p" fontWeight="semibold">
+                          {order.number}
+                        </Text>
+                        <Text as="p" variant="bodySm" tone="subdued">
+                          {order.method}
+                        </Text>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <Text as="p" fontWeight="semibold">
+                          {formatCurrency(order.amount)}
+                        </Text>
+                        <Text as="p" variant="bodySm" tone="subdued">
+                          {order.status}
+                        </Text>
+                      </div>
+                    </div>
+                  ))}
+                </BlockStack>
+              </BlockStack>
+            </Card>
+          </Layout.Section>
+
+          <Layout.Section>
+            <Card>
+              <BlockStack gap="400">
+                <Text as="h2" variant="headingMd">
+                  Quick Actions
+                </Text>
+
+                <DashboardLink shop={shop} />
+              </BlockStack>
+            </Card>
+          </Layout.Section>
+        </Layout>
+      </BlockStack>
+    </Page>
   );
 }
