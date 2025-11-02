@@ -15,6 +15,7 @@ export default function App() {
         <Links />
       </head>
       <body>
+        {/* @ts-expect-error - React Router type compatibility */}
         <Outlet />
         <ScrollRestoration />
         <Scripts />
