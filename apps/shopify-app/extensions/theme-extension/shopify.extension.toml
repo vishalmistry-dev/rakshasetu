@@ -1,0 +1,7 @@
+api_version = "2024-10"
+
+[[extensions]]
+uid = "46168af3-d224-b4bf-1192-cb72aa70a8bd3c0202d6"
+type = "theme"
+name = "Rakshasetu Checkout"
+handle = "rakshasetu-checkout"
