@@ -10,8 +10,10 @@ import {
 } from '@shopify/polaris';
 import { useState } from 'react';
 import { redirect, useNavigate } from 'react-router';
+import { Loading } from '../../components/ui/Loading';
 import { Select } from '../../components/ui/Select';
 import { TextField } from '../../components/ui/TextField';
+import { useToast } from '../../components/ui/Toast';
 import { merchantsApi } from '../../lib/api/merchants';
 import { BUSINESS_TYPES, INDIAN_STATES } from '../../lib/utils/constants';
 import { authenticate } from '../../shopify.server';
@@ -52,6 +54,10 @@ export async function action({ request }: { request: Request }) {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -75,6 +81,58 @@ export default function Onboarding() {
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.businessName) newErrors.businessName = 'Business name is required';
+    if (!formData.gstNumber) newErrors.gstNumber = 'GST number is required';
+    if (!formData.panNumber) newErrors.panNumber = 'PAN number is required';
+    if (!formData.phone || formData.phone.length < 10) newErrors.phone = 'Valid phone number is required';
+    if (!formData.pickupLine1) newErrors.pickupLine1 = 'Address is required';
+    if (!formData.pickupCity) newErrors.pickupCity = 'City is required';
+    if (!formData.pickupState) newErrors.pickupState = 'State is required';
+    if (!formData.pickupPincode || formData.pickupPincode.length !== 6) newErrors.pickupPincode = 'Valid 6-digit pincode is required';
+    if (!formData.bankAccount) newErrors.bankAccount = 'Account number is required';
+    if (!formData.ifscCode) newErrors.ifscCode = 'IFSC code is required';
+    if (!formData.accountHolder) newErrors.accountHolder = 'Account holder name is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      showToast('Please fix the errors in the form', true);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formElement = e.currentTarget;
+      const response = await fetch(formElement.action || window.location.pathname, {
+        method: 'POST',
+        body: new FormData(formElement),
+      });
+
+      if (response.ok) {
+        showToast('Onboarding completed successfully!');
+        setTimeout(() => navigate('/app'), 1000);
+      } else {
+        throw new Error('Failed to submit');
+      }
+    } catch (error) {
+      showToast('Failed to complete onboarding. Please try again.', true);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -82,10 +140,11 @@ export default function Onboarding() {
       title="Complete Your Setup"
       backAction={{ content: 'Dashboard', onAction: () => navigate('/app') }}
     >
-      <form method="post">
+      <form method="post" onSubmit={handleSubmit}>
         <Layout>
           <Layout.Section>
             <BlockStack gap="500">
+              {/* Business Information */}
               <Card>
                 <BlockStack gap="400">
                   <Text as="h2" variant="headingMd">
@@ -99,6 +158,7 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('businessName', value)}
                     autoComplete="off"
                     requiredIndicator
+                    error={errors.businessName}
                   />
 
                   <Select
@@ -121,6 +181,7 @@ export default function Onboarding() {
                       onChange={(value) => handleChange('gstNumber', value)}
                       autoComplete="off"
                       requiredIndicator
+                      error={errors.gstNumber}
                     />
 
                     <TextField
@@ -130,6 +191,7 @@ export default function Onboarding() {
                       onChange={(value) => handleChange('panNumber', value)}
                       autoComplete="off"
                       requiredIndicator
+                      error={errors.panNumber}
                     />
                   </InlineGrid>
 
@@ -141,10 +203,12 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('phone', value)}
                     autoComplete="tel"
                     requiredIndicator
+                    error={errors.phone}
                   />
                 </BlockStack>
               </Card>
 
+              {/* Pickup Address */}
               <Card>
                 <BlockStack gap="400">
                   <Text as="h2" variant="headingMd">
@@ -158,6 +222,7 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('pickupLine1', value)}
                     autoComplete="off"
                     requiredIndicator
+                    error={errors.pickupLine1}
                   />
 
                   <TextField
@@ -176,6 +241,7 @@ export default function Onboarding() {
                       onChange={(value) => handleChange('pickupCity', value)}
                       autoComplete="off"
                       requiredIndicator
+                      error={errors.pickupCity}
                     />
 
                     <Select
@@ -198,6 +264,7 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('pickupPincode', value)}
                     autoComplete="off"
                     requiredIndicator
+                    error={errors.pickupPincode}
                   />
 
                   <Checkbox
@@ -209,6 +276,7 @@ export default function Onboarding() {
                 </BlockStack>
               </Card>
 
+              {/* Bank Details */}
               <Card>
                 <BlockStack gap="400">
                   <Text as="h2" variant="headingMd">
@@ -222,6 +290,7 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('accountHolder', value)}
                     autoComplete="off"
                     requiredIndicator
+                    error={errors.accountHolder}
                   />
 
                   <TextField
@@ -231,6 +300,7 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('bankAccount', value)}
                     autoComplete="off"
                     requiredIndicator
+                    error={errors.bankAccount}
                   />
 
                   <TextField
@@ -240,10 +310,12 @@ export default function Onboarding() {
                     onChange={(value) => handleChange('ifscCode', value)}
                     autoComplete="off"
                     requiredIndicator
+                    error={errors.ifscCode}
                   />
                 </BlockStack>
               </Card>
 
+              {/* Terms */}
               <Card>
                 <BlockStack gap="400">
                   <Checkbox
@@ -264,11 +336,14 @@ export default function Onboarding() {
 
               <input type="hidden" name="pricingPlan" value={formData.pricingPlan} />
 
+              {isSubmitting && <Loading message="Completing setup..." />}
+
               <Button
                 variant="primary"
                 size="large"
                 submit
-                disabled={!formData.agreeToTerms || !formData.authorizeCollection}
+                disabled={!formData.agreeToTerms || !formData.authorizeCollection || isSubmitting}
+                loading={isSubmitting}
               >
                 Complete Setup
               </Button>

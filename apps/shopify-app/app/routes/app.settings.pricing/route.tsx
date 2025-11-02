@@ -1,8 +1,12 @@
 import { BlockStack, Button, Card, InlineGrid, Text } from '@shopify/polaris';
 import { useState } from 'react';
 import { TextField } from '../../components/ui/TextField';
+import { useToast } from '../../components/ui/Toast';
 
 export default function PricingSettings() {
+  const { showToast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [fees, setFees] = useState({
     codFee: '30',
     podFee: '30',
@@ -10,8 +14,18 @@ export default function PricingSettings() {
     partialFee: '25',
   });
 
-  const handleSave = () => {
-    console.log('Saving pricing:', fees);
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Saving pricing:', fees);
+      showToast('Pricing updated successfully!');
+    } catch (error) {
+      showToast('Failed to update pricing', true);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -55,7 +69,12 @@ export default function PricingSettings() {
           />
         </InlineGrid>
 
-        <Button variant="primary" onClick={handleSave}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Save Changes
         </Button>
       </BlockStack>

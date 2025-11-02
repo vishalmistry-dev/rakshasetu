@@ -2,8 +2,12 @@ import { BlockStack, Button, Card, Checkbox, InlineGrid } from '@shopify/polaris
 import { useState } from 'react';
 import { Select } from '../../components/ui/Select';
 import { TextField } from '../../components/ui/TextField';
+import { useToast } from '../../components/ui/Toast';
 
 export default function ReturnSettings() {
+  const { showToast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [settings, setSettings] = useState({
     returnsEnabled: true,
     returnWindowDays: '7',
@@ -11,6 +15,20 @@ export default function ReturnSettings() {
     qcRequired: false,
     exchangesEnabled: false,
   });
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Saving return settings:', settings);
+      showToast('Return settings saved!');
+    } catch (error) {
+      showToast('Failed to save return settings', true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Card>
@@ -30,6 +48,7 @@ export default function ReturnSettings() {
             autoComplete="off"
             disabled={!settings.returnsEnabled}
           />
+
           <Select
             label="Return shipping paid by"
             options={[
@@ -56,7 +75,12 @@ export default function ReturnSettings() {
           onChange={(v) => setSettings(p => ({ ...p, exchangesEnabled: v }))}
         />
 
-        <Button variant="primary" onClick={() => console.log('Save', settings)}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Save Changes
         </Button>
       </BlockStack>

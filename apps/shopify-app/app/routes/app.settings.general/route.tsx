@@ -1,18 +1,32 @@
 import { BlockStack, Button, Card, Checkbox } from '@shopify/polaris';
 import { useState } from 'react';
 import { Select } from '../../components/ui/Select';
+import { useToast } from '../../components/ui/Toast';
 import { COURIER_PARTNERS } from '../../lib/utils/constants';
 
 export default function GeneralSettings() {
+  const { showToast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [settings, setSettings] = useState({
     autoConfirmOrders: true,
     sendNotifications: true,
     defaultCourier: 'BLUEDART',
   });
 
-  const handleSave = () => {
-    console.log('Saving general settings:', settings);
-    // Will connect to API later
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Saving general settings:', settings);
+      showToast('Settings saved successfully!');
+    } catch (error) {
+      showToast('Failed to save settings', true);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -43,7 +57,12 @@ export default function GeneralSettings() {
           helpText="Default courier for new orders"
         />
 
-        <Button variant="primary" onClick={handleSave}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Save Changes
         </Button>
       </BlockStack>

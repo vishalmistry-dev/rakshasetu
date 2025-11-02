@@ -1,8 +1,12 @@
 import { BlockStack, Button, Card, Checkbox, Text } from '@shopify/polaris';
 import { useState } from 'react';
 import { TextField } from '../../components/ui/TextField';
+import { useToast } from '../../components/ui/Toast';
 
 export default function NotificationSettings() {
+  const { showToast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [settings, setSettings] = useState({
     emailEnabled: true,
     whatsappEnabled: true,
@@ -12,6 +16,20 @@ export default function NotificationSettings() {
     notifyOnDelivery: true,
     notificationEmail: '',
   });
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Saving notification settings:', settings);
+      showToast('Notification settings saved!');
+    } catch (error) {
+      showToast('Failed to save notification settings', true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Card>
@@ -62,7 +80,12 @@ export default function NotificationSettings() {
           autoComplete="email"
         />
 
-        <Button variant="primary" onClick={() => console.log('Save', settings)}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Save Changes
         </Button>
       </BlockStack>

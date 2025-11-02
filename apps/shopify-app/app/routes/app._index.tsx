@@ -1,16 +1,16 @@
 import { BlockStack, InlineGrid, Layout, Page, Text } from '@shopify/polaris';
-import { useLoaderData } from 'react-router';
+import { useLoaderData, useNavigation } from 'react-router';
 import { DashboardLink } from '../components/shared/DashboardLink';
 import { OnboardingBanner } from '../components/shared/OnboardingBanner';
 import { StatsCard } from '../components/shared/StatsCard';
 import { Card } from '../components/ui/Card';
+import { Loading } from '../components/ui/Loading';
 import { merchantsApi } from '../lib/api/merchants';
 import { ordersApi } from '../lib/api/orders';
 import { formatCurrency } from '../lib/utils/format';
 import { authenticate } from '../shopify.server';
-import type { Route } from './+types/app._index';
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: { request: Request }) {
   const { session } = await authenticate.admin(request);
 
   const merchant = await merchantsApi.get(session.shop);
@@ -20,7 +20,20 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function AppIndex() {
-  const { merchant, stats, shop } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+
+  const isLoading = navigation.state === 'loading';
+
+  if (isLoading) {
+    return (
+      <Page title="Dashboard">
+        <Loading message="Loading dashboard..." />
+      </Page>
+    );
+  }
+
+  const { merchant, stats, shop } = data;
 
   const handleStartOnboarding = () => {
     window.location.href = '/app/onboarding';
@@ -69,36 +82,42 @@ export default function AppIndex() {
                   Recent Orders
                 </Text>
 
-                <BlockStack gap="300">
-                  {stats.recent.map((order: { id: string; number: string; amount: number; method: string; status: string }) => (
-                    <div
-                      key={order.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        padding: '12px',
-                        borderBottom: '1px solid #e1e3e5',
-                      }}
-                    >
-                      <div>
-                        <Text as="p" fontWeight="semibold">
-                          {order.number}
-                        </Text>
-                        <Text as="p" variant="bodySm" tone="subdued">
-                          {order.method}
-                        </Text>
+                {stats.recent.length === 0 ? (
+                  <Text as="p" variant="bodyMd" tone="subdued">
+                    No orders yet. Orders will appear here once customers start placing them.
+                  </Text>
+                ) : (
+                  <BlockStack gap="300">
+                    {stats.recent.map((order: { id: string; number: string; amount: number; method: string; status: string }) => (
+                      <div
+                        key={order.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          padding: '12px',
+                          borderBottom: '1px solid #e1e3e5',
+                        }}
+                      >
+                        <div>
+                          <Text as="p" fontWeight="semibold">
+                            {order.number}
+                          </Text>
+                          <Text as="p" variant="bodySm" tone="subdued">
+                            {order.method}
+                          </Text>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <Text as="p" fontWeight="semibold">
+                            {formatCurrency(order.amount)}
+                          </Text>
+                          <Text as="p" variant="bodySm" tone="subdued">
+                            {order.status}
+                          </Text>
+                        </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <Text as="p" fontWeight="semibold">
-                          {formatCurrency(order.amount)}
-                        </Text>
-                        <Text as="p" variant="bodySm" tone="subdued">
-                          {order.status}
-                        </Text>
-                      </div>
-                    </div>
-                  ))}
-                </BlockStack>
+                    ))}
+                  </BlockStack>
+                )}
               </BlockStack>
             </Card>
           </Layout.Section>

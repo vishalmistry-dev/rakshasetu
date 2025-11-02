@@ -1,13 +1,31 @@
 import { BlockStack, Button, Card, Text } from '@shopify/polaris';
 import { useState } from 'react';
 import { TextField } from '../../components/ui/TextField';
+import { useToast } from '../../components/ui/Toast';
 
 export default function IntegrationSettings() {
+  const { showToast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [integrations, setIntegrations] = useState({
     metaPixelId: '',
     googleAnalyticsId: '',
     googleAdsConversionId: '',
   });
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Saving integrations:', integrations);
+      showToast('Integration settings saved!');
+    } catch (error) {
+      showToast('Failed to save integration settings', true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Card>
@@ -40,7 +58,12 @@ export default function IntegrationSettings() {
           autoComplete="off"
         />
 
-        <Button variant="primary" onClick={() => console.log('Save', integrations)}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Save Changes
         </Button>
       </BlockStack>
