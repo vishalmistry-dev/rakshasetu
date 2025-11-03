@@ -640,9 +640,8 @@ model User {
 }
 
 model UserKycDetails {
-    id         String  @id
-    userId     String? @unique
-    merchantId String? @unique
+    id     String  @id
+    userId String? @unique
 
     // PAN Details
     panNumber             String?
@@ -680,8 +679,7 @@ model UserKycDetails {
     updatedAt DateTime @updatedAt
 
     // Relations
-    user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    Merchant Merchant? @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("user_kyc_details")
 }
@@ -778,7 +776,6 @@ model Merchant {
     account       MerchantAccount?
     logistics     MerchantLogistics?
     preferences   MerchantPreferences?
-    kycDetails    UserKycDetails?
 
     // Infrastructure
     stores          MerchantStore[]
