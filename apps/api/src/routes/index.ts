@@ -1,10 +1,9 @@
-import { Router } from 'express'
-import { getUsers } from '../controllers/user.controller'
+import { Router } from "express";
 
-const router = Router()
+import mainAuthRoutes from "../core/auth/auth.routes";
 
-// User routes
-router.get('/users', getUsers)
-// router.post('/users', createUser)
+const mainRouter = Router();
 
-export default router
+mainRouter.use(`/auth`, mainAuthRoutes);
+
+export default mainRouter;
