@@ -1,27 +1,57 @@
+import mainRouter from '@/routes'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express, { Application } from 'express'
 import { errorHandler, notFoundHandler, requestLogger } from './common/middleware'
-import { asyncHandler, sendResponse } from './common/utils'
-
+import { ENV } from './config'
 
 export const createApp = (): Application => {
-    const app = express()
+  const app = express()
 
-    app.use(cors())
-    app.use(express.json())
+  // CORS configuration
+  const allowedOrigins = ENV.CORS_ORIGIN.split(',').map((origin) => origin.trim())
 
-    app.use(requestLogger)
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or Postman)
+        if (!origin) return callback(null, true)
 
-    // Routes (example)
-    app.get('/ping', asyncHandler(async (_req, res) => {
-        sendResponse(res, { message: 'pong' });
-    }));
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true)
+        } else {
+          callback(new Error('Not allowed by CORS'))
+        }
+      },
+      credentials: true, // Allow cookies
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+  )
 
-    // Catch undefined routes
-    app.use(notFoundHandler);
+  // Middleware
+  app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
+  app.use(cookieParser())
+  app.use(requestLogger)
 
-    // Global error handler
-    app.use(errorHandler);
+  // Health check (unversioned)
+  app.get('/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: 'v1',
+    })
+  })
 
-    return app
+  // API v1 routes
+  app.use('/api/v1', mainRouter)
+
+  // Catch undefined routes
+  app.use(notFoundHandler)
+
+  // Global error handler
+  app.use(errorHandler)
+
+  return app
 }

@@ -25,6 +25,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('4000'),
   LOG_LEVEL: z.string().optional(),
+  CORS_ORIGIN: z.string().min(1),
 
   DATABASE_URL: z.string().url(),
 
@@ -65,6 +66,11 @@ const envSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().min(1),
   TWILIO_PHONE_NUMBER: z.string().min(1),
   TWILIO_WHATSAPP_NUMBER: z.string().min(1),
+
+  SHOPIFY_API_KEY: z.string().min(1),
+  SHOPIFY_API_SECRET: z.string().min(1),
+  SHOPIFY_SCOPES: z.string().min(1),
+  SHOPIFY_APP_URL: z.string().url(),
 })
 
 const parsed = envSchema.safeParse(process.env)

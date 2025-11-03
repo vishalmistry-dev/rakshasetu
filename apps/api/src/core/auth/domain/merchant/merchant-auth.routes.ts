@@ -1,31 +1,40 @@
-import { Router } from "express";
-import { registerMerchantSchema } from "./merchant-auth.schema";
-import { bodySchema, validateRequest } from "@/common/utils";
+import { bodySchema, validateRequest } from '@/common/utils'
+import { Router } from 'express'
 import {
-  loginSchema,
+  forgotPassword,
+  login,
+  logout,
+  resetPassword,
+  setPassword,
+} from './merchant-auth.controller'
+import {
+  forgotPasswordSchema,
+  loginMerchantSchema,
   resetPasswordSchema,
-  verifyEmailSchema,
-} from "../../shared";
-import { registerMerchant } from "./merchant-auth.controller";
+  setPasswordSchema,
+} from './merchant-auth.schema'
 
-const router = Router();
-// ----------------------- Public Routes -----------------------
+const router = Router()
+
+// ========================== PUBLIC ROUTES ==========================
+
+// Set password (first time after Shopify install)
+router.post('/set-password/:token', validateRequest(bodySchema(setPasswordSchema)), setPassword)
+
+// Login to dashboard
+router.post('/login', validateRequest(bodySchema(loginMerchantSchema)), login)
+
+// Forgot password
+router.post('/forgot-password', validateRequest(bodySchema(forgotPasswordSchema)), forgotPassword)
+
+// Reset password
 router.post(
-  "/register",
-  validateRequest(bodySchema(registerMerchantSchema)),
-  registerMerchant
-);
-router.post("/login", validateRequest(bodySchema(loginSchema)));
-router.post("/forgot-password");
-router.post(
-  "/reset-password/:token",
-  validateRequest(bodySchema(resetPasswordSchema))
-);
-router.post("/logout");
+  '/reset-password/:token',
+  validateRequest(bodySchema(resetPasswordSchema)),
+  resetPassword
+)
 
-// ----------------------- Verification / 2FA -----------------------
-router.post("/verify-email", validateRequest(bodySchema(verifyEmailSchema)));
-router.post("/resend-otp");
-router.post("/2fa/verify");
+// Logout
+router.post('/logout', logout)
 
-export default router;
+export default router
