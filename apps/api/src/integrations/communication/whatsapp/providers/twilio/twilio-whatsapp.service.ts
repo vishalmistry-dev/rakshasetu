@@ -1,62 +1,60 @@
-// modules/shared/whatsapp/providers/twilioWhatsapp.service.ts
-import { ENV } from "@/config";
-import Twilio from "twilio";
+import { ENV } from '@/config'
+import Twilio from 'twilio'
+import { ButtonsMessageVariables, interactiveButtons } from '../../templates/interactiveButtons'
+import { interactiveList, ListMessageVariables } from '../../templates/interactiveList'
+import { normalMessage, NormalMessageVariables } from '../../templates/normalMessage'
 
-const client = Twilio(ENV.TWILIO_ACCOUNT_SID, ENV.TWILIO_AUTH_TOKEN);
+const client = Twilio(ENV.TWILIO_ACCOUNT_SID, ENV.TWILIO_AUTH_TOKEN)
 
-type WhatsAppTemplateVariables = Record<string, string | number>;
+// Simple text message
+export const sendWhatsAppViaTwilio = async (to: string, body: string) => {
+  try {
+    const message = await client.messages.create({
+      from: `whatsapp:${ENV.TWILIO_WHATSAPP_NUMBER}`,
+      to: `whatsapp:${to}`,
+      body,
+    })
+    return message
+  } catch (error) {
+    console.error('WhatsApp send error:', error)
+    throw error
+  }
+}
 
-export const sendWhatsAppMessage = async (
-    to: string,
-    body: string
+// Interactive messages (buttons/lists)
+type TemplateName = 'normal' | 'buttons' | 'list'
+type TemplateVariables = NormalMessageVariables | ButtonsMessageVariables | ListMessageVariables
+
+export const sendWhatsAppTemplate = async (
+  to: string,
+  templateName: TemplateName,
+  variables: TemplateVariables
 ) => {
-    try {
-        const message = await client.messages.create({
-            from: `whatsapp:${ENV.TWILIO_WHATSAPP_NUMBER}`, // your Twilio WhatsApp number
-            to: `whatsapp:${to}`,
-            body,
-        });
-        return message;
-    } catch (error) {
-        console.error("WhatsApp send error:", error);
-        throw error;
-    }
-};
+  let messageBody
 
-// Interactive template message (buttons, list, etc.)
-export const sendInteractiveTemplate = async (
-    to: string,
-    templateName: string,
-    variables: WhatsAppTemplateVariables
-) => {
-    try {
-        // Replace variables in template
-        let body = await loadWhatsAppTemplate(templateName, variables);
-        const message = await client.messages.create({
-            from: `whatsapp:${ENV.TWILIO_WHATSAPP_NUMBER}`,
-            to: `whatsapp:${to}`,
-            body,
-        });
-        return message;
-    } catch (error) {
-        console.error("WhatsApp template error:", error);
-        throw error;
-    }
-};
+  switch (templateName) {
+    case 'normal':
+      messageBody = normalMessage(variables as NormalMessageVariables)
+      break
+    case 'buttons':
+      messageBody = interactiveButtons(variables as ButtonsMessageVariables)
+      break
+    case 'list':
+      messageBody = interactiveList(variables as ListMessageVariables)
+      break
+    default:
+      throw new Error('Invalid WhatsApp template')
+  }
 
-// Load template helper
-const loadWhatsAppTemplate = async (
-    templateName: string,
-    variables: WhatsAppTemplateVariables
-) => {
-    // Example: templates are stored in /templates folder as text or json
-    const templatePath = `${__dirname}/../templates/${templateName}.txt`;
-    const fs = await import("fs/promises");
-    let template = await fs.readFile(templatePath, "utf-8");
-
-    Object.entries(variables).forEach(([key, value]) => {
-        template = template.replace(new RegExp(`{{${key}}}`, "g"), String(value));
-    });
-
-    return template;
-};
+  try {
+    const message = await client.messages.create({
+      from: `whatsapp:${ENV.TWILIO_WHATSAPP_NUMBER}`,
+      to: `whatsapp:${to}`,
+      ...messageBody,
+    })
+    return message
+  } catch (error) {
+    console.error('WhatsApp template error:', error)
+    throw error
+  }
+}

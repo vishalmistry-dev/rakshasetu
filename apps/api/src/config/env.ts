@@ -5,15 +5,12 @@ import { z } from 'zod'
 
 // Load .env from monorepo root (tsx doesn't support __dirname properly)
 const envPath = path.resolve(process.cwd(), '../../.env')
-console.log('🔍 Loading .env from:', envPath)
 const result = dotenv.config({ path: envPath })
 
 if (result.error) {
   console.error('❌ Failed to load .env file:', result.error)
   process.exit(1)
 }
-
-console.log('✅ .env loaded successfully')
 
 const durationRegex = /^[0-9]+[smhd]$/
 
@@ -76,7 +73,5 @@ if (!parsed.success) {
   logger.error('❌ Invalid environment variables:', parsed.error)
   process.exit(1)
 }
-
-console.log('✅ Environment validation passed')
 
 export const ENV = parsed.data
