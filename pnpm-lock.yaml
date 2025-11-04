@@ -71,6 +71,9 @@ importers:
       otplib:
         specifier: ^12.0.1
         version: 12.0.1
+      razorpay:
+        specifier: ^2.9.6
+        version: 2.9.6
       twilio:
         specifier: ^5.10.4
         version: 5.10.4
@@ -8869,6 +8872,14 @@ packages:
       http-errors: 2.0.0
       iconv-lite: 0.4.24
       unpipe: 1.0.0
+    dev: false
+
+  /razorpay@2.9.6:
+    resolution: {integrity: sha512-zsHAQzd6e1Cc6BNoCNZQaf65ElL6O6yw0wulxmoG5VQDr363fZC90Mp1V5EktVzG45yPyNomNXWlf4cQ3622gQ==}
+    dependencies:
+      axios: 1.13.1
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /rc9@2.1.2:

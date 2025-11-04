@@ -79,6 +79,11 @@ const envSchema = z.object({
   BLUEDART_LICENSE_KEY: z.string().min(1),
   BLUEDART_BASE_URL: z.string().url(),
   BLUEDART_ENVIRONMENT: z.enum(['sandbox', 'production']),
+
+  RAZORPAY_KEY_ID: z.string().min(1),
+  RAZORPAY_KEY_SECRET: z.string().min(1),
+  RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
+  RAZORPAY_BASE_URL: z.string().url(),
 })
 
 const parsed = envSchema.safeParse(process.env)
