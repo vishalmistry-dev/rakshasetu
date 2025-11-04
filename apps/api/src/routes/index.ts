@@ -4,6 +4,7 @@ import mainAuthRoutes from '@/core/auth/auth.routes'
 import merchantRoutes from '@/core/merchants/merchants.routes'
 import shopRoutes from '@/domains/shop/shop.routes'
 import integrationRoutes from '@/integrations/intergrations.routes'
+import logisticsRoutes from '../domains/logistics/logistics.routes'
 
 const mainRouter = Router()
 
@@ -14,5 +15,7 @@ mainRouter.use('/integrations', integrationRoutes)
 mainRouter.use('/merchants', merchantRoutes)
 
 mainRouter.use('/shop', shopRoutes)
+
+mainRouter.use('/logistics', logisticsRoutes)
 
 export default mainRouter
