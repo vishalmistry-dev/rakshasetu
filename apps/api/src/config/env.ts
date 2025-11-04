@@ -71,6 +71,14 @@ const envSchema = z.object({
   SHOPIFY_API_SECRET: z.string().min(1),
   SHOPIFY_SCOPES: z.string().min(1),
   SHOPIFY_APP_URL: z.string().url(),
+
+  BLUEDART_API_KEY: z.string().min(1),
+  BLUEDART_API_SECRET: z.string().min(1),
+  BLUEDART_CLIENT_ID: z.string().min(1),
+  BLUEDART_LOGIN_ID: z.string().min(1),
+  BLUEDART_LICENSE_KEY: z.string().min(1),
+  BLUEDART_BASE_URL: z.string().url(),
+  BLUEDART_ENVIRONMENT: z.enum(['sandbox', 'production']),
 })
 
 const parsed = envSchema.safeParse(process.env)
