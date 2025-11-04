@@ -1,0 +1,654 @@
+{
+  "info": {
+    "name": "Rakshasetu API - v1",
+    "description": "Complete API collection for Rakshasetu platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "merchantAccessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "merchantId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "storeId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:4000/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Merchant",
+      "item": [
+        {
+          "name": "Set Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/merchant/set-password/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "merchant", "set-password", ":token"],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "your_setup_token"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save access token from cookie",
+                  "const cookies = pm.cookies.get('merchantAccessToken');",
+                  "if (cookies) {",
+                  "    pm.collectionVariables.set('merchantAccessToken', cookies);",
+                  "}",
+                  "",
+                  "// Save merchant ID from response",
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data.merchant) {",
+                  "    pm.collectionVariables.set('merchantId', response.data.merchant.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"merchant@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/merchant/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "merchant", "login"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"merchant@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/merchant/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "merchant", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"newpassword123\",\n  \"confirmPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/merchant/reset-password/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "merchant", "reset-password", ":token"],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "reset_token"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/merchant/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "merchant", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Merchants",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchants/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Complete Onboarding",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessType\": \"Private Limited\",\n  \"gstNumber\": \"22AAAAA0000A1Z5\",\n  \"panNumber\": \"ABCDE1234F\",\n  \"bankAccount\": \"1234567890\",\n  \"ifscCode\": \"SBIN0001234\",\n  \"accountHolder\": \"John Doe\",\n  \"pickupAddress\": {\n    \"name\": \"John Doe\",\n    \"phone\": \"9876543210\",\n    \"line1\": \"123 Main Street\",\n    \"line2\": \"Apartment 4B\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\",\n    \"landmark\": \"Near City Mall\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchants/onboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "onboard"]
+            }
+          }
+        },
+        {
+          "name": "Get All Settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchants/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "settings"]
+            }
+          }
+        },
+        {
+          "name": "Update General Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"My Updated Business\",\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchants/settings/general",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "settings", "general"]
+            }
+          }
+        },
+        {
+          "name": "Update Notification Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notifyOnNewOrder\": true,\n  \"notifyOnPayment\": true,\n  \"notifyOnShipment\": true,\n  \"emailEnabled\": true,\n  \"whatsappEnabled\": true,\n  \"notificationEmail\": \"notifications@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchants/settings/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "settings", "notifications"]
+            }
+          }
+        },
+        {
+          "name": "Update Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codEnabled\": true,\n  \"codMinOrderValue\": 500,\n  \"remittanceCycle\": \"WEEKLY\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchants/settings/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "settings", "preferences"]
+            }
+          }
+        },
+        {
+          "name": "Update Logistics Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"defaultCourier\": \"bluedart\",\n  \"codEnabled\": true,\n  \"returnsEnabled\": true,\n  \"returnWindowDays\": 7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchants/settings/logistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["merchants", "settings", "logistics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stores",
+      "item": [
+        {
+          "name": "List Stores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data.length > 0) {",
+                  "    pm.collectionVariables.set('storeId', response.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/stores",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "stores"]
+            }
+          }
+        },
+        {
+          "name": "Get Store Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/stores/{{storeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "stores", "{{storeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Store Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/stores/{{storeId}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "stores", "{{storeId}}", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/products?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "products"],
+              "query": [
+                {
+                  "key": "storeId",
+                  "value": "{{storeId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "laptop",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/products/:productId",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "products", ":productId"],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sync Products",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"{{storeId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shop/products/sync",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "products", "sync"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/orders?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "orders"],
+              "query": [
+                {
+                  "key": "storeId",
+                  "value": "{{storeId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "CREATED",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "#1001",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/orders/:orderId",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "orders", ":orderId"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "order_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shop/orders/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "orders", "stats"],
+              "query": [
+                {
+                  "key": "storeId",
+                  "value": "{{storeId}}",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "merchantAccessToken={{merchantAccessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PICKED_UP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shop/orders/:orderId/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["shop", "orders", ":orderId", "status"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "order_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopify Integration",
+      "item": [
+        {
+          "name": "Start OAuth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/shopify/oauth?shop=your-store.myshopify.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["integrations", "shopify", "oauth"],
+              "query": [
+                {
+                  "key": "shop",
+                  "value": "your-store.myshopify.com"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

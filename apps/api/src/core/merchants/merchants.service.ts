@@ -6,7 +6,21 @@ import { prisma } from '@/config/prisma'
 export const getMerchantProfile = async (merchantId: string) => {
   const merchant = await prisma.merchant.findUnique({
     where: { id: merchantId },
-    include: {
+    select: {
+      id: true,
+      businessName: true,
+      email: true,
+      phone: true,
+      status: true,
+      isActive: true,
+      mode: true,
+      image: true,
+      emailVerified: true,
+      emailVerifiedAt: true,
+      lastLoginAt: true,
+      createdAt: true,
+      updatedAt: true,
+      // Relations
       profile: true,
       notifications: true,
       preferences: true,
@@ -30,7 +44,6 @@ export const getMerchantProfile = async (merchantId: string) => {
 
   return merchant
 }
-
 // ========================== ONBOARD ==========================
 export const onboardMerchant = async (merchantId: string, data: any) => {
   const merchant = await prisma.merchant.findUnique({
