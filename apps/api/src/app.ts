@@ -36,11 +36,28 @@ export const createApp = (): Application => {
   app.use(requestLogger)
 
   // Health check (unversioned)
-  app.get('/health', (req, res) => {
+  app.get('/health', (_req, res) => {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
       version: 'v1',
+    })
+  })
+
+  app.get('/rsmart/status', (_req, res) => {
+    res.json({
+      status: 'COMING_SOON',
+      title: 'RSmart Marketplace',
+      description: "India's most secure P2P marketplace with built-in escrow protection",
+      features: [
+        'Buy & sell with complete security',
+        'Escrow payment protection',
+        'Direct chat with buyers/sellers',
+        'Custom order requests',
+        'Service marketplace',
+      ],
+      launchDate: 'Q1 2026',
+      notifyMe: 'https://rakshasetu.com/notify-rsmart',
     })
   })
 
