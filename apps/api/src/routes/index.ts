@@ -4,21 +4,31 @@ import mainAuthRoutes from '@/core/auth/auth.routes'
 import merchantRoutes from '@/core/merchants/merchants.routes'
 import shopRoutes from '@/domains/shop/shop.routes'
 import integrationRoutes from '@/integrations/intergrations.routes'
+import adminRoutes from '../admin/admin.routes'
 import logisticsRoutes from '../domains/logistics/logistics.routes'
 import paymentRoutes from '../integrations/payment-gateways/payment-gateway.routes'
 
+// Main routes
 const mainRouter = Router()
 
-mainRouter.use(`/auth`, mainAuthRoutes)
+// API v1 routes
+const v1Router = Router()
 
-mainRouter.use('/integrations', integrationRoutes)
+v1Router.use(`/auth`, mainAuthRoutes)
 
-mainRouter.use('/merchants', merchantRoutes)
+v1Router.use('/integrations', integrationRoutes)
 
-mainRouter.use('/shop', shopRoutes)
+v1Router.use('/merchants', merchantRoutes)
 
-mainRouter.use('/logistics', logisticsRoutes)
+v1Router.use('/shop', shopRoutes)
 
-mainRouter.use('/payments', paymentRoutes)
+v1Router.use('/logistics', logisticsRoutes)
+
+v1Router.use('/payments', paymentRoutes)
+
+v1Router.use('/admin', adminRoutes)
+
+// Mount v1 routes
+mainRouter.use('/v1', v1Router)
 
 export default mainRouter
