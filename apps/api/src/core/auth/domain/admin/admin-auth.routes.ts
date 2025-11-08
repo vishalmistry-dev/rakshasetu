@@ -1,49 +1,22 @@
-import { bodySchema, paramsSchema, validateRequest } from "@/common/utils";
-import { Router } from "express";
-import {
-  forgotPasswordSchema,
-  loginSchema,
-  refreshTokenSchema,
-  resendOtpSchema,
-  resetPasswordSchema,
-  verifyEmailSchema,
-} from "../../shared";
-import {
-  forgotPassword,
-  loginAdmin,
-  logoutAdmin,
-  resendOtp,
-  resetPassword,
-  verifyEmail,
-} from "./admin-auth.controller";
+import { bodySchema, validateRequest } from '@/common/utils'
+import { authenticateAdmin } from '@/core/auth/middlewares'
+import { Router } from 'express'
+import { createAdmin, getCurrentAdmin, login, logout, refreshToken } from './admin-auth.controller'
+import { adminLoginSchema, createAdminSchema } from './admin-auth.schema'
 
-const router = Router();
+const router = Router()
 
-router.post("/login", validateRequest(bodySchema(loginSchema)), loginAdmin);
-router.post("/logout", logoutAdmin);
-router.post(
-  "/verify-email",
-  validateRequest(bodySchema(verifyEmailSchema)),
-  verifyEmail
-);
-router.post(
-  "/resend-otp",
-  validateRequest(bodySchema(resendOtpSchema)),
-  resendOtp
-);
+// Public routes
+router.post('/login', validateRequest(bodySchema(adminLoginSchema)), login)
+router.post('/refresh', refreshToken)
 
-router.post(
-  "/forgot-password",
-  validateRequest(bodySchema(forgotPasswordSchema)),
-  forgotPassword
-);
-router.post(
-  "/reset-password/:token",
-  validateRequest(
-    bodySchema(resetPasswordSchema),
-    paramsSchema(refreshTokenSchema)
-  ),
-  resetPassword
-);
+// Protected routes
+router.use(authenticateAdmin)
 
-export default router;
+router.post('/logout', logout)
+router.get('/me', getCurrentAdmin)
+
+// Super admin only (add permission check if needed)
+router.post('/admins', validateRequest(bodySchema(createAdminSchema)), createAdmin)
+
+export default router

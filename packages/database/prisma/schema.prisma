@@ -710,6 +710,8 @@ model Admin {
     // Relations
     DisputeTickets    DisputeTicket[]     @relation("AdminDisputes")
     ShopDisputeTicket ShopDisputeTicket[]
+    AdminActivityLog  AdminActivityLog[]
+    AdminNotification AdminNotification[]
 
     @@map("admins")
 }
@@ -3141,6 +3143,100 @@ model PlatformSetting {
     updatedAt DateTime   @updatedAt
 
     @@map("platform_settings")
+}
+
+// Admin Activity Log (Audit Trail)
+model AdminActivityLog {
+    id         String  @id
+    adminId    String
+    action     String // "APPROVED_MERCHANT", "RESOLVED_DISPUTE", etc
+    resource   String // "MERCHANT", "ORDER", "DISPUTE"
+    resourceId String?
+    metadata   Json? // Store details of action
+    ipAddress  String?
+    userAgent  String?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+    @@index([adminId])
+    @@index([action])
+    @@index([createdAt])
+    @@map("admin_activity_logs")
+}
+
+// Platform-wide Statistics
+model PlatformStats {
+    id   String   @id
+    date DateTime @unique
+
+    // Merchants
+    totalMerchants  Int @default(0)
+    activeMerchants Int @default(0)
+    newMerchants    Int @default(0)
+
+    // Stores
+    totalStores  Int @default(0)
+    activeStores Int @default(0)
+
+    // Orders
+    totalOrders     Int   @default(0)
+    completedOrders Int   @default(0)
+    cancelledOrders Int   @default(0)
+    totalRevenue    Float @default(0)
+    platformFee     Float @default(0)
+
+    // Shipments
+    totalShipments     Int @default(0)
+    shipmentsDelivered Int @default(0)
+    shipmentsInTransit Int @default(0)
+
+    // Payments
+    totalPayments      Int @default(0)
+    successfulPayments Int @default(0)
+    failedPayments     Int @default(0)
+    totalRefunds       Int @default(0)
+
+    // Disputes
+    totalDisputes    Int @default(0)
+    resolvedDisputes Int @default(0)
+    pendingDisputes  Int @default(0)
+
+    calculatedAt DateTime @default(now())
+
+    @@index([date])
+    @@map("platform_stats")
+}
+
+// Admin Notifications
+model AdminNotification {
+    id      String  @id
+    adminId String?
+
+    type     String // "DISPUTE_RAISED", "HIGH_VALUE_ORDER", "MERCHANT_PENDING"
+    title    String
+    message  String
+    priority String @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+
+    isRead Boolean   @default(false)
+    readAt DateTime?
+
+    resourceType String? // "ORDER", "DISPUTE", "MERCHANT"
+    resourceId   String?
+
+    metadata Json?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    admin Admin? @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+    @@index([adminId])
+    @@index([isRead])
+    @@index([createdAt])
+    @@map("admin_notifications")
 }
 
 // ============================================

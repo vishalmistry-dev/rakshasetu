@@ -1,145 +1,79 @@
-import { asyncHandler, sendResponse } from "@/common/utils";
-import { adminAuthService } from "./admin-auth.service";
-import { generateAccessToken } from "../../shared";
-import { cookieOptions } from "@/config/constants";
+import { asyncHandler, sendResponse } from '@/common/utils'
+import * as adminAuthService from './admin-auth.service'
 
-export const loginAdmin = asyncHandler(async (req, res, next) => {
-  try {
-    const body = req.body;
+// Login
+export const login = asyncHandler(async (req, res) => {
+  const data = req.body
 
-    const { record, message } = await adminAuthService.login(body);
+  const result = await adminAuthService.loginAdmin(data)
 
-    // ✅ Handle 2FA requirement
-    if (record.twoFactorStatus) {
-      return sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: message,
-        data: {
-          requires2FA: true,
-          userId: record.id,
-        },
-      });
-    }
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Login successful',
+    data: result,
+  })
+})
 
-    // ✅ Generate JWT
-    const accessToken = generateAccessToken({
-      id: record.id,
-      email: record.email,
-      userName: record.userName,
-      firstName: record.firstName,
-      lastName: record.lastName,
-      type: record.type,
-    });
+// Refresh token
+export const refreshToken = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body
 
-    // ✅ Set access token cookie
-    res.cookie("adminAccessToken", accessToken, cookieOptions);
-
-    // ✅ Send response
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: message,
-      data: {},
-    });
-  } catch (err) {
-    next(err);
+  if (!refreshToken) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'Refresh token is required',
+    })
   }
-});
 
-export const logoutAdmin = asyncHandler(async (req, res, next) => {
-  res.clearCookie("adminAccessToken", {
-    ...cookieOptions,
-    maxAge: 0,
-  });
+  const tokens = await adminAuthService.refreshAdminToken(refreshToken)
 
-  res.status(200).json({ success: true, message: "Logged out successfully." });
-});
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Token refreshed successfully',
+    data: tokens,
+  })
+})
 
-export const verifyEmail = asyncHandler(async (req, res, next) => {
-  try {
-    const body = req.body;
+// Logout
+export const logout = asyncHandler(async (req, res) => {
+  const adminId = req.admin!.id
 
-    const { record, message } = await adminAuthService.verifyEmail(body);
+  await adminAuthService.logoutAdmin(adminId)
 
-    // ✅ Generate JWT token
-    const accessToken = generateAccessToken({
-      id: record.id,
-      userName: record.userName,
-      firstName: record.firstName,
-      lastName: record.lastName,
-      email: record.email,
-      type: record.type,
-    });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Logout successful',
+  })
+})
 
-    // ✅ Set token cookie (controller handles it)
-    res.cookie("adminAccessToken", accessToken, cookieOptions);
+// Get current admin
+export const getCurrentAdmin = asyncHandler(async (req, res) => {
+  const adminId = req.admin!.id
 
-    // ✅ Send final response
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: message,
-      data: {
-        id: record.id,
-        firstName: record.firstName,
-        lastName: record.lastName,
-        email: record.email,
-        userName: record.userName,
-        type: record.type,
-        emailVerified: record.emailVerified,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+  const admin = await adminAuthService.getCurrentAdmin(adminId)
 
-export const resendOtp = asyncHandler(async (req, res, next) => {
-  try {
-    const body = req.body;
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Admin retrieved successfully',
+    data: admin,
+  })
+})
 
-    const result = await adminAuthService.resendOtp(body);
+// Create admin (super admin only)
+export const createAdmin = asyncHandler(async (req, res) => {
+  const data = req.body
 
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: result.message,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+  const admin = await adminAuthService.createAdmin(data)
 
-export const forgotPassword = asyncHandler(async (req, res, next) => {
-  try {
-    const body = req.body;
-
-    const result = await adminAuthService.forgotPassword(body);
-
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: result.message,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-export const resetPassword = asyncHandler(async (req, res, next) => {
-  try {
-    const token = req.params.token as string;
-    const body = req.body;
-
-    const result = await adminAuthService.resetPassword(token, body);
-
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: result.message,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Admin created successfully',
+    data: admin,
+  })
+})
