@@ -5,6 +5,8 @@ import express, { Application } from 'express'
 import { errorHandler, notFoundHandler, requestLogger } from './common/middleware'
 import { ENV } from './config'
 
+// import { listRoutes } from '@/scripts/list-routes'
+
 export const createApp = (): Application => {
   const app = express()
 
@@ -62,13 +64,23 @@ export const createApp = (): Application => {
   })
 
   // API v1 routes
-  app.use('/api/v1', mainRouter)
+  app.use('/api/', mainRouter)
 
   // Catch undefined routes
   app.use(notFoundHandler)
 
   // Global error handler
   app.use(errorHandler)
+
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('\n' + '='.repeat(80))
+  //   console.log('📋 REGISTERED API ROUTES')
+  //   console.log('='.repeat(80))
+
+  //   // Method 1: Using express-list-routes package
+  //   // expressListRoutes(app)
+  //   listRoutes(app)
+  // }
 
   return app
 }
