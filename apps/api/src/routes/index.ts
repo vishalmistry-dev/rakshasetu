@@ -6,6 +6,7 @@ import shopRoutes from '@/domains/shop/shop.routes'
 import integrationRoutes from '@/integrations/intergrations.routes'
 import adminRoutes from '../admin/admin.routes'
 import analyticsRoutes from '../domains/analytics/analytics.routes'
+import filesRoutes from '../domains/files/files.routes'
 import logisticsRoutes from '../domains/logistics/logistics.routes'
 import notificationRoutes from '../domains/notifications/notifications.routes'
 import paymentRoutes from '../integrations/payment-gateways/payment-gateway.routes'
@@ -32,8 +33,9 @@ v1Router.use('/admin', adminRoutes)
 
 v1Router.use('/notifications', notificationRoutes)
 
-// Analytics
 v1Router.use('/analytics', analyticsRoutes)
+
+v1Router.use('/files', filesRoutes)
 
 // Mount v1 routes
 mainRouter.use('/v1', v1Router)
