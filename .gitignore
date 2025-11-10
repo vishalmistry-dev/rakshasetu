@@ -143,3 +143,5 @@ debug-*.ts
 # Testing/Debug files
 test-*.ts
 debug-*.ts
+
+docs/

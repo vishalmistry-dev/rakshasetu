@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     /* ✅ Modern libraries */
     "lib": ["ES2017", "DOM"],
+    "ignoreDeprecations": "5.0",
     /* ✅ Path aliases */
     "moduleResolution": "node",
     "baseUrl": ".",

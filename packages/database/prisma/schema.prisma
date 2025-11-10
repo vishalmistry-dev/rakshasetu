@@ -499,6 +499,102 @@ enum WEBHOOK_TOPIC {
     CUSTOMERS_UPDATE
 }
 
+// Notification System
+enum NOTIFICATION_TYPE {
+    ORDER_CREATED
+    ORDER_UPDATED
+    ORDER_CANCELLED
+    ORDER_DELIVERED
+    PAYMENT_RECEIVED
+    PAYMENT_FAILED
+    SHIPMENT_CREATED
+    SHIPMENT_PICKED_UP
+    SHIPMENT_DELIVERED
+    DISPUTE_RAISED
+    DISPUTE_RESOLVED
+    MERCHANT_APPROVED
+    MERCHANT_REJECTED
+    RETURN_REQUESTED
+    RETURN_APPROVED
+    REFUND_PROCESSED
+    HIGH_VALUE_ORDER
+    MERCHANT_PENDING
+    SYSTEM_ALERT
+}
+
+enum NOTIFICATION_EVENT {
+    ORDER
+    PAYMENT
+    SHIPMENT
+    DISPUTE
+    MERCHANT
+    RETURN
+    REFUND
+    SYSTEM
+}
+
+enum NOTIFICATION_PRIORITY {
+    LOW
+    NORMAL
+    HIGH
+    URGENT
+}
+
+// Financial System
+enum FEE_CONFIG_TYPE {
+    PLATFORM
+    COD
+    LOGISTICS
+    ESCROW
+    PAYMENT_GATEWAY
+}
+
+enum APPLICABLE_FOR {
+    ALL
+    MERCHANT
+    CUSTOMER
+    STORE
+}
+
+// File System
+enum FILE_TYPE {
+    INVOICE
+    LABEL
+    DOCUMENT
+    IMAGE
+    PDF
+    EXCEL
+    CSV
+}
+
+enum RESOURCE_TYPE {
+    ORDER
+    SHIPMENT
+    PRODUCT
+    MERCHANT
+    USER
+    DISPUTE
+    PAYMENT
+}
+
+// Email System
+enum EMAIL_CATEGORY {
+    AUTH
+    ORDER
+    SHIPMENT
+    PAYMENT
+    DISPUTE
+    MERCHANT
+    SYSTEM
+}
+
+// Courier System
+enum COURIER_STATUS {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+}
+
 enum WEBHOOK_STATUS {
     ACTIVE
     INACTIVE
@@ -635,6 +731,7 @@ model User {
     ShopCart         ShopCart[]
     ShopOrderGroup   ShopOrderGroup[]
     ShopPayment      ShopPayment[]
+    files            File[]
 
     @@map("users")
 }
@@ -773,11 +870,10 @@ model Merchant {
     updatedAt DateTime @updatedAt
 
     // Core Relations
-    profile       MerchantProfile?
-    notifications MerchantNotifications?
-    account       MerchantAccount?
-    logistics     MerchantLogistics?
-    preferences   MerchantPreferences?
+    profile     MerchantProfile?
+    account     MerchantAccount?
+    logistics   MerchantLogistics?
+    preferences MerchantPreferences?
 
     // Infrastructure
     stores          MerchantStore[]
@@ -801,6 +897,11 @@ model Merchant {
     apiKeys       MerchantApiKey[]
     webhooks      MerchantWebhook[]
     shopifyStates ShopifyState[]
+
+    // New Relations
+    files                 File[]
+    notificationsList     Notification[]         @relation("MerchantNotifications")
+    merchantNotifications MerchantNotification[] @relation("MerchantNotificationsList")
 
     @@index([email])
     @@index([status])
@@ -838,39 +939,6 @@ model MerchantProfile {
     updatedAt DateTime @updatedAt
 
     @@map("merchant_profiles")
-}
-
-model MerchantNotifications {
-    id         String   @id
-    merchantId String   @unique
-    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-
-    // Order Notifications
-    notifyOnNewOrder Boolean @default(true)
-    notifyOnPayment  Boolean @default(true)
-    notifyOnShipment Boolean @default(true)
-    notifyOnDelivery Boolean @default(true)
-    notifyOnReturn   Boolean @default(true)
-    notifyOnDispute  Boolean @default(true)
-
-    // Channels
-    emailEnabled    Boolean @default(true)
-    whatsappEnabled Boolean @default(true)
-    smsEnabled      Boolean @default(false)
-
-    // Contact Overrides
-    notificationEmail    String?
-    notificationWhatsApp String?
-    notificationPhone    String?
-
-    // Reports
-    dailyReportEnabled  Boolean @default(false)
-    weeklyReportEnabled Boolean @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@map("merchant_notifications")
 }
 
 model MerchantPreferences {
@@ -2877,24 +2945,27 @@ model Refund {
 // ============================================
 
 model Notification {
-    id        String  @id
-    userId    String
-    title     String
-    message   String
-    type      String
-    event     String
-    link      String?
-    data      Json?
-    priority  Int     @default(1)
-    delivered Boolean @default(false)
-    read      Boolean @default(false)
+    id         String                @id
+    userId     String?
+    merchantId String?
+    title      String
+    message    String
+    type       NOTIFICATION_TYPE
+    event      NOTIFICATION_EVENT
+    link       String?
+    data       Json?
+    priority   NOTIFICATION_PRIORITY @default(NORMAL)
+    delivered  Boolean               @default(false)
+    read       Boolean               @default(false)
 
     createdAt DateTime @default(now())
 
     // Relations
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    merchant Merchant? @relation("MerchantNotifications", fields: [merchantId], references: [id], onDelete: Cascade)
 
     @@index([userId])
+    @@index([merchantId])
     @@index([type])
     @@index([event])
     @@map("notifications")
@@ -2974,17 +3045,17 @@ model MerchantAccount {
     merchantId String   @unique
     merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
 
-    availableBalance Float  @default(0.0)
-    pendingCharges   Float  @default(0.0)
-    totalEarnings    Float  @default(0.0)
-    totalWithdrawn   Float  @default(0.0)
-    totalCharges     Float  @default(0.0)
-    currency         String @default("INR")
-    status           String @default("ACTIVE")
+    availableBalance Float          @default(0.0)
+    pendingCharges   Float          @default(0.0)
+    totalEarnings    Float          @default(0.0)
+    totalWithdrawn   Float          @default(0.0)
+    totalCharges     Float          @default(0.0)
+    currency         String         @default("INR")
+    status           ACCOUNT_STATUS @default(ACTIVE)
 
-    payoutMethod    String?
+    payoutMethod    PAYOUT_METHOD?
     lastPayoutAt    DateTime?
-    payoutFrequency String    @default("MANUAL")
+    payoutFrequency PAYOUT_FREQUENCY @default(MANUAL)
 
     auditTrail Json?
     notes      String?
@@ -3005,12 +3076,12 @@ model MerchantDeduction {
     merchantId        String
 
     referenceId String
-    type        String
+    type        DEDUCTION_TYPE
     amount      Float
-    status      String  @default("PENDING")
+    status      DEDUCTION_STATUS @default(PENDING)
     remarks     String?
 
-    triggeredBy String    @default("SYSTEM")
+    triggeredBy DEDUCTION_SOURCE @default(SYSTEM)
     settledAt   DateTime?
     waivedBy    String?
 
@@ -3033,8 +3104,8 @@ model PayoutTransaction {
     merchantAccountId String
 
     amount        Float
-    method        String
-    status        String  @default("PENDING")
+    method        PAYOUT_METHOD
+    status        PAYOUT_STATUS @default(PENDING)
     externalTxnId String?
     referenceNote String?
     failureReason String?
@@ -3215,15 +3286,15 @@ model AdminNotification {
     id      String  @id
     adminId String?
 
-    type     String // "DISPUTE_RAISED", "HIGH_VALUE_ORDER", "MERCHANT_PENDING"
+    type     NOTIFICATION_TYPE
     title    String
     message  String
-    priority String @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+    priority NOTIFICATION_PRIORITY @default(NORMAL)
 
     isRead Boolean   @default(false)
     readAt DateTime?
 
-    resourceType String? // "ORDER", "DISPUTE", "MERCHANT"
+    resourceType RESOURCE_TYPE?
     resourceId   String?
 
     metadata Json?
@@ -3237,6 +3308,146 @@ model AdminNotification {
     @@index([isRead])
     @@index([createdAt])
     @@map("admin_notifications")
+}
+
+// ============================================
+// SECTION 13: FILE MANAGEMENT & CONFIGURATION
+// ============================================
+
+model File {
+    id           String         @id
+    merchantId   String?
+    userId       String?
+    filename     String
+    originalName String
+    mimeType     String
+    size         Int
+    url          String
+    cloudinaryId String?
+    folder       String?
+    type         FILE_TYPE
+    resourceType RESOURCE_TYPE?
+    resourceId   String?
+    metadata     Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    merchant Merchant? @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([merchantId])
+    @@index([userId])
+    @@index([type])
+    @@index([resourceType, resourceId])
+    @@map("files")
+}
+
+model CourierConfiguration {
+    id          String  @id
+    courierCode String  @unique
+    courierName String
+    isActive    Boolean @default(true)
+    priority    Int     @default(0)
+
+    // Pricing
+    baseRate  Float
+    perKgRate Float
+    minWeight Float @default(0)
+    maxWeight Float @default(50)
+
+    // Coverage
+    serviceable   Json? // Array of pincodes/regions
+    deliveryTypes Json? // [STANDARD, EXPRESS, etc]
+
+    // Features
+    features Json? // {cod: true, reverse: true, etc}
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([courierCode])
+    @@index([isActive])
+    @@map("courier_configurations")
+}
+
+model FeeConfiguration {
+    id          String          @id
+    configType  FEE_CONFIG_TYPE
+    label       String
+    description String?
+
+    feeType   PLATFORM_FEE_TYPE
+    feeValue  Float
+    minAmount Float?            @default(0)
+    maxAmount Float?
+
+    applicableFor APPLICABLE_FOR @default(ALL)
+    category      String? // SHOP, MARKETPLACE
+
+    isActive Boolean @default(true)
+    priority Int     @default(0)
+
+    metadata Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([configType])
+    @@index([isActive])
+    @@map("fee_configurations")
+}
+
+model EmailTemplate {
+    id           String  @id
+    templateCode String  @unique
+    name         String
+    subject      String
+    htmlContent  String  @db.Text
+    textContent  String? @db.Text
+
+    category  EMAIL_CATEGORY
+    variables Json? // Available template variables
+
+    isActive Boolean @default(true)
+    isSystem Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([templateCode])
+    @@index([category])
+    @@index([isActive])
+    @@map("email_templates")
+}
+
+model MerchantNotification {
+    id         String @id
+    merchantId String
+
+    type     NOTIFICATION_TYPE
+    title    String
+    message  String
+    priority NOTIFICATION_PRIORITY @default(NORMAL)
+
+    isRead Boolean   @default(false)
+    readAt DateTime?
+
+    resourceType RESOURCE_TYPE?
+    resourceId   String?
+
+    metadata Json?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    merchant Merchant @relation("MerchantNotificationsList", fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@index([merchantId])
+    @@index([isRead])
+    @@index([createdAt])
+    @@map("merchant_notifications")
 }
 
 // ============================================
