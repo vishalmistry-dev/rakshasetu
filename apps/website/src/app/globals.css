@@ -49,6 +49,14 @@
 
     /* Radii */
     --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   /* ----------------------- */
@@ -93,6 +101,14 @@
     --info: 202 100% 60%;
     --info-hover: 202 100% 50%;
     --info-foreground: 0 0% 100%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   /* ----------------------- */
@@ -193,4 +209,31 @@
   .border-info {
     border-color: hsl(var(--info));
   }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+input:focus {
+  /* Targets the default blue/gold/gray outline */
+  outline: none !important;
+
+  /* Targets the shadow/ring often mistaken for an outline */
+  box-shadow: none !important;
+
+  /* Targets Tailwind's ring utility if it's somehow winning */
+  --tw-ring-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* If you need to target the input with your specific class: */
+.flex-1:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
