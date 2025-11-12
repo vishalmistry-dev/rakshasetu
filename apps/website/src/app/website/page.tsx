@@ -18,14 +18,14 @@ export default function Home() {
           🚀 Rakshasetu - Main Website
         </h1>
 
-        <div className="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-sm">
+        <div className="bg-gray-100 text-primary p-6 rounded-lg font-mono text-sm">
           <p className="mb-2">✅ Next.js 15 Running</p>
           <p className="mb-2">✅ TypeScript Working</p>
           <p className="mb-2">✅ Tailwind CSS Active</p>
           <p className="mb-4">✅ Database Types Imported</p>
 
           <div className="border-t border-green-700 pt-4 mt-4">
-            <p className="text-white mb-2">Demo User from Database Types:</p>
+            <p className="text-secondary mb-2">Demo User from Database Types:</p>
             <pre className="text-xs overflow-auto">
               {JSON.stringify(demoUser, null, 2)}
             </pre>
