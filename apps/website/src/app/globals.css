@@ -1,3 +1,239 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* ----------------------- */
+  /* LIGHT MODE COLORS       */
+  /* ----------------------- */
+  :root {
+    /* Base */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%; /* #1a1a1a */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 85% 35%;
+    --muted: 0 0% 96%;
+    --muted-hover: 0 0% 92%;
+    --muted-foreground: 0 0% 40%;
+
+    /* Brand Colors */
+    --primary: 28 100% 55%; /* Vibrant Orange */
+    --primary-hover: 28 100% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --accent: 202 100% 24%; /* Deep Blue */
+    --accent-hover: 202 100% 18%;
+    --accent-foreground: 0 0% 100%;
+
+    --secondary: 219 16% 40%; /* Slate blue */
+    --secondary-hover: 219 16% 30%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Semantic Colors */
+    --success: 142 76% 36%;
+    --success-hover: 142 76% 28%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 47%;
+    --warning-hover: 45 93% 38%;
+    --warning-foreground: 0 0% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-hover: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --info: 202 100% 44%;
+    --info-hover: 202 100% 38%;
+    --info-foreground: 0 0% 100%;
+
+    /* Radii */
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* ----------------------- */
+  /* DARK MODE COLORS        */
+  /* ----------------------- */
+  .dark {
+    --background: 220 15% 10%;
+    --foreground: 0 0% 98%;
+    --border: 220 15% 25%;
+    --input: 220 15% 25%;
+    --ring: 202 100% 60%;
+    --muted: 220 10% 25%;
+    --muted-hover: 220 10% 20%;
+    --muted-foreground: 0 0% 65%;
+
+    /* Brand Colors */
+    --primary: 28 100% 60%;
+    --primary-hover: 28 100% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --accent: 202 100% 55%;
+    --accent-hover: 202 100% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --secondary: 219 16% 50%;
+    --secondary-hover: 219 16% 40%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Semantic Colors */
+    --success: 142 76% 38%;
+    --success-hover: 142 76% 30%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 50%;
+    --warning-hover: 45 93% 40%;
+    --warning-foreground: 0 0% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-hover: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --info: 202 100% 60%;
+    --info-hover: 202 100% 50%;
+    --info-foreground: 0 0% 100%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* ----------------------- */
+  /* GLOBAL STYLES           */
+  /* ----------------------- */
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading text-foreground;
+  }
+
+  p {
+    @apply text-muted-foreground;
+  }
+
+  a {
+    @apply text-primary hover:text-primary/90 underline-offset-2 transition-colors;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+@layer utilities {
+  /* Custom color utilities with hover states */
+  .bg-primary-hover {
+    background-color: hsl(var(--primary-hover));
+  }
+  .bg-accent-hover {
+    background-color: hsl(var(--accent-hover));
+  }
+  .bg-secondary-hover {
+    background-color: hsl(var(--secondary-hover));
+  }
+  .bg-success-hover {
+    background-color: hsl(var(--success-hover));
+  }
+  .bg-warning-hover {
+    background-color: hsl(var(--warning-hover));
+  }
+  .bg-destructive-hover {
+    background-color: hsl(var(--destructive-hover));
+  }
+  .bg-info-hover {
+    background-color: hsl(var(--info-hover));
+  }
+  .bg-muted-hover {
+    background-color: hsl(var(--muted-hover));
+  }
+
+  /* Text color utilities */
+  .text-success {
+    color: hsl(var(--success));
+  }
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+  .text-info {
+    color: hsl(var(--info));
+  }
+  .text-success-foreground {
+    color: hsl(var(--success-foreground));
+  }
+  .text-warning-foreground {
+    color: hsl(var(--warning-foreground));
+  }
+  .text-info-foreground {
+    color: hsl(var(--info-foreground));
+  }
+
+  /* Border utilities */
+  .border-success {
+    border-color: hsl(var(--success));
+  }
+  .border-warning {
+    border-color: hsl(var(--warning));
+  }
+  .border-info {
+    border-color: hsl(var(--info));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+input:focus {
+  /* Targets the default blue/gold/gray outline */
+  outline: none !important;
+
+  /* Targets the shadow/ring often mistaken for an outline */
+  box-shadow: none !important;
+
+  /* Targets Tailwind's ring utility if it's somehow winning */
+  --tw-ring-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* If you need to target the input with your specific class: */
+.flex-1:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}

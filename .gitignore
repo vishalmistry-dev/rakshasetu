@@ -135,3 +135,13 @@ pids/
 # ─────────────────────────────────────────────
 .grunt/
 build/Release/
+
+# Testing/Debug files
+test-*.ts
+debug-*.ts
+
+# Testing/Debug files
+test-*.ts
+debug-*.ts
+
+docs/

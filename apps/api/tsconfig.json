@@ -1,16 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    /* ✅ Language and module settings */
+    "target": "ES2017",
     "module": "commonjs",
-    "lib": ["ES2020"],
-    "outDir": "./dist",
     "rootDir": "./src",
+    "outDir": "./dist",
+    /* ✅ Strictness and compatibility */
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "skipLibCheck": true,
+    /* ✅ Modern libraries */
+    "lib": ["ES2017", "DOM"],
+    "ignoreDeprecations": "5.0",
+    /* ✅ Path aliases */
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
