@@ -1,0 +1,1 @@
+Hello {{firstName}}, welcome to {{appName}}! We're excited to have you.

@@ -1,0 +1,812 @@
+first is older backend structure
+
+second is the refactored structure ( in second one that prisma folder and schema was just to remove that prisma error thats all thats not how we gonna be usign prisma we have seprate packages as u can see in our project info)
+
+third one is where we ahve to create this api
+
+
+
+
+
+we have to build the api according to second file structure because i already bilt there errors systems. logging systems, global middlewares, etc
+
+
+1.
+Vishal Mistry@LEGION MINGW64 /d/Work/projects-old/rakshasetu/apps/api
+$ tree -I '.turbo|node_modules'
+.
+|-- index.html
+|-- package-lock.json
+|-- package.json
+|-- public
+|   `-- temp
+|-- seeds
+|   |-- seedAdmin.js
+|   `-- seedCourier.ts
+|-- src
+|   |-- app.ts
+|   |-- config
+|   |   |-- db.ts
+|   |   |-- email.ts
+|   |   |-- env.ts
+|   |   `-- platformFee.ts
+|   |-- constants
+|   |   `-- index.ts
+|   |-- middlewares
+|   |   |-- middleware.ts
+|   |   |-- multer.ts
+|   |   `-- webhookMiddleware.ts
+|   |-- modules
+|   |   |-- admin
+|   |   |   |-- controllers
+|   |   |   |   |-- admin.controller.ts
+|   |   |   |   `-- user.controller.ts
+|   |   |   |-- routes
+|   |   |   |   |-- admin.routes.ts
+|   |   |   |   |-- routes.ts
+|   |   |   |   `-- user.routes.ts
+|   |   |   |-- services
+|   |   |   |   |-- admin.service.ts
+|   |   |   |   `-- user.service.ts
+|   |   |   `-- validators
+|   |   |       |-- admin.validator.ts
+|   |   |       `-- user.validator.ts
+|   |   |-- auth
+|   |   |   |-- adminAuth
+|   |   |   |   |-- controllers
+|   |   |   |   |   `-- adminAuth.controller.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   `-- adminAuth.routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   `-- adminAuth.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- adminAuth.validator.ts
+|   |   |   |-- merchantAuth
+|   |   |   |   |-- controllers
+|   |   |   |   |   `-- merchantAuth.controller.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   `-- merchantAuth.routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   `-- merchantAuth.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- merchantAuth.validator.ts
+|   |   |   `-- userAuth
+|   |   |       |-- controllers
+|   |   |       |   `-- userAuth.controller.ts
+|   |   |       |-- routes
+|   |   |       |   `-- userAuth.routes.ts
+|   |   |       |-- services
+|   |   |       |   `-- userAuth.service.ts
+|   |   |       `-- validators
+|   |   |           `-- userAuth.validator.ts
+|   |   |-- logistics
+|   |   |   |-- adminLogistics
+|   |   |   |   |-- controllers
+|   |   |   |   |-- routes
+|   |   |   |   |   `-- routes.ts
+|   |   |   |   |-- services
+|   |   |   |   `-- validators
+|   |   |   |-- merchantLogistics
+|   |   |   |   |-- controllers
+|   |   |   |   |-- routes
+|   |   |   |   |   `-- routes.ts
+|   |   |   |   |-- services
+|   |   |   |   `-- validators
+|   |   |   `-- routes.ts
+|   |   |-- marketplace
+|   |   |   |-- adminMarketplace
+|   |   |   |   |-- connections
+|   |   |   |   |   |-- controllers
+|   |   |   |   |   |   `-- connections.controller.ts
+|   |   |   |   |   |-- routes
+|   |   |   |   |   |   `-- connections.routes.ts
+|   |   |   |   |   |-- services
+|   |   |   |   |   |   `-- connections.service.ts
+|   |   |   |   |   `-- validators
+|   |   |   |   |       `-- connections.validator.ts
+|   |   |   |   |-- disputes
+|   |   |   |   |   |-- controllers
+|   |   |   |   |   |   `-- dispute.controller.ts
+|   |   |   |   |   |-- routes
+|   |   |   |   |   |   `-- dispute.routes.ts
+|   |   |   |   |   |-- services
+|   |   |   |   |   |   `-- dispute.service.ts
+|   |   |   |   |   `-- validators
+|   |   |   |   |       `-- dispute.validator.ts
+|   |   |   |   |-- listings
+|   |   |   |   |   |-- controllers
+|   |   |   |   |   |   `-- listing.controller.ts
+|   |   |   |   |   |-- routes
+|   |   |   |   |   |   `-- listing.routes.ts
+|   |   |   |   |   |-- services
+|   |   |   |   |   |   `-- listing.service.ts
+|   |   |   |   |   `-- validators
+|   |   |   |   |       `-- listing.validator.ts
+|   |   |   |   |-- orders
+|   |   |   |   |   |-- controllers
+|   |   |   |   |   |   `-- order.controller.ts
+|   |   |   |   |   |-- routes
+|   |   |   |   |   |   `-- order.routes.ts
+|   |   |   |   |   |-- services
+|   |   |   |   |   |   `-- order.service.ts
+|   |   |   |   |   `-- validators
+|   |   |   |   |       `-- order.validator.ts
+|   |   |   |   |-- payments
+|   |   |   |   |   |-- controllers
+|   |   |   |   |   |-- routes
+|   |   |   |   |   |-- services
+|   |   |   |   |   `-- validators
+|   |   |   |   |-- releases
+|   |   |   |   |   |-- controllers
+|   |   |   |   |   |   `-- release.controller.ts
+|   |   |   |   |   |-- routes
+|   |   |   |   |   |   `-- release.routes.ts
+|   |   |   |   |   |-- services
+|   |   |   |   |   |   `-- releases.service.ts
+|   |   |   |   |   `-- validators
+|   |   |   |   `-- routes.ts
+|   |   |   |-- routes.ts
+|   |   |   `-- userMarketplace
+|   |   |       |-- connections
+|   |   |       |   |-- controllers
+|   |   |       |   |   `-- connections.controller.ts
+|   |   |       |   |-- routes
+|   |   |       |   |   `-- connections.routes.ts
+|   |   |       |   |-- services
+|   |   |       |   |   `-- connections.service.ts
+|   |   |       |   `-- validators
+|   |   |       |       `-- connections.validator.ts
+|   |   |       |-- disputes
+|   |   |       |   |-- controllers
+|   |   |       |   |   `-- dispute.controller.ts
+|   |   |       |   |-- routes
+|   |   |       |   |   `-- dispute.routes.ts
+|   |   |       |   |-- services
+|   |   |       |   |   `-- dispute.service.ts
+|   |   |       |   `-- validators
+|   |   |       |       `-- dispute.validator.ts
+|   |   |       |-- listings
+|   |   |       |   |-- controllers
+|   |   |       |   |   |-- adminListings.controller.ts
+|   |   |       |   |   `-- listings.controller.ts
+|   |   |       |   |-- routes
+|   |   |       |   |   |-- adminListings.routes.ts
+|   |   |       |   |   `-- listings.routes.ts
+|   |   |       |   |-- services
+|   |   |       |   |   |-- adminListings.service.ts
+|   |   |       |   |   `-- listings.service.ts
+|   |   |       |   `-- validators
+|   |   |       |       |-- adminListings.validator.ts
+|   |   |       |       `-- listings.validator.ts
+|   |   |       |-- orders
+|   |   |       |   |-- controllers
+|   |   |       |   |   `-- order.controller.ts
+|   |   |       |   |-- routes
+|   |   |       |   |   `-- order.routes.ts
+|   |   |       |   |-- services
+|   |   |       |   |   `-- order.service.ts
+|   |   |       |   `-- validators
+|   |   |       |       `-- order.validator.ts
+|   |   |       |-- payments
+|   |   |       |   |-- controllers
+|   |   |       |   |   `-- payment.controller.ts
+|   |   |       |   |-- routes
+|   |   |       |   |   `-- payment.routes.ts
+|   |   |       |   |-- services
+|   |   |       |   |   `-- payment.service.ts
+|   |   |       |   `-- validators
+|   |   |       |       `-- payment.validator.ts
+|   |   |       |-- releases
+|   |   |       |   |-- controllers
+|   |   |       |   |   `-- release.controller.ts
+|   |   |       |   |-- routes
+|   |   |       |   |   `-- release.routes.ts
+|   |   |       |   |-- services
+|   |   |       |   |   `-- release.service.ts
+|   |   |       |   `-- validators
+|   |   |       |       `-- release.validator.ts
+|   |   |       `-- routes.ts
+|   |   |-- merchant
+|   |   |   |-- controllers
+|   |   |   |   `-- merchant.controller.ts
+|   |   |   |-- routes
+|   |   |   |   `-- merchant.routes.ts
+|   |   |   |-- services
+|   |   |   |   `-- merchant.service.ts
+|   |   |   `-- validators
+|   |   |       `-- merchant.validator.ts
+|   |   |-- platforms
+|   |   |   |-- lib
+|   |   |   |   `-- shopify.ts
+|   |   |   `-- shopify
+|   |   |       |-- controllers
+|   |   |       |   |-- checkout.controller.ts
+|   |   |       |   |-- shopify.controller.ts
+|   |   |       |   `-- webhooks.controller.ts
+|   |   |       |-- routes
+|   |   |       |   |-- checkout.routes.ts
+|   |   |       |   |-- routes.ts
+|   |   |       |   |-- shopify.routes.ts
+|   |   |       |   `-- webhooks.routes.ts
+|   |   |       |-- services
+|   |   |       |   |-- checkout.service.ts
+|   |   |       |   |-- shopify.service.ts
+|   |   |       |   `-- webhooks.service.ts
+|   |   |       `-- validators
+|   |   |           `-- checkout.validator.ts
+|   |   |-- shared
+|   |   |   |-- conversation
+|   |   |   |   |-- services
+|   |   |   |   |   |-- conversation.service.ts
+|   |   |   |   |   `-- message.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       |-- conversation.validator.ts
+|   |   |   |       `-- message.validator.ts
+|   |   |   |-- couriers
+|   |   |   |   |-- clients
+|   |   |   |   |   `-- blueDart.client.ts
+|   |   |   |   |-- helpers
+|   |   |   |   |   `-- couriersHelpers.ts
+|   |   |   |   `-- types
+|   |   |   |       |-- blueDart.types.ts
+|   |   |   |       `-- helpersTypes.ts
+|   |   |   |-- delivery
+|   |   |   |   |-- services
+|   |   |   |   |   `-- delivery.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- delivery.validator.ts
+|   |   |   |-- logs
+|   |   |   |   |-- controllers
+|   |   |   |   |   `-- log.controller.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   `-- log.routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   `-- log.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- log.validator.ts
+|   |   |   |-- notifications
+|   |   |   |   |-- controllers
+|   |   |   |   |   `-- notifications.controller.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   `-- notifications.routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   `-- notifications.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- notifications.validator.ts
+|   |   |   |-- providers
+|   |   |   |   `-- razorpay.provider.ts
+|   |   |   |-- shipping
+|   |   |   |   |-- services
+|   |   |   |   |   `-- shipping.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- shipping.validator.ts
+|   |   |   `-- webhooks
+|   |   |       |-- controllers
+|   |   |       |   `-- payment.webhook.controller.ts
+|   |   |       |-- routes
+|   |   |       |   `-- payment.webhook.routes.ts
+|   |   |       `-- services
+|   |   |           `-- payment.webhook.service.ts
+|   |   |-- shop
+|   |   |   |-- adminShop
+|   |   |   |   |-- controllers
+|   |   |   |   |   |-- orders.controller.ts
+|   |   |   |   |   |-- products.controller.ts
+|   |   |   |   |   `-- stores.controller.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   |-- orders.routes.ts
+|   |   |   |   |   |-- products.routes.ts
+|   |   |   |   |   |-- routes.ts
+|   |   |   |   |   `-- stores.routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   |-- orders.service.ts
+|   |   |   |   |   |-- products.service.ts
+|   |   |   |   |   `-- stores.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       `-- stores.validator.ts
+|   |   |   |-- customerShop
+|   |   |   |   |-- controllers
+|   |   |   |   |   |-- cart.controller.ts
+|   |   |   |   |   |-- order.controller.ts
+|   |   |   |   |   `-- payment.controller.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   |-- cart.routes.ts
+|   |   |   |   |   |-- order.routes.ts
+|   |   |   |   |   |-- payment.routes.ts
+|   |   |   |   |   `-- routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   |-- cart.service.ts
+|   |   |   |   |   |-- order.service.ts
+|   |   |   |   |   `-- payment.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       |-- cart.validator.ts
+|   |   |   |       |-- order.validator.ts
+|   |   |   |       `-- payment.validator.ts
+|   |   |   |-- helpers
+|   |   |   |   |-- merchantAccountUtils.ts
+|   |   |   |   `-- platformFeeUtils.ts
+|   |   |   |-- merchantShop
+|   |   |   |   |-- controllers
+|   |   |   |   |   |-- orders.controller.ts
+|   |   |   |   |   |-- shipping.controller.ts
+|   |   |   |   |   |-- shopify.controller.ts
+|   |   |   |   |   `-- stores.controller.ts
+|   |   |   |   |-- helpers
+|   |   |   |   |   |-- calculateBlueDartRate.ts
+|   |   |   |   |   |-- createPickupData.ts
+|   |   |   |   |   |-- createWaybillData.ts
+|   |   |   |   |   |-- generateQuotesForPartner.ts
+|   |   |   |   |   |-- getEstimatedPickupWindow.ts
+|   |   |   |   |   `-- registerShopifyWebhooks.ts
+|   |   |   |   |-- providers
+|   |   |   |   |   `-- bluedart
+|   |   |   |   |       |-- auth.ts
+|   |   |   |   |       |-- pickup.ts
+|   |   |   |   |       |-- quote.ts
+|   |   |   |   |       |-- shipment.ts
+|   |   |   |   |       |-- track.ts
+|   |   |   |   |       |-- transistTime.ts
+|   |   |   |   |       |-- types.ts
+|   |   |   |   |       `-- utils.ts
+|   |   |   |   |-- routes
+|   |   |   |   |   |-- orders.routes.ts
+|   |   |   |   |   |-- routes.ts
+|   |   |   |   |   |-- shipping.routes.ts
+|   |   |   |   |   |-- shopify.routes.ts
+|   |   |   |   |   `-- stores.routes.ts
+|   |   |   |   |-- services
+|   |   |   |   |   |-- orders.service.ts
+|   |   |   |   |   |-- shipping.service.ts
+|   |   |   |   |   |-- shopify.service.ts
+|   |   |   |   |   `-- stores.service.ts
+|   |   |   |   `-- validators
+|   |   |   |       |-- orders.validator.ts
+|   |   |   |       `-- store.validator.ts
+|   |   |   `-- routes.ts
+|   |   |-- user
+|   |   |   |-- controllers
+|   |   |   |   `-- user.controller.ts
+|   |   |   |-- routes
+|   |   |   |   `-- user.routes.ts
+|   |   |   |-- services
+|   |   |   |   `-- user.service.ts
+|   |   |   `-- validators
+|   |   |       `-- user.validator.ts
+|   |   `-- webhooks
+|   |       |-- controllers
+|   |       |   `-- shopify.controller.ts
+|   |       |-- routes
+|   |       |   |-- routes.ts
+|   |       |   `-- shopify.routes.ts
+|   |       |-- services
+|   |       |   `-- shopify.services.ts
+|   |       `-- validators
+|   |-- routes
+|   |   `-- index.ts
+|   |-- server.ts
+|   |-- types
+|   |   |-- express
+|   |   |   `-- index.d.ts
+|   |   `-- types.ts
+|   `-- utils
+|       |-- AppError.ts
+|       |-- asyncHandler.ts
+|       |-- checkUserKycDetails.ts
+|       |-- cloudinary.ts
+|       |-- errorHandler.ts
+|       |-- generateUid.ts
+|       |-- generateUniqueUsername.ts
+|       |-- jwt.ts
+|       |-- notFound.ts
+|       |-- sendEmail.ts
+|       `-- triggerNotification.ts
+|-- tsconfig.json
+`-- tsconfig.shopify.json
+
+178 directories, 209 files
+
+
+2.
+Vishal Mistry@LEGION MINGW64 /d/Work/projects-old/backend
+$ tree -I 'node_modules'
+.
+|-- logs
+|   |-- combined.log
+|   `-- error.log
+|-- package-lock.json
+|-- package.json
+|-- prisma
+|   `-- schema.prisma
+|-- prisma.config.ts
+|-- src
+|   |-- admin
+|   |   |-- admin.routes.ts
+|   |   |-- analytics
+|   |   |   |-- analytics.controller.ts
+|   |   |   |-- analytics.routes.ts
+|   |   |   `-- analytics.service.ts
+|   |   |-- dashboard
+|   |   |   |-- dashboard.controller.ts
+|   |   |   |-- dashboard.routes.ts
+|   |   |   |-- dashboard.schema.ts
+|   |   |   `-- dashboard.service.ts
+|   |   |-- escrow-management
+|   |   |   |-- escrow-management.controller.ts
+|   |   |   |-- escrow-management.routes.ts
+|   |   |   `-- escrow-management.service.ts
+|   |   |-- finance
+|   |   |   |-- finance.controller.ts
+|   |   |   |-- finance.routes.ts
+|   |   |   `-- finance.service.ts
+|   |   |-- logs
+|   |   |   |-- logs.controller.ts
+|   |   |   |-- logs.routes.ts
+|   |   |   `-- logs.service.ts
+|   |   |-- moderation
+|   |   |   |-- moderation.controller.ts
+|   |   |   |-- moderation.routes.ts
+|   |   |   `-- moderation.service.ts
+|   |   `-- settings
+|   |       |-- settings.controller.ts
+|   |       |-- settings.routes.ts
+|   |       `-- settings.service.ts
+|   |-- app.ts
+|   |-- common
+|   |   |-- errors
+|   |   |   |-- AppErrorHandler.ts
+|   |   |   |-- appError.ts
+|   |   |   |-- axiosError.ts
+|   |   |   |-- errorTypes.ts
+|   |   |   |-- index.ts
+|   |   |   |-- jwtError.ts
+|   |   |   |-- multerError.ts
+|   |   |   |-- prismaError.ts
+|   |   |   |-- unknownError.ts
+|   |   |   `-- zodError.ts
+|   |   |-- middleware
+|   |   |   |-- error.middleware.ts
+|   |   |   |-- index.ts
+|   |   |   |-- multer.middleware.ts
+|   |   |   |-- notFound.middleware.ts
+|   |   |   `-- requestLogger.middleware.ts
+|   |   |-- types
+|   |   |   |-- common.types.ts
+|   |   |   |-- enums.ts
+|   |   |   `-- express.d.ts
+|   |   `-- utils
+|   |       |-- asyncHandler.utils.ts
+|   |       |-- index.ts
+|   |       |-- logger.utils.ts
+|   |       |-- sendResponse.utils.ts
+|   |       |-- uniqueFileName.utils.ts
+|   |       |-- uniqueId.utils.ts
+|   |       |-- unqiueUsername.utils.ts
+|   |       `-- validateRequest.utils.ts
+|   |-- config
+|   |   |-- constants.ts
+|   |   |-- env.ts
+|   |   |-- index.ts
+|   |   `-- prisma.ts
+|   |-- core
+|   |   |-- auth
+|   |   |   |-- auth.routes.ts
+|   |   |   |-- auth.service.ts
+|   |   |   |-- domain
+|   |   |   |   |-- admin
+|   |   |   |   |   |-- admin-auth.controller.ts
+|   |   |   |   |   |-- admin-auth.routes.ts
+|   |   |   |   |   `-- admin-auth.service.ts
+|   |   |   |   |-- merchant
+|   |   |   |   |   |-- merchant-auth.controller.ts
+|   |   |   |   |   |-- merchant-auth.routes.ts
+|   |   |   |   |   |-- merchant-auth.schema.ts
+|   |   |   |   |   `-- merchant-auth.service.ts
+|   |   |   |   `-- user
+|   |   |   |       |-- user-auth.controller.ts
+|   |   |   |       |-- user-auth.routes.ts
+|   |   |   |       |-- user-auth.schema.ts
+|   |   |   |       `-- user-auth.service.ts
+|   |   |   |-- middlewares
+|   |   |   |   |-- authenticateMerchant.middleware.ts
+|   |   |   |   |-- authenticateUser.middleware.ts
+|   |   |   |   |-- authorizeRole.middleware.ts
+|   |   |   |   |-- index.ts
+|   |   |   |   `-- require2FA.middleware.ts
+|   |   |   `-- shared
+|   |   |       |-- auth.constants.ts
+|   |   |       |-- auth.types.ts
+|   |   |       |-- core
+|   |   |       |   `-- core.service.ts
+|   |   |       |-- dto
+|   |   |       |   |-- index.ts
+|   |   |       |   |-- login.dto.ts
+|   |   |       |   |-- refresh-token.dto.ts
+|   |   |       |   |-- reset-password.dto.ts
+|   |   |       |   |-- verify-email.dto.ts
+|   |   |       |   `-- verify-otp.dto.ts
+|   |   |       |-- index.ts
+|   |   |       |-- otp.manager.ts
+|   |   |       |-- password.manager.ts
+|   |   |       `-- token.manager.ts
+|   |   |-- conversations
+|   |   |   |-- conversations.service.ts
+|   |   |   |-- conversations.types.ts
+|   |   |   `-- index.ts
+|   |   |-- disputes
+|   |   |   |-- disputes.controller.ts
+|   |   |   |-- disputes.routes.ts
+|   |   |   |-- disputes.schema.ts
+|   |   |   |-- disputes.service.ts
+|   |   |   `-- resolution-engine.ts
+|   |   |-- escrow
+|   |   |   |-- escrow.schema.ts
+|   |   |   |-- escrow.service.ts
+|   |   |   |-- escrow.types.ts
+|   |   |   |-- policies
+|   |   |   |   |-- dispute.policy.ts
+|   |   |   |   |-- refund.policy.ts
+|   |   |   |   `-- release.policy.ts
+|   |   |   `-- state-machine.ts
+|   |   |-- merchants
+|   |   |   |-- merchants.controller.ts
+|   |   |   |-- merchants.routes.ts
+|   |   |   |-- merchants.schema.ts
+|   |   |   `-- merchants.service.ts
+|   |   |-- notifications
+|   |   |   |-- notifications.controller.ts
+|   |   |   |-- notifications.routes.ts
+|   |   |   |-- notifications.schema.ts
+|   |   |   |-- notifications.service.ts
+|   |   |   `-- templates
+|   |   |       |-- dispute.templates.ts
+|   |   |       |-- escrow.templates.ts
+|   |   |       `-- order.templates.ts
+|   |   |-- payments
+|   |   |   |-- payment-methods.ts
+|   |   |   |-- payments.schema.ts
+|   |   |   `-- payments.service.ts
+|   |   |-- payouts
+|   |   |   |-- payout-scheduler.ts
+|   |   |   |-- payouts.schema.ts
+|   |   |   `-- payouts.service.ts
+|   |   |-- transactions
+|   |   |   |-- transaction-types.ts
+|   |   |   |-- transactions.schema.ts
+|   |   |   `-- transactions.service.ts
+|   |   `-- users
+|   |       |-- users.controller.ts
+|   |       |-- users.routes.ts
+|   |       |-- users.schema.ts
+|   |       `-- users.service.ts
+|   |-- integrations
+|   |   |-- communication
+|   |   |   |-- email
+|   |   |   |   |-- email.helpers.ts
+|   |   |   |   |-- email.service.ts
+|   |   |   |   |-- email.types.ts
+|   |   |   |   |-- index.ts
+|   |   |   |   |-- providers
+|   |   |   |   |   |-- nodemailer
+|   |   |   |   |   |   `-- nodemailer.service.ts
+|   |   |   |   |   `-- sendgrid
+|   |   |   |   |       `-- sendgrid.service.ts
+|   |   |   |   `-- templates
+|   |   |   |       |-- dispute-created.html
+|   |   |   |       |-- escrow-hold.html
+|   |   |   |       |-- escrow-release.html
+|   |   |   |       |-- order-confirmation.html
+|   |   |   |       `-- welcome.html
+|   |   |   |-- index.ts
+|   |   |   |-- sms
+|   |   |   |   |-- index.ts
+|   |   |   |   |-- providers
+|   |   |   |   |   `-- twilio
+|   |   |   |   |       `-- twilio.service.ts
+|   |   |   |   |-- sms.helpers.ts
+|   |   |   |   |-- sms.service.ts
+|   |   |   |   |-- sms.types.ts
+|   |   |   |   `-- templates
+|   |   |   |       |-- otp.sms.txt
+|   |   |   |       `-- welcome.sms.txt
+|   |   |   `-- whatsapp
+|   |   |       |-- index.ts
+|   |   |       |-- providers
+|   |   |       |   `-- twilio
+|   |   |       |       `-- twilio-whatsapp.service.ts
+|   |   |       |-- templates
+|   |   |       |   |-- interactiveButtons.ts
+|   |   |       |   |-- interactiveList.ts
+|   |   |       |   `-- normalMessage.ts
+|   |   |       |-- whatsapp.helpers.ts
+|   |   |       |-- whatsapp.service.ts
+|   |   |       `-- whatsapp.types.ts
+|   |   |-- courier-partners
+|   |   |   |-- bluedart
+|   |   |   |   |-- bluedart.client.ts
+|   |   |   |   |-- bluedart.service.ts
+|   |   |   |   |-- bluedart.types.ts
+|   |   |   |   `-- modules
+|   |   |   |       |-- auth.module.ts
+|   |   |   |       |-- pickup.module.ts
+|   |   |   |       |-- quote.module.ts
+|   |   |   |       |-- shipment.module.ts
+|   |   |   |       `-- track.module.ts
+|   |   |   |-- courier.interface.ts
+|   |   |   `-- delhivery
+|   |   |       `-- delhivery.service.ts
+|   |   |-- payment-gateways
+|   |   |   |-- payment-gateway.interface.ts
+|   |   |   |-- razorpay
+|   |   |   |   |-- razorpay.client.ts
+|   |   |   |   |-- razorpay.service.ts
+|   |   |   |   |-- razorpay.types.ts
+|   |   |   |   `-- webhooks
+|   |   |   |       |-- handlers
+|   |   |   |       |   |-- payment-failed.handler.ts
+|   |   |   |       |   |-- payment-success.handler.ts
+|   |   |   |       |   `-- refund.handler.ts
+|   |   |   |       |-- webhooks.controller.ts
+|   |   |   |       `-- webhooks.routes.ts
+|   |   |   `-- stripe
+|   |   |       `-- stripe.service.ts
+|   |   |-- shopify
+|   |   |   |-- api
+|   |   |   |   |-- checkout.api.ts
+|   |   |   |   |-- client.ts
+|   |   |   |   |-- orders.api.ts
+|   |   |   |   `-- products.api.ts
+|   |   |   |-- helpers
+|   |   |   |   |-- hmac-validator.ts
+|   |   |   |   `-- webhook-registry.ts
+|   |   |   |-- oauth
+|   |   |   |   |-- oauth.controller.ts
+|   |   |   |   |-- oauth.routes.ts
+|   |   |   |   `-- oauth.service.ts
+|   |   |   |-- shopify.routes.ts
+|   |   |   |-- sync
+|   |   |   |   |-- inventory-sync.service.ts
+|   |   |   |   |-- orders-sync.service.ts
+|   |   |   |   `-- products-sync.service.ts
+|   |   |   `-- webhooks
+|   |   |       |-- handlers
+|   |   |       |   |-- app-uninstalled.handler.ts
+|   |   |       |   |-- order-created.handler.ts
+|   |   |       |   |-- product-created.handler.ts
+|   |   |       |   `-- product-updated.handler.ts
+|   |   |       |-- webhooks.controller.ts
+|   |   |       |-- webhooks.middleware.ts
+|   |   |       `-- webhooks.routes.ts
+|   |   `-- storage
+|   |       |-- cloudinary
+|   |       |   `-- cloudinary.service.ts
+|   |       `-- s3
+|   |-- jobs
+|   |   |-- queues
+|   |   |   |-- email.queue.ts
+|   |   |   |-- escrow.queue.ts
+|   |   |   |-- notification.queue.ts
+|   |   |   |-- setup.ts
+|   |   |   `-- webhook.queue.ts
+|   |   `-- workers
+|   |       |-- cleanup.worker.ts
+|   |       |-- escrow-auto-release.worker.ts
+|   |       |-- payout-processing.worker.ts
+|   |       `-- shopify-sync.worker.ts
+|   |-- modules
+|   |   |-- checkout-gateway
+|   |   |   |-- app
+|   |   |   |   |-- install.controller.ts
+|   |   |   |   |-- install.routes.ts
+|   |   |   |   |-- install.schema.ts
+|   |   |   |   `-- install.service.ts
+|   |   |   |-- checkout
+|   |   |   |   |-- checkout.controller.ts
+|   |   |   |   |-- checkout.routes.ts
+|   |   |   |   |-- checkout.schema.ts
+|   |   |   |   `-- checkout.service.ts
+|   |   |   |-- checkout-gateway.routes.ts
+|   |   |   |-- extensions
+|   |   |   |   |-- admin-ui
+|   |   |   |   `-- checkout-ui
+|   |   |   |-- orders
+|   |   |   |   |-- orders.controller.ts
+|   |   |   |   |-- orders.routes.ts
+|   |   |   |   |-- orders.schema.ts
+|   |   |   |   `-- orders.service.ts
+|   |   |   `-- returns
+|   |   |       |-- returns.controller.ts
+|   |   |       |-- returns.routes.ts
+|   |   |       |-- returns.schema.ts
+|   |   |       `-- returns.service.ts
+|   |   |-- rsmart
+|   |   |   |-- connections
+|   |   |   |   |-- connections.controller.ts
+|   |   |   |   |-- connections.routes.ts
+|   |   |   |   |-- connections.schema.ts
+|   |   |   |   `-- connections.service.ts
+|   |   |   |-- helpers
+|   |   |   |   `-- listing-search.ts
+|   |   |   |-- listings
+|   |   |   |   |-- listings.controller.ts
+|   |   |   |   |-- listings.routes.ts
+|   |   |   |   |-- listings.schema.ts
+|   |   |   |   `-- listings.service.ts
+|   |   |   |-- orders
+|   |   |   |   |-- orders.controller.ts
+|   |   |   |   |-- orders.routes.ts
+|   |   |   |   |-- orders.schema.ts
+|   |   |   |   `-- orders.service.ts
+|   |   |   `-- rsmart.routes.ts
+|   |   `-- shop
+|   |       |-- cart
+|   |       |   |-- cart.controller.ts
+|   |       |   |-- cart.routes.ts
+|   |       |   |-- cart.schema.ts
+|   |       |   `-- cart.service.ts
+|   |       |-- helpers
+|   |       |   |-- merchant-split.ts
+|   |       |   `-- platform-fee.ts
+|   |       |-- orders
+|   |       |   |-- orders.controller.ts
+|   |       |   |-- orders.routes.ts
+|   |       |   |-- orders.schema.ts
+|   |       |   `-- orders.service.ts
+|   |       |-- products
+|   |       |   |-- products.controller.ts
+|   |       |   |-- products.routes.ts
+|   |       |   |-- products.schema.ts
+|   |       |   `-- products.service.ts
+|   |       |-- shop.routes.ts
+|   |       `-- stores
+|   |           |-- stores.controller.ts
+|   |           |-- stores.routes.ts
+|   |           |-- stores.schema.ts
+|   |           `-- stores.service.ts
+|   |-- routes
+|   |   `-- index.ts
+|   |-- server.ts
+|   `-- services
+|       |-- analytics
+|       |   |-- analytics.service.ts
+|       |   `-- reports
+|       |       |-- escrow.report.ts
+|       |       |-- marketplace.report.ts
+|       |       `-- revenue.report.ts
+|       `-- logistics
+|           |-- helpers
+|           |   |-- label-generator.ts
+|           |   `-- rate-calculator.ts
+|           |-- logistics.routes.ts
+|           |-- pickups
+|           |   |-- pickups.controller.ts
+|           |   |-- pickups.routes.ts
+|           |   |-- pickups.schema.ts
+|           |   `-- pickups.service.ts
+|           |-- shipments
+|           |   |-- shipments.controller.ts
+|           |   |-- shipments.routes.ts
+|           |   |-- shipments.schema.ts
+|           |   `-- shipments.service.ts
+|           `-- tracking
+|               |-- tracking.controller.ts
+|               |-- tracking.routes.ts
+|               |-- tracking.schema.ts
+|               `-- tracking.service.ts
+`-- tsconfig.json
+
+104 directories, 279 files
+
+3.
+Vishal Mistry@LEGION MINGW64 /d/Work/Projects/Main/rakshasetu/apps/api (develop)
+$ tree -I 'node_modules'
+.
+|-- package.json
+|-- src
+|   |-- controllers
+|   |   `-- user.controller.ts
+|   |-- index.ts
+|   |-- middleware
+|   `-- routes
+|       `-- index.ts
+`-- tsconfig.json
+4 directories, 5 files

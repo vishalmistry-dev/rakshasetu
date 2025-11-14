@@ -1,0 +1,1 @@
+Your verification code is {{code}}. It will expire in {{expiry}} minutes.
