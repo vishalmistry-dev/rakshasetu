@@ -74,7 +74,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
             isCollapsed ? "h-16 justify-center" : "py-[17px] px-4 justify-start"
           )}
         >
-          <Logo showText={!isCollapsed} size={isCollapsed ? "sm" : "md"} />
+          <Logo isCollapsed={isCollapsed} />
         </div>
 
         {/* Navigation */}

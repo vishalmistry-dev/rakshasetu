@@ -1,3 +1,4 @@
+import { RootProvider } from '@/shared/providers/RootProvider'
 import type { Metadata } from 'next'
 import { inter, manrope } from './fonts'
 import './globals.css'
@@ -14,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
-      <body>{children}</body>
+      <body>
+        <RootProvider>
+          {children}
+        </RootProvider>
+      </body>
     </html>
   )
 }

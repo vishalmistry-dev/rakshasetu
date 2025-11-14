@@ -1,64 +1,55 @@
+import { ROUTE_CONFIG } from '@/config/routes'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-const SUBDOMAIN_MAP = {
-  shop: 'shop',
-  merchant: 'merchant',
-  admin: 'admin',
-  rsmart: 'rsmart',
-} as const
+// Helper: check if path matches any public route
+function isPublicRoute(path: string, routes: readonly string[]): boolean {
+  return routes.some((route) => path.startsWith(route))
+}
 
-export function middleware(req: NextRequest) {
-  const host = req.headers.get('host') || ''
-  const subdomain = getSubdomain(host)
-  const url = req.nextUrl.clone()
+export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host') || ''
+  const { pathname } = request.nextUrl
 
-  // Skip static files and API routes
-  if (
-    url.pathname.startsWith('/_next') ||
-    url.pathname.startsWith('/api') ||
-    url.pathname.includes('.')
-  ) {
-    return NextResponse.next()
-  }
+  // --- detect subdomain ---
+  let subdomain: keyof typeof ROUTE_CONFIG | undefined
+  if (host.startsWith('admin.')) subdomain = 'admin'
+  else if (host.startsWith('merchant.')) subdomain = 'merchant'
+  else if (host.startsWith('shop.')) subdomain = 'shop'
+  else if (host.startsWith('rsmart.')) subdomain = 'rsmart'
 
-  // Handle subdomain routing
-  if (subdomain && subdomain in SUBDOMAIN_MAP) {
-    const prefix = `/${SUBDOMAIN_MAP[subdomain as keyof typeof SUBDOMAIN_MAP]}`
+  const moduleConfig = subdomain ? ROUTE_CONFIG[subdomain] : null
 
-    if (!url.pathname.startsWith(prefix)) {
-      url.pathname = `${prefix}${url.pathname}`
-      return NextResponse.rewrite(url)
-    }
-  } else {
-    // No subdomain = main website
-    // Redirect localhost:3000 to /website
-    if (url.pathname === '/') {
-      url.pathname = '/website'
-      return NextResponse.rewrite(url)
+  // --- if we found a subdomain, rewrite the request internally ---
+  if (moduleConfig) {
+    const { internalPath } = moduleConfig
+    const rewrittenPath = pathname.startsWith(internalPath)
+      ? pathname
+      : `${internalPath}${pathname}`
+
+    // --- Auth checks now run against the rewritten path ---
+    const { cookie, publicRoutes } = moduleConfig
+    const token = request.cookies.get(cookie)?.value
+    const isPublic = isPublicRoute(rewrittenPath, publicRoutes)
+
+    if (!isPublic && !token) {
+      // redirect to login on that subdomain
+      return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    if (!url.pathname.startsWith('/website')) {
-      url.pathname = `/website${url.pathname}`
-      return NextResponse.rewrite(url)
+    if (rewrittenPath.endsWith('/login') && token) {
+      return NextResponse.redirect(new URL(`${internalPath}/dashboard`, request.url))
+    }
+
+    // rewrite for internal routing
+    if (!pathname.startsWith(internalPath)) {
+      return NextResponse.rewrite(new URL(rewrittenPath, request.url))
     }
   }
 
   return NextResponse.next()
 }
 
-function getSubdomain(host: string): string | null {
-  const hostname = host.split(':')[0]
-
-  if (hostname.includes('localhost')) {
-    const parts = hostname.split('.')
-    return parts.length > 1 ? parts[0] : null
-  }
-
-  const parts = hostname.split('.')
-  return parts.length >= 3 ? parts[0] : null
-}
-
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }

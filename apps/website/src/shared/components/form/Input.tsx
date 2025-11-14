@@ -1,12 +1,11 @@
 "use client"
 
-import * as React from "react"
-import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Input as ShadcnInput } from "@/components/ui/input"
-import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { cva, type VariantProps } from "class-variance-authority"
+import { AlertCircle, Eye, EyeOff } from "lucide-react"
+import * as React from "react"
 
-// 1. Define comprehensive variants for the input field
 const inputVariants = cva(
     "flex w-full rounded-md border bg-background ring-offset-background file:border-0 file:bg-transparent file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
     {
@@ -30,11 +29,9 @@ const inputVariants = cva(
             },
         },
         compoundVariants: [
-            // Left icon padding
             { size: "sm", hasLeftIcon: true, class: "pl-8" },
             { size: "base", hasLeftIcon: true, class: "pl-10" },
             { size: "lg", hasLeftIcon: true, class: "pl-12" },
-            // Right icon padding
             { size: "sm", hasRightIcon: true, class: "pr-8" },
             { size: "base", hasRightIcon: true, class: "pr-10" },
             { size: "lg", hasRightIcon: true, class: "pr-12" },
@@ -48,7 +45,6 @@ const inputVariants = cva(
     },
 )
 
-// 2. Define variants for the icons
 const iconVariants = cva("transition-colors", {
     variants: {
         size: {
@@ -68,7 +64,6 @@ const iconVariants = cva("transition-colors", {
     },
 })
 
-// 3. Icon wrapper positioning
 const iconWrapperVariants = cva("absolute inset-y-0 flex items-center", {
     variants: {
         position: {
@@ -94,12 +89,11 @@ const iconWrapperVariants = cva("absolute inset-y-0 flex items-center", {
     },
 })
 
-// 4. Omit the conflicting "size" prop from HTML
 export type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> &
-    VariantProps<typeof inputVariants> & {
+    Omit<VariantProps<typeof inputVariants>, "error" | "hasLeftIcon" | "hasRightIcon"> & {
         leftIcon?: React.ReactElement<React.SVGProps<SVGSVGElement>>
         rightIcon?: React.ReactElement<React.SVGProps<SVGSVGElement>>
-        error?: boolean
+        error?: string
         helperText?: string
         label?: string
     }
@@ -112,7 +106,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             leftIcon,
             rightIcon,
             size = "base",
-            error = false,
+            error,
             helperText,
             label,
             disabled,
@@ -121,30 +115,25 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         },
         ref,
     ) => {
-        // Generate a unique ID if not provided (for label association)
         const generatedId = React.useId()
         const inputId = id || generatedId
 
-        // --- Password Logic ---
         const [showPassword, setShowPassword] = React.useState(false)
         const isPassword = type === "password"
         const inputType = isPassword && showPassword ? "text" : type
 
-        // Determine icon state
-        const iconState = disabled ? "disabled" : error ? "error" : "default"
-
-        // Check if we have any right-side content
+        const hasError = !!error
+        const iconState = disabled ? "disabled" : hasError ? "error" : "default"
         const hasRightContent = isPassword || rightIcon
 
         return (
             <div className="w-full">
-                {/* --- Label --- */}
                 {label && (
                     <label
                         htmlFor={inputId}
                         className={cn(
                             "mb-1.5 block text-sm font-medium",
-                            error ? "text-red-500" : "text-foreground",
+                            hasError ? "text-red-500" : "text-foreground",
                             disabled && "opacity-50 cursor-not-allowed"
                         )}
                     >
@@ -153,7 +142,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 )}
 
                 <div className="relative w-full">
-                    {/* --- Left Icon --- */}
                     {leftIcon && (
                         <div
                             className={cn(
@@ -170,27 +158,25 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         </div>
                     )}
 
-                    {/* --- The Input Atom --- */}
                     <ShadcnInput
                         id={inputId}
                         type={inputType}
                         className={cn(
                             inputVariants({
                                 size,
-                                error,
-                                hasLeftIcon: leftIcon ? true : false,
-                                hasRightIcon: hasRightContent ? true : false,
+                                error: hasError,
+                                hasLeftIcon: !!leftIcon,
+                                hasRightIcon: !!hasRightContent,
                             }),
                             className,
                         )}
                         disabled={disabled}
-                        aria-invalid={error}
-                        aria-describedby={helperText ? `${inputId}-helper` : undefined}
+                        aria-invalid={hasError}
+                        aria-describedby={(error || helperText) ? `${inputId}-helper` : undefined}
                         ref={ref}
                         {...props}
                     />
 
-                    {/* --- Right Icon / Password Toggle / Error Icon --- */}
                     {hasRightContent && (
                         <div
                             className={cn(
@@ -229,17 +215,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     )}
                 </div>
 
-                {/* --- Helper Text / Error Message --- */}
-                {helperText && (
+                {(error || helperText) && (
                     <p
                         id={`${inputId}-helper`}
                         className={cn(
                             "mt-1.5 text-xs",
-                            error ? "text-red-500" : "text-muted-foreground"
+                            hasError ? "text-red-500" : "text-muted-foreground"
                         )}
                     >
-                        {error && <AlertCircle className="inline h-3 w-3 mr-1" />}
-                        {helperText}
+                        {hasError && <AlertCircle className="inline h-3 w-3 mr-1" />}
+                        {error || helperText}
                     </p>
                 )}
             </div>
@@ -249,3 +234,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input"
 
 export { Input }
+
