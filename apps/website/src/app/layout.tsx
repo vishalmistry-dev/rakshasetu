@@ -6,6 +6,11 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'RakshaSetu - Secure E-commerce Platform',
   description: 'Escrow and logistics platform for Indian merchants',
+  icons: {
+    icon: [
+      { url: "/assets/favicon.png", type: "image/png" },
+    ]
+  }
 }
 
 export default function RootLayout({

@@ -1,30 +1,39 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CheckCircle } from "lucide-react"
-import React, { useState } from "react"
+import { useMerchantForgotPassword } from "@/modules/merchant/hooks/auth/useMerchantForgotPassword"
+import { Button } from "@/shared/components/form/Button"
+import { Input } from "@/shared/components/form/Input"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { CheckCircle, Mail } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+
+const ForgotPasswordSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+})
+
+type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [successEmail, setSuccessEmail] = useState<string | null>(null)
+  const forgotPasswordMutation = useMerchantForgotPassword()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(ForgotPasswordSchema),
+  })
 
-    // TODO: Implement your forgot password logic
-    console.log({ email })
-
-    setTimeout(() => {
-      setLoading(false)
-      setSuccess(true)
-    }, 1000)
+  const onSubmit = (data: ForgotPasswordInput) => {
+    forgotPasswordMutation.mutate(data, {
+      onSuccess: () => setSuccessEmail(data.email),
+    })
   }
 
-  if (success) {
+  if (successEmail) {
     return (
       <div className="w-full space-y-6 text-center">
         <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -33,7 +42,7 @@ export default function ForgotPasswordForm() {
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Check Your Email</h1>
           <p className="text-muted-foreground">
-            We've sent a password reset link to <strong>{email}</strong>
+            We've sent a password reset link to <strong>{successEmail}</strong>
           </p>
         </div>
       </div>
@@ -49,25 +58,18 @@ export default function ForgotPasswordForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="merchant@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Input
+          label="Email Address"
+          type="email"
+          placeholder="merchant@example.com"
+          leftIcon={<Mail />}
+          error={errors.email?.message}
+          {...register("email")}
+        />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
-        >
-          {loading ? "Sending..." : "Send Reset Link"}
+        <Button type="submit" className="w-full" loading={forgotPasswordMutation.isPending}>
+          {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
         </Button>
       </form>
     </div>

@@ -1,5 +1,6 @@
 import { AppError } from '@/common/errors'
 import { prisma } from '@/config/prisma'
+import { sendEmail } from '@/integrations/communication'
 import { comparePasswords, hashPassword } from '../../shared/password.manager'
 import { generateRefreshToken, verifyRefreshToken } from '../../shared/token.manager'
 
@@ -139,6 +140,8 @@ export const forgotMerchantPassword = async (email: string) => {
   })
 
   // TODO: Send reset email with resetToken
+
+  await sendEmail(merchant.email, 'password-reset', { resetToken })
 
   return {
     message: 'Password reset link sent to your email',

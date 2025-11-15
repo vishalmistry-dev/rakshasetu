@@ -53,7 +53,8 @@ export function Topbar({
 }: TopbarProps) {
   const pathname = usePathname()
 
-  const userName = user?.firstName || user?.lastName
+
+  const userName = tenant === "merchant" ? user.businessName : user?.firstName || user?.lastName
     ? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim()
     : undefined
 
@@ -68,11 +69,11 @@ export function Topbar({
 
           <nav className="flex items-center gap-1 text-sm font-medium">
             {tabs.map(({ label, href, icon: Icon }) => {
-              const isActive = pathname === href || pathname.startsWith(href)
+              const isActive = pathname === href || pathname.startsWith(`${href}`)
               return (
                 <Link
                   key={label}
-                  href={href}
+                  href={`${href}`}
                   className={cn(
                     "flex items-center gap-1 px-3 py-1 rounded-full transition-colors",
                     isActive

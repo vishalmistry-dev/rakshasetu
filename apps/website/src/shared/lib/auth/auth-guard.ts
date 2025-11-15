@@ -4,14 +4,13 @@ import { AuthService } from './auth.service'
 
 export class AuthGuard {
   static async requireAuth<T = any>(subdomain: SubdomainType): Promise<T> {
-    const user = await AuthService.validateToken<T>(subdomain)
+    const result = await AuthService.validateToken<T>(subdomain)
 
-    if (!user) {
-      const loginPath = AuthService.getLoginPath(subdomain)
-      redirect(loginPath)
+    if (!result) {
+      redirect(AuthService.getLoginPath(subdomain))
     }
 
-    return user
+    return result // return raw merchant
   }
 
   static async optionalAuth<T = any>(subdomain: SubdomainType): Promise<T | null> {

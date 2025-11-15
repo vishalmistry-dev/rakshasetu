@@ -1,5 +1,5 @@
+import { showToast } from '@/shared/components/common/Toast'
 import { AxiosError, AxiosInstance } from 'axios'
-import { toast } from 'sonner'
 
 export class ApiInterceptors {
   static setupRequestInterceptor(instance: AxiosInstance) {
@@ -26,37 +26,77 @@ export class ApiInterceptors {
 
   private static handleApiError(error: AxiosError) {
     if (!error.response) {
-      toast.error('Network Error', {
-        description: 'Unable to reach the server',
+      showToast('error', {
+        title: 'Network Error',
+        description: 'Unable to reach the server. Check your connection.',
       })
       return
     }
 
     const status = error.response.status
-    const message = (error.response.data as any)?.message || error.message
+    const data = error.response.data as any
+
+    const message =
+      data?.message ||
+      data?.error ||
+      (Array.isArray(data?.errors) ? data.errors[0]?.msg : null) ||
+      error.message
 
     switch (status) {
       case 401:
+        showToast('error', {
+          title: 'Unauthorized',
+          description: message || 'Please login again',
+        })
         this.handleUnauthorized()
         break
+
       case 403:
-        toast.error('Forbidden', {
-          description: "You don't have permission",
+        showToast('error', {
+          title: 'Access Denied',
+          description: message || "You don't have permission to access this resource",
         })
         break
+
       case 404:
-        toast.error('Not Found', {
-          description: message,
+        showToast('error', {
+          title: 'Not Found',
+          description: message || 'The requested resource was not found',
         })
         break
+
+      case 422:
+        showToast('error', {
+          title: 'Validation Error',
+          description: message || 'Please check your input and try again',
+        })
+        break
+
+      case 429:
+        showToast('warning', {
+          title: 'Too Many Requests',
+          description: 'Please slow down and try again later',
+        })
+        break
+
       case 500:
-        toast.error('Server Error', {
-          description: 'Something went wrong',
+        showToast('error', {
+          title: 'Server Error',
+          description: message || 'Something went wrong on our end. Please try again later.',
         })
         break
+
+      case 503:
+        showToast('error', {
+          title: 'Service Unavailable',
+          description: 'The service is temporarily unavailable. Please try again later.',
+        })
+        break
+
       default:
-        toast.error('Error', {
-          description: message,
+        showToast('error', {
+          title: 'Error',
+          description: message || 'An unexpected error occurred',
         })
     }
   }
