@@ -27,6 +27,7 @@ export interface SidebarLink {
   icon: React.ComponentType<{ className?: string }>
   group?: string
   children?: SidebarLink[]
+  defaultOpen?: boolean // ← Added
 }
 
 interface SidebarProps {
@@ -83,7 +84,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
               {!isCollapsed && <SidebarGroupLabel>{groupName}</SidebarGroupLabel>}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {items.map(({ title, url, icon: Icon, children }) => {
+                  {items.map(({ title, url, icon: Icon, children, defaultOpen }) => {
                     const isActive = url === activeUrl
 
                     return children ? (
@@ -91,7 +92,13 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                         type="single"
                         collapsible
                         key={title}
-                        defaultValue={isCollapsed ? title : undefined}
+                        defaultValue={
+                          isCollapsed
+                            ? undefined
+                            : defaultOpen
+                              ? title
+                              : undefined
+                        } // ← Use defaultOpen
                       >
                         <AccordionItem value={title}>
                           <AccordionTrigger
@@ -159,10 +166,10 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
 
         {/* Account Section */}
         <div className={cn("border-t border-gray-200", !isCollapsed && "px-4 py-3")}>
-          <Accordion type="single" collapsible defaultValue={isCollapsed ? "account" : undefined}>
+          <Accordion type="single" collapsible defaultValue={isCollapsed ? undefined : "account"}>
             <AccordionItem value="account">
               {!isCollapsed && (
-                <AccordionTrigger className="w-full px-2 py-1 mb-2 text-left text-sm font-medium">
+                <AccordionTrigger className="w-full px-2 py-1 text-left text-sm font-medium">
                   Account
                 </AccordionTrigger>
               )}
@@ -197,9 +204,6 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-
-          {/* Help CTA */}
-          {/* <SidebarHelp tenant={tenant} isCollapsed={isCollapsed} /> */}
         </div>
       </SidebarContent>
     </ShadcnSidebar>

@@ -67,7 +67,7 @@ export function Topbar({
         <div className="flex items-center gap-4">
           {showSidebarTrigger && sidebarTrigger}
 
-          <nav className="flex items-center gap-1 text-sm font-medium">
+          <nav className="flex items-center gap-2 text-sm font-medium">
             {tabs.map(({ label, href, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(`${href}`)
               return (
@@ -75,7 +75,7 @@ export function Topbar({
                   key={label}
                   href={`${href}`}
                   className={cn(
-                    "flex items-center gap-1 px-3 py-1 rounded-full transition-colors",
+                    "flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors",
                     isActive
                       ? "bg-gray-100 text-orange-600 font-medium"
                       : "text-gray-600 hover:text-orange-600"

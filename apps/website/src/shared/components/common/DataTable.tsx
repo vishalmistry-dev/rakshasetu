@@ -1,8 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -12,9 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { cva, type VariantProps } from "class-variance-authority"
+import { Button } from "@/shared/components/form/Button"
+import { Input } from "@/shared/components/form/Input"
 import {
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   ChevronsUpDown,
   Search,
@@ -31,10 +32,9 @@ export interface DataTableColumn<T = any> {
   header: string | React.ReactNode
   sortable?: boolean
   render?: (row: T, index: number) => React.ReactNode
-  cellClassName?: string
-  headerClassName?: string
   width?: string
   align?: "left" | "center" | "right"
+  sortFn?: (a: any, b: any) => number
 }
 
 export interface DataTablePagination {
@@ -44,14 +44,11 @@ export interface DataTablePagination {
   totalPages: number
 }
 
-export interface DataTableProps<T = any>
-  extends VariantProps<typeof tableVariants> {
-  // Data
+export interface DataTableProps<T = any> {
   data: T[]
   columns: DataTableColumn<T>[]
   loading?: boolean
   emptyMessage?: string
-  emptyIcon?: React.ReactNode
 
   // Selection
   selectable?: boolean
@@ -59,139 +56,94 @@ export interface DataTableProps<T = any>
   onSelectionChange?: (selected: Set<string>) => void
   getRowId?: (row: T) => string
 
-  // Sorting
+  // Client-side features
+  clientSort?: boolean
+  clientSearch?: boolean
+
+  // Server-side features
   sortBy?: string
   sortDirection?: "asc" | "desc"
   onSort?: (key: string) => void
 
-  // Pagination
+  // Pagination (can be client or server)
   pagination?: DataTablePagination
   onPageChange?: (page: number) => void
-  showPagination?: boolean
+  clientPagination?: boolean
+  pageSize?: number
 
   // Search
   searchable?: boolean
   searchValue?: string
   onSearchChange?: (value: string) => void
   searchPlaceholder?: string
-  searchDebounce?: number
-
-  // Styling
-  className?: string
-  tableClassName?: string
-  headerClassName?: string
-  rowClassName?: string | ((row: T, index: number) => string)
-  cellClassName?: string
 
   // Actions
   actions?: React.ReactNode
   onRowClick?: (row: T, index: number) => void
 
-  // Behavior
-  stickyHeader?: boolean
-  striped?: boolean
-  hoverable?: boolean
-  compact?: boolean
-  bordered?: boolean
-
-  // Loading
-  loadingRows?: number
+  // Styling
+  className?: string
 }
-
-// ==========================================
-// VARIANTS
-// ==========================================
-
-const tableVariants = cva("w-full", {
-  variants: {
-    size: {
-      sm: "text-xs",
-      base: "text-sm",
-      lg: "text-base",
-    },
-  },
-  defaultVariants: {
-    size: "base",
-  },
-})
 
 // ==========================================
 // COMPONENT
 // ==========================================
 
 export function DataTable<T = any>({
-  // Data
   data,
   columns,
   loading = false,
   emptyMessage = "No data found",
-  emptyIcon,
 
-  // Selection
   selectable = false,
   selectedRows = new Set(),
   onSelectionChange,
   getRowId = (row: any) => row.id,
 
-  // Sorting
-  sortBy,
-  sortDirection = "asc",
-  onSort,
+  clientSort = true,
+  clientSearch = true,
 
-  // Pagination
+  sortBy: externalSortBy,
+  sortDirection: externalSortDirection = "asc",
+  onSort: externalOnSort,
+
   pagination,
   onPageChange,
-  showPagination = true,
+  clientPagination = false,
+  pageSize = 10,
 
-  // Search
   searchable = false,
-  searchValue = "",
-  onSearchChange,
+  searchValue: externalSearchValue = "",
+  onSearchChange: externalOnSearchChange,
   searchPlaceholder = "Search...",
-  searchDebounce = 300,
 
-  // Styling
-  className,
-  tableClassName,
-  headerClassName,
-  rowClassName,
-  cellClassName,
-
-  // Actions
   actions,
   onRowClick,
 
-  // Behavior
-  stickyHeader = false,
-  striped = false,
-  hoverable = true,
-  compact = false,
-  bordered = false,
-
-  // Loading
-  loadingRows = 5,
-
-  // Variants
-  size = "base",
+  className,
 }: DataTableProps<T>) {
   // ==========================================
   // STATE
   // ==========================================
 
-  const [debouncedSearch, setDebouncedSearch] = React.useState(searchValue)
+  const [internalSearch, setInternalSearch] = React.useState(externalSearchValue)
+  const [internalSortBy, setInternalSortBy] = React.useState<string>()
+  const [internalSortDirection, setInternalSortDirection] = React.useState<"asc" | "desc">("asc")
+  const [internalPage, setInternalPage] = React.useState(1)
+
+  // Determine if using client or server features
+  const sortBy = clientSort ? internalSortBy : externalSortBy
+  const sortDirection = clientSort ? internalSortDirection : externalSortDirection
+  const currentPage = clientPagination ? internalPage : (pagination?.page || 1)
 
   // ==========================================
-  // SELECTION LOGIC
+  // SELECTION
   // ==========================================
 
   const allSelected = React.useMemo(() => {
     if (data.length === 0) return false
     return data.every((row) => selectedRows.has(getRowId(row)))
   }, [data, selectedRows, getRowId])
-
-  const someSelected = React.useMemo(() => {
-    return data.some((row) => selectedRows.has(getRowId(row))) && !allSelected
-  }, [data, selectedRows, allSelected, getRowId])
 
   const handleSelectAll = () => {
     const newSelected = new Set(selectedRows)
@@ -214,28 +166,128 @@ export function DataTable<T = any>({
   }
 
   // ==========================================
-  // SEARCH DEBOUNCE
+  // SEARCH
   // ==========================================
+
+  const searchValue = clientSearch ? internalSearch : externalSearchValue
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      onSearchChange?.(debouncedSearch)
-    }, searchDebounce)
-    return () => clearTimeout(timer)
-  }, [debouncedSearch, searchDebounce, onSearchChange])
+    if (!clientSearch) {
+      const timer = setTimeout(() => {
+        externalOnSearchChange?.(internalSearch)
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [internalSearch, clientSearch, externalOnSearchChange])
+
+  React.useEffect(() => {
+    setInternalSearch(externalSearchValue)
+  }, [externalSearchValue])
 
   // ==========================================
-  // SORT ICON
+  // CLIENT-SIDE FILTERING
+  // ==========================================
+
+  const filteredData = React.useMemo(() => {
+    if (!clientSearch || !searchValue) return data
+
+    return data.filter((row: any) => {
+      const searchLower = searchValue.toLowerCase()
+      return columns.some(col => {
+        const value = row[col.key]
+        if (value == null) return false
+        return String(value).toLowerCase().includes(searchLower)
+      })
+    })
+  }, [data, searchValue, columns, clientSearch])
+
+  // ==========================================
+  // CLIENT-SIDE SORTING
+  // ==========================================
+
+  const sortedData = React.useMemo(() => {
+    if (!clientSort || !sortBy) return filteredData
+
+    const sorted = [...filteredData].sort((a: any, b: any) => {
+      const column = columns.find(col => col.key === sortBy)
+
+      // Use custom sort function if provided
+      if (column?.sortFn) {
+        return column.sortFn(a[sortBy], b[sortBy])
+      }
+
+      // Default sort
+      const aVal = a[sortBy]
+      const bVal = b[sortBy]
+
+      if (aVal == null) return 1
+      if (bVal == null) return -1
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return aVal - bVal
+      }
+
+      return String(aVal).localeCompare(String(bVal))
+    })
+
+    return sortDirection === "desc" ? sorted.reverse() : sorted
+  }, [filteredData, sortBy, sortDirection, columns, clientSort])
+
+  // ==========================================
+  // CLIENT-SIDE PAGINATION
+  // ==========================================
+
+  const paginatedData = React.useMemo(() => {
+    if (!clientPagination) return sortedData
+
+    const start = (currentPage - 1) * pageSize
+    const end = start + pageSize
+    return sortedData.slice(start, end)
+  }, [sortedData, currentPage, pageSize, clientPagination])
+
+  const totalPages = clientPagination
+    ? Math.ceil(sortedData.length / pageSize)
+    : (pagination?.totalPages || 1)
+
+  const displayData = clientPagination ? paginatedData : sortedData
+
+  // ==========================================
+  // HANDLERS
+  // ==========================================
+
+  const handleSort = (key: string) => {
+    if (clientSort) {
+      if (internalSortBy === key) {
+        setInternalSortDirection(internalSortDirection === "asc" ? "desc" : "asc")
+      } else {
+        setInternalSortBy(key)
+        setInternalSortDirection("asc")
+      }
+    } else {
+      externalOnSort?.(key)
+    }
+  }
+
+  const handlePageChange = (page: number) => {
+    if (clientPagination) {
+      setInternalPage(page)
+    } else {
+      onPageChange?.(page)
+    }
+  }
+
+  // ==========================================
+  // RENDER HELPERS
   // ==========================================
 
   const getSortIcon = (columnKey: string) => {
     if (sortBy !== columnKey) {
-      return <ChevronsUpDown className="ml-1 h-4 w-4 text-muted-foreground" />
+      return <ChevronsUpDown className="ml-2 h-4 w-4 text-gray-400" />
     }
     return sortDirection === "asc" ? (
-      <ChevronUp className="ml-1 h-4 w-4" />
+      <ChevronUp className="ml-2 h-4 w-4 text-orange-600" />
     ) : (
-      <ChevronDown className="ml-1 h-4 w-4" />
+      <ChevronDown className="ml-2 h-4 w-4 text-orange-600" />
     )
   }
 
@@ -247,70 +299,54 @@ export function DataTable<T = any>({
     <div className={cn("space-y-4", className)}>
       {/* Toolbar */}
       {(searchable || actions) && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Search */}
+        <div className="flex items-center justify-between gap-4">
           {searchable && (
-            <div className="relative w-full sm:w-[320px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder={searchPlaceholder}
-                value={debouncedSearch}
-                onChange={(e) => setDebouncedSearch(e.target.value)}
-                className="pl-9 pr-9"
+                value={internalSearch}
+                onChange={(e) => setInternalSearch(e.target.value)}
+                className="pl-10 pr-10"
               />
-              {debouncedSearch && (
+              {internalSearch && (
                 <button
-                  onClick={() => setDebouncedSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setInternalSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
           )}
-
-          {/* Actions */}
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
 
-      {/* Table Container */}
-      <div
-        className={cn(
-          "rounded-md border bg-background overflow-auto",
-          bordered && "border-2"
-        )}
-      >
-        <Table className={cn(tableVariants({ size }), tableClassName)}>
-          {/* Header */}
-          <TableHeader
-            className={cn(stickyHeader && "sticky top-0 bg-background z-10", headerClassName)}
-          >
-            <TableRow>
-              {/* Selection Column */}
+      {/* Table */}
+      <div className="border rounded-lg overflow-hidden bg-white">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gray-50 hover:bg-gray-50">
               {selectable && (
-                <TableHead className="w-[50px]">
+                <TableHead className="w-12">
                   <Checkbox
                     checked={allSelected}
                     onCheckedChange={handleSelectAll}
-                    aria-label="Select all"
                   />
                 </TableHead>
               )}
-
-              {/* Data Columns */}
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
                   className={cn(
-                    column.headerClassName,
+                    "font-medium text-gray-700",
                     column.align === "center" && "text-center",
                     column.align === "right" && "text-right",
-                    column.sortable && "cursor-pointer select-none",
-                    compact && "py-2"
+                    column.sortable && "cursor-pointer select-none hover:text-gray-900"
                   )}
                   style={{ width: column.width }}
-                  onClick={() => column.sortable && onSort?.(column.key)}
+                  onClick={() => column.sortable && handleSort(column.key)}
                 >
                   <div className="flex items-center">
                     {column.header}
@@ -321,21 +357,20 @@ export function DataTable<T = any>({
             </TableRow>
           </TableHeader>
 
-          {/* Body */}
           <TableBody>
-            {/* Loading State */}
+            {/* Loading */}
             {loading && (
               <>
-                {Array.from({ length: loadingRows }).map((_, idx) => (
+                {Array.from({ length: 5 }).map((_, idx) => (
                   <TableRow key={`loading-${idx}`}>
                     {selectable && (
                       <TableCell>
-                        <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+                        <div className="h-4 w-4 bg-gray-200 animate-pulse rounded" />
                       </TableCell>
                     )}
                     {columns.map((column) => (
-                      <TableCell key={column.key} className={cn(compact && "py-2")}>
-                        <div className="h-4 bg-muted animate-pulse rounded" />
+                      <TableCell key={column.key}>
+                        <div className="h-4 bg-gray-200 animate-pulse rounded" />
                       </TableCell>
                     ))}
                   </TableRow>
@@ -343,65 +378,50 @@ export function DataTable<T = any>({
               </>
             )}
 
-            {/* Empty State */}
-            {!loading && data.length === 0 && (
+            {/* Empty */}
+            {!loading && displayData.length === 0 && (
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (selectable ? 1 : 0)}
-                  className="h-24 text-center"
+                  className="h-32 text-center text-gray-500"
                 >
-                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                    {emptyIcon}
-                    <p className="text-sm">{emptyMessage}</p>
-                  </div>
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
 
-            {/* Data Rows */}
+            {/* Data */}
             {!loading &&
-              data.map((row, index) => {
+              displayData.map((row, index) => {
                 const rowId = getRowId(row)
                 const isSelected = selectedRows.has(rowId)
-                const computedRowClassName =
-                  typeof rowClassName === "function"
-                    ? rowClassName(row, index)
-                    : rowClassName
 
                 return (
                   <TableRow
                     key={rowId}
                     className={cn(
-                      striped && index % 2 === 1 && "bg-muted/50",
-                      hoverable && "hover:bg-muted/50",
-                      isSelected && "bg-muted",
-                      onRowClick && "cursor-pointer",
-                      computedRowClassName
+                      "group hover:bg-gray-50",
+                      isSelected && "bg-blue-50",
+                      onRowClick && "cursor-pointer"
                     )}
                     onClick={() => onRowClick?.(row, index)}
                   >
-                    {/* Selection Cell */}
                     {selectable && (
-                      <TableCell className={cn(compact && "py-2")}>
+                      <TableCell>
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={() => handleSelectRow(rowId)}
-                          aria-label={`Select row ${index + 1}`}
                           onClick={(e) => e.stopPropagation()}
                         />
                       </TableCell>
                     )}
-
-                    {/* Data Cells */}
                     {columns.map((column) => (
                       <TableCell
                         key={column.key}
                         className={cn(
-                          column.cellClassName,
-                          cellClassName,
+                          "relative",
                           column.align === "center" && "text-center",
-                          column.align === "right" && "text-right",
-                          compact && "py-2"
+                          column.align === "right" && "text-right"
                         )}
                       >
                         {column.render
@@ -417,32 +437,33 @@ export function DataTable<T = any>({
       </div>
 
       {/* Pagination */}
-      {showPagination && pagination && !loading && data.length > 0 && (
-        <div className="flex items-center justify-between text-sm">
-          <div className="text-muted-foreground">
-            Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
-            {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{" "}
-            {pagination.total} results
+      {(pagination || clientPagination) && !loading && displayData.length > 0 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-gray-600">
+            {clientPagination ? (
+              <>Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} results</>
+            ) : (
+              <>Page {currentPage} of {totalPages}</>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              disabled={pagination.page === 1}
-              onClick={() => onPageChange?.(pagination.page - 1)}
+              disabled={currentPage === 1}
+              onClick={() => handlePageChange(currentPage - 1)}
             >
+              <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </Button>
-            <span className="text-muted-foreground">
-              Page {pagination.page} of {pagination.totalPages}
-            </span>
             <Button
               variant="outline"
               size="sm"
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() => onPageChange?.(pagination.page + 1)}
+              disabled={currentPage >= totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
             >
               Next
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
         </div>
@@ -450,82 +471,3 @@ export function DataTable<T = any>({
     </div>
   )
 }
-
-// ==========================================
-// USAGE EXAMPLES
-// ==========================================
-
-/*
-// 1. SIMPLE TABLE
-<DataTable
-  data={orders}
-  columns={[
-    { key: "id", header: "Order ID" },
-    { key: "customer", header: "Customer" },
-    { key: "amount", header: "Amount", render: (row) => `₹${row.amount}` },
-    { key: "status", header: "Status", render: (row) => <StatusBadge status={row.status} /> },
-  ]}
-/>
-
-// 2. TABLE WITH SORTING & PAGINATION
-<DataTable
-  data={orders}
-  columns={[
-    { key: "id", header: "ID", sortable: true },
-    { key: "date", header: "Date", sortable: true },
-  ]}
-  sortBy={sortBy}
-  sortDirection={sortDirection}
-  onSort={handleSort}
-  pagination={{
-    page: 1,
-    pageSize: 10,
-    total: 100,
-    totalPages: 10,
-  }}
-  onPageChange={setPage}
-/>
-
-// 3. TABLE WITH SELECTION
-const [selected, setSelected] = useState(new Set())
-
-<DataTable
-  data={orders}
-  columns={columns}
-  selectable
-  selectedRows={selected}
-  onSelectionChange={setSelected}
-/>
-
-// 4. TABLE WITH SEARCH & ACTIONS
-<DataTable
-  data={orders}
-  columns={columns}
-  searchable
-  searchValue={search}
-  onSearchChange={setSearch}
-  actions={
-    <>
-      <Button onClick={handleExport}>Export</Button>
-      <Button onClick={handleCreate}>Create</Button>
-    </>
-  }
-/>
-
-// 5. FULLY CUSTOMIZED
-<DataTable
-  data={orders}
-  columns={columns}
-  loading={loading}
-  selectable
-  searchable
-  stickyHeader
-  striped
-  hoverable
-  compact
-  bordered
-  size="sm"
-  onRowClick={(row) => router.push(`/orders/${row.id}`)}
-  rowClassName={(row) => row.status === 'urgent' ? 'bg-red-50' : ''}
-/>
-*/

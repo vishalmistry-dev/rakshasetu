@@ -84,6 +84,12 @@ const envSchema = z.object({
   RAZORPAY_KEY_SECRET: z.string().min(1),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
   RAZORPAY_BASE_URL: z.string().url(),
+
+  SANDBOX_BASE_URL: z.string().url(),
+  SANDBOX_API_TEST_KEY: z.string().min(1),
+  SANDBOX_API_TEST_SECRET: z.string().min(1),
+  SANDBOX_API_KEY: z.string().min(1),
+  SANDBOX_API_SECRET: z.string().min(1),
 })
 
 const parsed = envSchema.safeParse(process.env)

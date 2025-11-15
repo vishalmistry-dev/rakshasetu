@@ -25,8 +25,10 @@ export function MerchantDashboardLayoutWrapper({
   const pathname = usePathname()
 
   const getCurrentSection = () => {
-    if (pathname.startsWith("/merchant/shop")) return "shop"
-    if (pathname.startsWith("/merchant/logistics")) return "logistics"
+    if (pathname.startsWith("/merchant/stores")) return "stores"
+    if (pathname.startsWith("/merchant/orders")) return "orders"
+    if (pathname.startsWith("/merchant/shipments")) return "shipments"
+    if (pathname.startsWith("/merchant/payouts")) return "payouts"
     return "default"
   }
 

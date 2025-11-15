@@ -229,7 +229,7 @@ app/
 ## File Count
 
 - **Created:** ~40 files
-- **Modified:** ~5 files (config)
+- **Modified:** ~5 files
 - **Lines of Code:** ~2000+
 
 ---

@@ -18,6 +18,8 @@ import {
   preferencesSchema,
 } from './merchants.schema'
 
+import merchantKYCRoutes from './kyc/merchant-kyc.routes'
+
 const router = Router()
 
 // All routes require authentication
@@ -47,5 +49,7 @@ router.put(
   validateRequest(bodySchema(logisticsSettingsSchema)),
   updateLogistics
 )
+
+router.use('/kyc', merchantKYCRoutes)
 
 export default router
