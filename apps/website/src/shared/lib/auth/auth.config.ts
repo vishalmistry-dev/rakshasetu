@@ -8,7 +8,7 @@ export const AUTH_CONFIGS: Record<SubdomainType, AuthConfig> = {
   },
   merchant: {
     cookieName: 'merchantAccessToken',
-    apiEndpoint: '/merchant/current-merchant',
+    apiEndpoint: '/merchants/profile',
     loginPath: '/merchant/login',
   },
   shop: {

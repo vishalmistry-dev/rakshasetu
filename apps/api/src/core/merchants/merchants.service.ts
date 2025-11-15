@@ -22,7 +22,6 @@ export const getMerchantProfile = async (merchantId: string) => {
       updatedAt: true,
       // Relations
       profile: true,
-      notifications: true,
       preferences: true,
       logistics: true,
       stores: {
@@ -131,7 +130,6 @@ export const getAllSettings = async (merchantId: string) => {
     where: { id: merchantId },
     include: {
       profile: true,
-      notifications: true,
       preferences: true,
       logistics: true,
     },
@@ -149,7 +147,6 @@ export const getAllSettings = async (merchantId: string) => {
       mode: merchant.mode,
     },
     profile: merchant.profile,
-    notifications: merchant.notifications,
     preferences: merchant.preferences,
     logistics: merchant.logistics,
   }
@@ -170,28 +167,26 @@ export const updateGeneralSettings = async (merchantId: string, data: any) => {
 
 // ========================== UPDATE NOTIFICATION SETTINGS ==========================
 export const updateNotificationSettings = async (merchantId: string, data: any) => {
-  let notifications = await prisma.merchantNotifications.findUnique({
-    where: { merchantId },
-  })
-
-  if (!notifications) {
-    // Create if doesn't exist
-    notifications = await prisma.merchantNotifications.create({
-      data: {
-        id: await generateUniqueId('mnt', 'merchantNotifications'),
-        merchantId,
-        ...data,
-      },
-    })
-  } else {
-    // Update
-    notifications = await prisma.merchantNotifications.update({
-      where: { merchantId },
-      data,
-    })
-  }
-
-  return notifications
+  // let notifications = await prisma.merchantNotifications.findUnique({
+  //   where: { merchantId },
+  // })
+  // if (!notifications) {
+  //   // Create if doesn't exist
+  //   notifications = await prisma.merchantNotifications.create({
+  //     data: {
+  //       id: await generateUniqueId('mnt', 'merchantNotifications'),
+  //       merchantId,
+  //       ...data,
+  //     },
+  //   })
+  // } else {
+  //   // Update
+  //   notifications = await prisma.merchantNotifications.update({
+  //     where: { merchantId },
+  //     data,
+  //   })
+  // }
+  // return notifications
 }
 
 // ========================== UPDATE PREFERENCES ==========================

@@ -1,4 +1,4 @@
-import { APP_CONFIG } from '~/lib/utils/constants';
+import { APP_CONFIG } from '../../lib/utils/constants';
 import { Button } from '../ui/Button';
 
 interface DashboardLinkProps {

@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 const config: Config = {
   darkMode: ['class'],
@@ -108,7 +109,97 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    // Custom scrollbar plugin
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        // Thin scrollbar
+        '.scrollbar-thin': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'rgb(203 213 225) transparent',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgb(203 213 225)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgb(148 163 184)',
+          },
+        },
+        // Extra thin scrollbar
+        '.scrollbar-thin-alt': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'rgb(226 232 240) transparent',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+            height: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgb(226 232 240)',
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgb(203 213 225)',
+          },
+        },
+        // Hidden scrollbar (but still scrollable)
+        '.scrollbar-none': {
+          'scrollbar-width': 'none',
+          '-ms-overflow-style': 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+        },
+        // Custom colored scrollbars
+        '.scrollbar-primary': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'hsl(var(--primary)) transparent',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'hsl(var(--primary))',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'hsl(var(--primary-hover))',
+          },
+        },
+        '.scrollbar-secondary': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'hsl(var(--secondary)) transparent',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'hsl(var(--secondary))',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'hsl(var(--secondary-hover))',
+          },
+        },
+      })
+    }),
+  ],
 }
 
 export default config
