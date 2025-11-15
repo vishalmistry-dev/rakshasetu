@@ -16,6 +16,7 @@ interface AccountDropdownProps {
     image?: string | null
     firstName?: string | null
     lastName?: string | null
+    businessName?: string | null
   } | null
   tenant: "merchant" | "admin" | "user"
   onLogout: () => void
@@ -36,11 +37,37 @@ export function AccountDropdown({
   roles = [],
   loading = false,
 }: AccountDropdownProps) {
+
   const getInitials = () => {
+    // MERCHANT → use businessName
+    if (tenant === "merchant") {
+      const name = user?.businessName?.trim() || ""
+
+      if (!name) return "U"
+
+      const parts = name.split(" ").filter(Boolean)
+
+      // If only one word → use first letter twice (like Instagram)
+      if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase()
+      }
+
+      // Otherwise → first + last
+      const first = parts[0][0] || ""
+      const last = parts[parts.length - 1][0] || ""
+
+      const initials = `${first}${last}`.toUpperCase()
+      return initials || "U"
+    }
+
+    // ADMIN / OTHER TENANTS → firstName + lastName
     const first = user?.firstName?.[0] || ""
     const last = user?.lastName?.[0] || ""
-    return `${first}${last}`.toUpperCase() || "U"
+
+    const initials = `${first}${last}`.toUpperCase()
+    return initials || "U"
   }
+
 
   return (
     <DropdownMenu>

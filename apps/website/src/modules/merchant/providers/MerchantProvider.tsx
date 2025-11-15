@@ -1,9 +1,9 @@
 "use client"
 
-import { MerchantUser } from "@/shared/types/auth.types"
+import { Merchant } from "@rakshasetu/database"
 import React, { createContext, useContext } from "react"
 
-const MerchantContext = createContext<MerchantUser | null>(null)
+const MerchantContext = createContext<Merchant | null>(null)
 
 export function useMerchant() {
   const context = useContext(MerchantContext)
@@ -15,7 +15,7 @@ export function useMerchant() {
 
 interface Props {
   children: React.ReactNode
-  initialMerchant: MerchantUser
+  initialMerchant: Merchant
 }
 
 export function MerchantProvider({ children, initialMerchant }: Props) {

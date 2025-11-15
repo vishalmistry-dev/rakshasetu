@@ -6,10 +6,10 @@ async function main() {
 
   const merchant = await prisma.merchant.create({
     data: {
-      id: 'mrc_test_001',
-      businessName: 'Test Store',
-      email: 'test@merchant.com',
-      phone: '9876543210',
+      id: 'mrc_dev_001',
+      businessName: 'Dev Account',
+      email: 'vishal01dev@gmail.com',
+      phone: '7984315243',
       password: hashedPassword,
       status: 'ACTIVE',
       isActive: true,

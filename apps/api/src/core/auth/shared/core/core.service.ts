@@ -3,7 +3,6 @@ import { prisma } from '@/config/prisma'
 
 import { generateUniqueId, generateUsername } from '@/common/utils'
 import { authenticator } from 'otplib'
-import { RegisterMerchantInput } from '../../domain/merchant/merchant-auth.schema'
 import { RegisterUserInput } from '../../domain/user/user-auth.schema'
 import { LoginInput, ResetPasswordInput, VerifyEmailInput, VerifyOtpInput } from '../dto'
 import { generateOtp } from '../otp.manager'
@@ -17,7 +16,7 @@ export const createAuthCoreService = (entity: entityType) => {
     entity === 'user' ? prisma.user : entity === 'merchant' ? prisma.merchant : prisma.admin
 
   // --------------------------- REGISTER --------------------------- //
-  const register = async <T extends RegisterUserInput | RegisterMerchantInput>(data: T) => {
+  const register = async <T extends RegisterUserInput>(data: T) => {
     const existing = await model.findFirst({
       where: { OR: [{ email: data.email }, { mobile: data.mobile }] },
     })

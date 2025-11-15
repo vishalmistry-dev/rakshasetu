@@ -1,78 +1,58 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useRouter } from "next/navigation"
-import React, { useState } from "react"
+import { useMerchantResetPassword } from "@/modules/merchant/hooks/auth/useMerchantResetPassword"
+import { MerchantPasswordResetSchema, MerchantResetPasswordInput } from "@/modules/merchant/validators/auth.validators"
+import { Button } from "@/shared/components/form/Button"
+import { Input } from "@/shared/components/form/Input"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useParams, useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
 
-export default function ResetPasswordForm({ token }: { token: string }) {
+export default function ResetPasswordForm() {
   const router = useRouter()
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const { token } = useParams()
+  const resetPasswordMutation = useMerchantResetPassword(token as string)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<MerchantResetPasswordInput>({
+    resolver: zodResolver(MerchantPasswordResetSchema),
+  })
 
-    if (password !== confirmPassword) {
-      alert("Passwords don't match!")
-      return
-    }
-
-    setLoading(true)
-
-    // TODO: Implement your reset password logic
-    console.log({ token, password })
-
-    setTimeout(() => {
-      setLoading(false)
-      router.push("/admin/login")
-    }, 1000)
+  const onSubmit = (data: MerchantResetPasswordInput) => {
+    resetPasswordMutation.mutate(data)
   }
+
 
   return (
     <div className="w-full space-y-6">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Reset Password</h1>
-        <p className="text-muted-foreground">
-          Enter your new password below
-        </p>
+        <p className="text-muted-foreground">Enter your new password below</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-          />
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Input
+          label="New Password"
+          type="password"
+          placeholder="••••••••"
+          error={errors.newPassword?.message}
+          {...register("newPassword")}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={8}
-          />
-        </div>
+        <Input
+          label="Confirm Password"
+          type="password"
+          placeholder="••••••••"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword")}
+        />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
-        >
-          {loading ? "Resetting..." : "Reset Password"}
+        <Button type="submit" className="w-full" loading={resetPasswordMutation.isPending}>
+          Reset Password
         </Button>
       </form>
     </div>

@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils"
 import { Logo } from "@/shared/components/common/Logo"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { SidebarHelp } from "./SidebarHelp"
 
 export interface SidebarLink {
   title: string
@@ -78,7 +77,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <div className="flex-1 overflow-y-auto px-2">
+        <div className="flex-1 overflow-y-auto px-2 scrollbar-thin-alt">
           {Object.entries(groupedLinks).map(([groupName, items]) => (
             <SidebarGroup key={groupName}>
               {!isCollapsed && <SidebarGroupLabel>{groupName}</SidebarGroupLabel>}
@@ -97,7 +96,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                         <AccordionItem value={title}>
                           <AccordionTrigger
                             className={cn(
-                              "flex items-center justify-between w-full rounded-md transition-colors",
+                              "flex items-center justify-between w-full rounded-md transition-colors ",
                               isActive
                                 ? "bg-gray-100 text-orange-600 font-medium"
                                 : "hover:bg-gray-100 text-gray-600",
@@ -117,7 +116,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                               return (
                                 <Link
                                   key={childTitle}
-                                  href={childUrl}
+                                  href={`${childUrl}`}
                                   className={cn(
                                     "flex items-center gap-2 rounded-md text-sm transition-colors",
                                     isChildActive
@@ -137,7 +136,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                     ) : (
                       <SidebarMenuItem key={title}>
                         <Link
-                          href={url}
+                          href={`${url}`}
                           className={cn(
                             "flex items-center gap-2 rounded-md transition-colors",
                             isActive
@@ -200,7 +199,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
           </Accordion>
 
           {/* Help CTA */}
-          <SidebarHelp tenant={tenant} isCollapsed={isCollapsed} />
+          {/* <SidebarHelp tenant={tenant} isCollapsed={isCollapsed} /> */}
         </div>
       </SidebarContent>
     </ShadcnSidebar>

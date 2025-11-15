@@ -1,7 +1,7 @@
 "use client"
 
 import { Checkbox } from "@/components/ui/checkbox"
-import { showToast } from "@/lib/toast"
+import { showToast } from "@/shared/components/common/Toast"
 import { Button } from "@/shared/components/form/Button"
 import { Input } from "@/shared/components/form/Input"
 import { zodResolver } from "@hookform/resolvers/zod"

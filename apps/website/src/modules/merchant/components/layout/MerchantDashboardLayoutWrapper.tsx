@@ -1,8 +1,9 @@
 "use client"
 
+import { useMerchantLogout } from "@/modules/merchant/hooks/auth/useMerchantLogout"
 import { MerchantProvider } from "@/modules/merchant/providers/MerchantProvider"
 import { DashboardLayout } from "@/shared/components/layout/DashboardLayout"
-import { MerchantUser } from "@/shared/types/auth.types"
+import { Merchant } from "@rakshasetu/database"
 import { CreditCard, Package } from "lucide-react"
 import { usePathname } from "next/navigation"
 import {
@@ -17,26 +18,23 @@ export function MerchantDashboardLayoutWrapper({
   initialMerchant
 }: {
   children: React.ReactNode
-  initialMerchant: MerchantUser
+  initialMerchant: Merchant
 }) {
+
+  const LogoutMutation = useMerchantLogout()
   const pathname = usePathname()
 
   const getCurrentSection = () => {
-    if (pathname.startsWith("/merchant/stores")) return "stores"
-    if (pathname.startsWith("/merchant/orders")) return "orders"
+    if (pathname.startsWith("/merchant/shop")) return "shop"
+    if (pathname.startsWith("/merchant/logistics")) return "logistics"
     return "default"
   }
 
   const sidebarLinks = merchantSidebarLinks[getCurrentSection()]
 
-  const merchant = {
-    firstName: "Vishal",
-    lastName: "Mistry",
-    image: null,
-  }
 
   const handleLogout = () => {
-    console.log("Logout")
+    LogoutMutation.mutate()
   }
 
   const handleNotificationDismiss = (id: string) => {
@@ -54,7 +52,7 @@ export function MerchantDashboardLayoutWrapper({
         globalLinks={merchantGlobalLinks}
         topbarTabs={merchantTopbarTabs}
         searchIndex={merchantSearchIndex}
-        user={merchant}
+        user={initialMerchant}
         tenant="merchant"
         onLogout={handleLogout}
         onNotificationDismiss={handleNotificationDismiss}

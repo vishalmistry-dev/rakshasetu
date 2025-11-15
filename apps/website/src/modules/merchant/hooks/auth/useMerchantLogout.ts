@@ -3,19 +3,19 @@ import { showToast } from '@/shared/components/common/Toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 
-export function useMerchantLogin() {
+export function useMerchantLogout() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: MerchantRepository.login,
+    mutationFn: MerchantRepository.logout,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['merchant', 'current'] })
       showToast('success', {
-        title: 'Logged in',
-        description: 'Welcome back! You are logged in successfully.',
+        title: 'Logged out',
+        description: 'You have been logged out successfully.',
       })
-      router.push('/dashboard')
+      router.push('/login')
     },
   })
 }

@@ -15,11 +15,11 @@ export async function createUser(email: string, firstName: string) {
       id: crypto.randomUUID(),
       email,
       firstName,
-      lastName: "",
+      lastName: '',
       userName: email,
-      business: "",
+      business: '',
       mobile: '',
       password: '',
-    }
+    },
   })
 }

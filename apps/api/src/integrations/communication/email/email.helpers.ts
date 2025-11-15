@@ -3,10 +3,7 @@ import path from 'path'
 
 export const loadEmailTemplate = async (templateName: string, variables: Record<string, any>) => {
   // Use process.cwd() to get monorepo root, then navigate to templates
-  const templatesPath = path.join(
-    process.cwd(),
-    'apps/api/src/integrations/communication/email/templates'
-  )
+  const templatesPath = path.join(process.cwd(), '/src/integrations/communication/email/templates')
   const filePath = path.join(templatesPath, `${templateName}.html`)
 
   let template = await fs.readFile(filePath, 'utf-8')
