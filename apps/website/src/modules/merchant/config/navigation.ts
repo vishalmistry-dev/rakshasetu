@@ -48,9 +48,8 @@ export const merchantTopbarTabs = [
 // ================================
 export const merchantGlobalLinks: SidebarLink[] = [
   { title: 'Profile', url: '/merchant/profile', icon: User2 },
-  { title: '2FA Security', url: '/merchant/2fa', icon: ShieldCheck },
+  { title: '2FA Security', url: '/merchant/security', icon: ShieldCheck },
   { title: 'KYC Verification', url: '/merchant/kyc', icon: FileText },
-  { title: 'Bank & GST Details', url: '/merchant/bank', icon: Landmark },
   { title: 'Account Settings', url: '/merchant/settings', icon: Settings },
 ]
 
@@ -92,7 +91,6 @@ export const merchantSearchIndex = [
   // Settings
   { title: 'Profile Settings', source: 'Settings', href: '/merchant/profile' },
   { title: 'KYC Verification', source: 'Settings', href: '/merchant/kyc' },
-  { title: 'Bank Details', source: 'Settings', href: '/merchant/bank' },
   { title: 'Account Settings', source: 'Settings', href: '/merchant/settings' },
 ]
 
