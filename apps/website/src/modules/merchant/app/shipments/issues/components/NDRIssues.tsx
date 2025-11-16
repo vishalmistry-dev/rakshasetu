@@ -5,7 +5,7 @@ import { DataTable, type DataTableColumn } from "@/shared/components/common/Data
 import { InfoBanner } from "@/shared/components/common/InfoBanner"
 import { Modal } from "@/shared/components/common/Modal"
 import { StatsGrid } from "@/shared/components/common/StatsGrid"
-import { Tabs } from "@/shared/components/common/Tabs"
+import { Tabs, type Tab } from "@/shared/components/common/Tabs"
 import { Button } from "@/shared/components/form/Button"
 import { Input } from "@/shared/components/form/Input"
 import { Textarea } from "@/shared/components/form/Textarea"
@@ -13,9 +13,8 @@ import {
   AlertTriangle,
   CheckCircle,
   MapPin,
-  Phone,
   RotateCcw,
-  XCircle,
+  XCircle
 } from "lucide-react"
 import { useState } from "react"
 
@@ -58,16 +57,7 @@ const ndrOrders = [
   },
 ]
 
-const statusConfig: Record<string, { label: string; class: string }> = {
-  pending: { label: "Pending", class: "bg-gray-50 text-gray-700 border-gray-200" },
-  in_transit: { label: "In Transit", class: "bg-purple-50 text-purple-700 border-purple-200" },
-  out_for_delivery: { label: "Out for Delivery", class: "bg-blue-50 text-blue-700 border-blue-200" },
-  delivered: { label: "Delivered", class: "bg-green-50 text-green-700 border-green-200" },
-  ndr: { label: "NDR", class: "bg-red-50 text-red-700 border-red-200" },
-  rto: { label: "RTO", class: "bg-orange-50 text-orange-700 border-orange-200" },
-}
-
-export default function NDRManagementPage() {
+export function NDRIssues() {
   const [activeTab, setActiveTab] = useState("pending")
   const [selected, setSelected] = useState(new Set<string>())
   const [actionModal, setActionModal] = useState<{
@@ -197,14 +187,13 @@ export default function NDRManagementPage() {
     },
   ]
 
-  const tabs = [
+  const tabs: Tab[] = [
     { label: "Pending", value: "pending", badge: 5 },
     { label: "Reattempt Scheduled", value: "reattempt", badge: 3 },
     { label: "RTO Initiated", value: "rto", badge: 2 },
     { label: "Resolved", value: "resolved", badge: 12 },
   ]
 
-  // Stats - UPDATED
   const stats = [
     {
       label: "Total NDR",
@@ -230,27 +219,11 @@ export default function NDRManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">NDR Management</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage failed delivery attempts and schedule reattempts
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">
-            <Phone className="h-4 w-4 mr-2" />
-            Bulk Contact
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Cards - UPDATED */}
+      {/* Stats */}
       <StatsGrid stats={stats} columns={4} />
 
-      {/* Tabs */}
-      <Tabs tabs={tabs} value={activeTab} onChange={setActiveTab} />
+      {/* Sub Tabs */}
+      <Tabs tabs={tabs} value={activeTab} onChange={setActiveTab} variant="pills" />
 
       {/* Table */}
       <DataTable
@@ -279,7 +252,7 @@ export default function NDRManagementPage() {
         }
       />
 
-      {/* Reattempt Modal - UPDATED */}
+      {/* Reattempt Modal */}
       <Modal
         open={actionModal.open && actionModal.action === "reattempt"}
         onOpenChange={(open) => setActionModal({ ...actionModal, open })}
@@ -307,7 +280,7 @@ export default function NDRManagementPage() {
         </div>
       </Modal>
 
-      {/* Update Details Modal - UPDATED */}
+      {/* Update Details Modal */}
       <Modal
         open={actionModal.open && actionModal.action === "update"}
         onOpenChange={(open) => setActionModal({ ...actionModal, open })}
@@ -341,7 +314,7 @@ export default function NDRManagementPage() {
         </div>
       </Modal>
 
-      {/* RTO Confirmation Modal - UPDATED */}
+      {/* RTO Confirmation Modal */}
       <Modal
         open={actionModal.open && actionModal.action === "rto"}
         onOpenChange={(open) => setActionModal({ ...actionModal, open })}

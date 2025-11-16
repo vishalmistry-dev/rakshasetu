@@ -30,7 +30,8 @@ import {
   Pencil,
   Truck
 } from "lucide-react"
-import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 // Mock data
 const mockOrders = [
@@ -130,9 +131,43 @@ const StatusBadge = ({ status }: { status: string }) => {
 }
 
 export default function OrdersPage() {
-  const [activeTab, setActiveTab] = useState("new")
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const statusParam = searchParams.get('status')
+
   const [selected, setSelected] = useState(new Set<string>())
   const [orders, setOrders] = useState(mockOrders)
+
+  // Default to "all" if no status param
+  const [activeTab, setActiveTab] = useState(statusParam || "all")
+
+  useEffect(() => {
+    // If there's a status param, use it
+    if (statusParam) {
+      if (statusParam !== activeTab) {
+        setActiveTab(statusParam)
+      }
+    } else {
+      // If no status param, default to "all"
+      setActiveTab("all")
+    }
+  }, [statusParam])
+
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab)
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (newTab === "all") {
+      // Remove status param for "all" tab
+      params.delete('status')
+    } else {
+      // Set status param for other tabs
+      params.set('status', newTab)
+    }
+
+    const queryString = params.toString()
+    router.push(queryString ? `?${queryString}` : window.location.pathname, { scroll: false })
+  }
 
   // Edit modals
   const [editAddressModal, setEditAddressModal] = useState<{ open: boolean, orderId: string, value: string }>({
@@ -364,7 +399,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs tabs={tabs} value={activeTab} onChange={setActiveTab} />
+      <Tabs tabs={tabs} value={activeTab} onChange={handleTabChange} />
 
       {/* Table */}
       <DataTable

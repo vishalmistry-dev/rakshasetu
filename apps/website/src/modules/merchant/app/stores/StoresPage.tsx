@@ -11,6 +11,7 @@ import {
   Settings,
   Store,
 } from "lucide-react"
+import Link from "next/link"
 
 const stores = [
   {
@@ -56,10 +57,12 @@ export default function StoresPage() {
             Manage your connected stores
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Connect Store
-        </Button>
+        <Link href="/merchant/stores/connect">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Connect Store
+          </Button>
+        </Link>
       </div>
 
       {/* Stores Grid */}
@@ -114,14 +117,18 @@ export default function StoresPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="flex-1">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-              <Button variant="outline" size="sm" className="flex-1">
-                <BarChart className="h-4 w-4 mr-2" />
-                Analytics
-              </Button>
+              <Link href={`/merchant/stores/${store.id}/settings?tab=shipping`} className="flex-1 text-inherit">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
+              <Link href={`/merchant/stores/analytics?store=${store.id}`} className="flex-1 text-inherit">
+                <Button variant="outline" size="sm" className="w-full">
+                  <BarChart className="h-4 w-4 mr-2" />
+                  Analytics
+                </Button>
+              </Link>
             </div>
           </Card>
         ))}

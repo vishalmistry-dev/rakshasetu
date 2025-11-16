@@ -59,7 +59,7 @@ export const merchantGlobalLinks: SidebarLink[] = [
 // ================================
 export const merchantSearchIndex = [
   // Dashboard
-  { title: 'Dashboard Overview', source: 'Dashboard', href: '/merchant' },
+  { title: 'Dashboard Overview', source: 'Dashboard', href: '/merchant/dashboard' },
   { title: 'Analytics', source: 'Dashboard', href: '/merchant/analytics' },
 
   // Stores
@@ -105,7 +105,7 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
   // ================================
   default: [
     // Overview
-    { title: 'Overview', url: '/merchant', icon: Home, group: 'Dashboard' },
+    { title: 'Overview', url: '/merchant/dashboard', icon: Home, group: 'Dashboard' },
     { title: 'Analytics', url: '/merchant/analytics', icon: BarChart, group: 'Dashboard' },
 
     // Quick Stats - Open by default
@@ -116,9 +116,9 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
       group: 'Dashboard',
       defaultOpen: true, // ← Open by default
       children: [
-        { title: 'Revenue', url: '/merchant/stats/revenue', icon: DollarSign },
-        { title: 'Order Summary', url: '/merchant/stats/orders', icon: Package },
-        { title: 'Shipment Status', url: '/merchant/stats/shipments', icon: Truck },
+        { title: 'Revenue', url: '/merchant/analytics?view=revenue', icon: DollarSign },
+        { title: 'Order Summary', url: '/merchant/orders?status=all', icon: Package },
+        { title: 'Shipment Status', url: '/merchant/shipments?tab=all', icon: Truck },
       ],
     },
 
@@ -153,10 +153,18 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
       group: 'Settings',
       defaultOpen: false,
       children: [
-        { title: 'Shipping Preferences', url: '/merchant/stores/settings/shipping', icon: Truck },
-        { title: 'Payment Methods', url: '/merchant/stores/settings/payment', icon: CreditCard },
-        { title: 'Notifications', url: '/merchant/stores/settings/notifications', icon: Bell },
-        { title: 'Webhooks', url: '/merchant/stores/settings/webhooks', icon: Zap },
+        {
+          title: 'Shipping Preferences',
+          url: '/merchant/stores/settings?tab=shipping',
+          icon: Truck,
+        },
+        {
+          title: 'Payment Methods',
+          url: '/merchant/stores/settings?tab=payment',
+          icon: CreditCard,
+        },
+        { title: 'Notifications', url: '/merchant/stores/settings?tab=notifications', icon: Bell },
+        { title: 'Webhooks', url: '/merchant/stores/settings?tab=webhooks', icon: Zap },
       ],
     },
 
@@ -190,10 +198,12 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
       defaultOpen: true, // ← Open by default
       children: [
         { title: 'New Orders', url: '/merchant/orders?status=new', icon: Clock },
-        { title: 'Ready to Ship', url: '/merchant/orders?status=ready', icon: Package },
-        { title: 'Shipped', url: '/merchant/orders?status=shipped', icon: Truck },
+        { title: 'Processing', url: '/merchant/orders?status=processing', icon: Package },
+        { title: 'In Transit', url: '/merchant/orders?status=transit', icon: Truck },
         { title: 'Delivered', url: '/merchant/orders?status=delivered', icon: FileCheck },
+        { title: 'Returns & RTO', url: '/merchant/orders?status=returns', icon: RotateCcw },
         { title: 'Cancelled', url: '/merchant/orders?status=cancelled', icon: FileX },
+        { title: 'Disputed', url: '/merchant/orders?status=disputed', icon: AlertTriangle },
       ],
     },
 
@@ -227,13 +237,21 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
       group: 'Settings',
       defaultOpen: false,
       children: [
-        { title: 'Auto-Assignment Rules', url: '/merchant/orders/settings/auto-assign', icon: Zap },
+        {
+          title: 'Auto-Assignment Rules',
+          url: '/merchant/orders/settings?tab=auto-assign',
+          icon: Zap,
+        },
         {
           title: 'Order Notifications',
-          url: '/merchant/orders/settings/notifications',
+          url: '/merchant/orders/settings?tab=notifications',
           icon: Bell,
         },
-        { title: 'Return Policies', url: '/merchant/orders/settings/returns', icon: RotateCcw },
+        {
+          title: 'Return Policies',
+          url: '/merchant/orders/settings?tab=returns',
+          icon: RotateCcw,
+        },
       ],
     },
   ],
@@ -262,11 +280,19 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
       url: '/merchant/shipments/issues',
       icon: AlertTriangle,
       group: 'Issues',
-      defaultOpen: true, // ← Open by default
+      defaultOpen: true,
       children: [
-        { title: 'NDR (Failed Delivery)', url: '/merchant/shipments/ndr', icon: AlertTriangle },
-        { title: 'RTO (Return to Origin)', url: '/merchant/shipments/rto', icon: RotateCcw },
-        { title: 'Delayed Shipments', url: '/merchant/shipments/delayed', icon: Clock },
+        {
+          title: 'NDR (Failed Delivery)',
+          url: '/merchant/shipments/issues?tab=ndr',
+          icon: AlertTriangle,
+        },
+        {
+          title: 'RTO (Return to Origin)',
+          url: '/merchant/shipments/issues?tab=rto',
+          icon: RotateCcw,
+        },
+        { title: 'Delayed Shipments', url: '/merchant/shipments/issues?tab=delayed', icon: Clock },
       ],
     },
 
@@ -323,12 +349,16 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
       children: [
         {
           title: 'Courier Preferences',
-          url: '/merchant/shipments/settings/preferences',
+          url: '/merchant/shipments/settings?tab=preferences',
           icon: Truck,
         },
-        { title: 'Packaging Config', url: '/merchant/shipments/settings/packaging', icon: Package },
-        { title: 'Weight Rules', url: '/merchant/shipments/settings/weight', icon: Scale },
-        { title: 'Shipping Zones', url: '/merchant/shipments/settings/zones', icon: Globe },
+        {
+          title: 'Packaging Config',
+          url: '/merchant/shipments/settings?tab=packaging',
+          icon: Package,
+        },
+        { title: 'Weight Rules', url: '/merchant/shipments/settings?tab=weight', icon: Scale },
+        { title: 'Shipping Zones', url: '/merchant/shipments/settings?tab=zones', icon: Globe },
       ],
     },
   ],

@@ -5,7 +5,8 @@ import { DataTable, type DataTableColumn } from "@/shared/components/common/Data
 import { Tabs } from "@/shared/components/common/Tabs"
 import { Button } from "@/shared/components/form/Button"
 import { Download, Filter, MapPin, Package } from "lucide-react"
-import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 const shipments = [
   {
@@ -53,8 +54,28 @@ const statusConfig: Record<string, { label: string; class: string }> = {
 }
 
 export default function ShipmentsPage() {
-  const [activeTab, setActiveTab] = useState("all")
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const tabParam = searchParams.get('tab')
+
+  const [activeTab, setActiveTab] = useState(tabParam || "all")
   const [selected, setSelected] = useState(new Set<string>())
+
+  // Sync URL with tab
+  useEffect(() => {
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam)
+    }
+  }, [tabParam])
+
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', newTab)
+    router.push(`?${params.toString()}`, { scroll: false })
+  }
+
 
   const columns: DataTableColumn[] = [
     {
@@ -165,7 +186,7 @@ export default function ShipmentsPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs tabs={tabs} value={activeTab} onChange={setActiveTab} />
+      <Tabs tabs={tabs} value={activeTab} onChange={handleTabChange} />
 
       {/* Table */}
       <DataTable

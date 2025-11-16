@@ -14,6 +14,18 @@ import {
   Truck,
 } from "lucide-react"
 import Link from "next/link"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 // Mock data
 const stats = [
@@ -92,11 +104,11 @@ const recentOrders = [
 ]
 
 const orderStatus = [
-  { label: "New", count: 23, color: "bg-blue-500" },
-  { label: "Processing", count: 15, color: "bg-yellow-500" },
-  { label: "Shipped", count: 45, color: "bg-purple-500" },
-  { label: "Delivered", count: 120, color: "bg-green-500" },
-  { label: "Issues", count: 11, color: "bg-red-500" },
+  { label: "New", count: 23, color: "#3b82f6" },
+  { label: "Processing", count: 15, color: "#eab308" },
+  { label: "Shipped", count: 45, color: "#a855f7" },
+  { label: "Delivered", count: 120, color: "#22c55e" },
+  { label: "Issues", count: 11, color: "#ef4444" },
 ]
 
 const quickActions = [
@@ -124,12 +136,9 @@ const revenueData = [
 ]
 
 export default function DashboardPage() {
-  const totalOrders = orderStatus.reduce((sum, s) => sum + s.count, 0)
-  const maxRevenue = Math.max(...revenueData.map(d => d.amount))
-
   return (
     <div className="space-y-6">
-      {/* Stats Grid - UPDATED */}
+      {/* Stats Grid */}
       <StatsGrid stats={stats} columns={4} />
 
       {/* Charts Row */}
@@ -146,22 +155,37 @@ export default function DashboardPage() {
             }
           />
           <CardContent>
-            <div className="h-64 flex items-end justify-between gap-2">
-              {revenueData.map((item) => {
-                const height = (item.amount / maxRevenue) * 100
-                return (
-                  <div key={item.day} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="w-full bg-gray-100 rounded-t relative" style={{ height: '200px' }}>
-                      <div
-                        className="absolute bottom-0 w-full bg-orange-500 rounded-t transition-all hover:bg-orange-600"
-                        style={{ height: `${height}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-600">{item.day}</span>
-                  </div>
-                )
-              })}
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="day"
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  axisLine={{ stroke: '#e5e7eb' }}
+                />
+                <YAxis
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  axisLine={{ stroke: '#e5e7eb' }}
+                  tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  }}
+                  formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                  cursor={{ fill: 'rgba(251, 146, 60, 0.1)' }}
+                />
+                <Bar
+                  dataKey="amount"
+                  fill="#f97316"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={60}
+                />
+              </BarChart>
+            </ResponsiveContainer>
             <div className="mt-4 flex items-center justify-between text-sm">
               <span className="text-gray-600">Total Revenue (7 days)</span>
               <span className="font-semibold text-gray-900">
@@ -175,38 +199,49 @@ export default function DashboardPage() {
         <Card>
           <CardHeader title="Order Status" />
           <CardContent>
-            <div className="space-y-4">
-              {orderStatus.map((status) => {
-                const percentage = ((status.count / totalOrders) * 100).toFixed(0)
-                return (
-                  <div key={status.label}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`h-3 w-3 rounded-full ${status.color}`} />
-                        <span className="text-sm text-gray-700">{status.label}</span>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">
-                        {status.count}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${status.color} transition-all`}
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={orderStatus}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="count"
+                  nameKey="label"
+                >
+                  {orderStatus.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
 
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Orders</span>
-                <span className="text-lg font-semibold text-gray-900">
-                  {totalOrders}
-                </span>
-              </div>
+            <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+              {orderStatus.map((status) => (
+                <div key={status.label} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: status.color }}
+                    />
+                    <span className="text-sm text-gray-700">{status.label}</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">
+                    {status.count}
+                  </span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

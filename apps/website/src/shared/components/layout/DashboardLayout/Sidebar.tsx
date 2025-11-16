@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Logo } from "@/shared/components/common/Logo"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 
 export interface SidebarLink {
   title: string
@@ -27,7 +27,7 @@ export interface SidebarLink {
   icon: React.ComponentType<{ className?: string }>
   group?: string
   children?: SidebarLink[]
-  defaultOpen?: boolean // ← Added
+  defaultOpen?: boolean
 }
 
 interface SidebarProps {
@@ -38,17 +38,74 @@ interface SidebarProps {
 
 export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
 
-  // Get active URL
-  const getActiveUrl = (links: SidebarLink[]): string | undefined =>
-    links
-      .map(link => link.url)
-      .filter(url => pathname === url || pathname.startsWith(`${url}/`))
-      .sort((a, b) => b.length - a.length)[0]
+  // Build full current URL with query params
+  const currentFullUrl = searchParams.toString()
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname
 
-  const activeUrl = getActiveUrl(links)
+  // Better active link detection
+  const isLinkActive = (url: string, checkChildren = false): boolean => {
+    // Split both URLs into path and query parts
+    const [currentPath, currentQuery] = currentFullUrl.split('?')
+    const [linkPath, linkQuery] = url.split('?')
+
+    // If paths don't match, not active
+    if (currentPath !== linkPath) {
+      // Check for child routes only if checkChildren is true
+      if (checkChildren && currentPath.startsWith(linkPath + '/')) {
+        return true
+      }
+      return false
+    }
+
+    // Paths match - now check query params
+
+    // If link has no query params
+    if (!linkQuery) {
+      // Match only if current URL also has no query params
+      return !currentQuery
+    }
+
+    // If link has query params, check if they match current query params
+    const currentParams = new URLSearchParams(currentQuery || '')
+    const linkParams = new URLSearchParams(linkQuery)
+
+    // Check if all link query params match current query params
+    let allMatch = true
+    for (const [key, value] of linkParams.entries()) {
+      if (currentParams.get(key) !== value) {
+        allMatch = false
+        break
+      }
+    }
+
+    return allMatch
+  }
+
+  // Check if any child is active (for accordion state)
+  const hasActiveChild = (children?: SidebarLink[]): boolean => {
+    if (!children) return false
+    return children.some(child => isLinkActive(child.url, false))
+  }
+
+  // Get default accordion value
+  const getDefaultAccordionValue = (item: SidebarLink): string | undefined => {
+    if (isCollapsed) return undefined
+
+    // Open if default open is true
+    if (item.defaultOpen) return item.title
+
+    // Open if link is active or has active children
+    if (isLinkActive(item.url, false) || hasActiveChild(item.children)) {
+      return item.title
+    }
+
+    return undefined
+  }
 
   // Group links
   const groupedLinks = links.reduce((acc, item) => {
@@ -85,20 +142,14 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {items.map(({ title, url, icon: Icon, children, defaultOpen }) => {
-                    const isActive = url === activeUrl
+                    const isActive = isLinkActive(url, false)
 
                     return children ? (
                       <Accordion
                         type="single"
                         collapsible
                         key={title}
-                        defaultValue={
-                          isCollapsed
-                            ? undefined
-                            : defaultOpen
-                              ? title
-                              : undefined
-                        } // ← Use defaultOpen
+                        defaultValue={getDefaultAccordionValue({ title, url, icon: Icon, children, defaultOpen })}
                       >
                         <AccordionItem value={title}>
                           <AccordionTrigger
@@ -119,11 +170,11 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                             className={isCollapsed ? "space-y-1" : "ml-4 mt-1 space-y-1"}
                           >
                             {children.map(({ title: childTitle, url: childUrl, icon: ChildIcon }) => {
-                              const isChildActive = childUrl === activeUrl
+                              const isChildActive = isLinkActive(childUrl, false)
                               return (
                                 <Link
                                   key={childTitle}
-                                  href={`${childUrl}`}
+                                  href={childUrl}
                                   className={cn(
                                     "flex items-center gap-2 rounded-md text-sm transition-colors",
                                     isChildActive
@@ -143,7 +194,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                     ) : (
                       <SidebarMenuItem key={title}>
                         <Link
-                          href={`${url}`}
+                          href={url}
                           className={cn(
                             "flex items-center gap-2 rounded-md transition-colors",
                             isActive
@@ -179,7 +230,7 @@ export function Sidebar({ links, globalLinks, tenant }: SidebarProps) {
                     <SidebarMenu>
                       {globalLinks.map(({ title, url, icon: Icon }) => {
                         const resolvedUrl = url.replace("{tenant}", tenant)
-                        const isActive = pathname === resolvedUrl || pathname.startsWith(resolvedUrl)
+                        const isActive = isLinkActive(resolvedUrl, false)
                         return (
                           <SidebarMenuItem key={title}>
                             <Link
