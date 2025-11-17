@@ -1,10 +1,14 @@
 import { BlockStack, Button, Card, Checkbox, Text } from '@shopify/polaris';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { TextField } from '../../components/ui/TextField';
 import { useToast } from '../../components/ui/Toast';
+import { merchantsApi } from '../../lib/api/merchants';
 
 export default function NotificationSettings() {
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const shop = searchParams.get('shop') || '';
   const [isSaving, setIsSaving] = useState(false);
 
   const [settings, setSettings] = useState({
@@ -18,11 +22,15 @@ export default function NotificationSettings() {
   });
 
   const handleSave = async () => {
+    if (!shop) {
+      showToast('Shop parameter is missing', true);
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving notification settings:', settings);
+      await merchantsApi.updateSettings(shop, 'notifications', settings);
       showToast('Notification settings saved!');
     } catch (error) {
       showToast('Failed to save notification settings', true);

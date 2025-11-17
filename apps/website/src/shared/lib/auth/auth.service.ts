@@ -31,7 +31,6 @@ export class AuthService {
 
       return res.data.data ?? null
     } catch (err) {
-      // Don't try to delete cookie here - middleware handles it
       return null
     }
   }

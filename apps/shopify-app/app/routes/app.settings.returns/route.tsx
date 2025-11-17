@@ -1,11 +1,15 @@
 import { BlockStack, Button, Card, Checkbox, InlineGrid } from '@shopify/polaris';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { Select } from '../../components/ui/Select';
 import { TextField } from '../../components/ui/TextField';
 import { useToast } from '../../components/ui/Toast';
+import { merchantsApi } from '../../lib/api/merchants';
 
 export default function ReturnSettings() {
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const shop = searchParams.get('shop') || '';
   const [isSaving, setIsSaving] = useState(false);
 
   const [settings, setSettings] = useState({
@@ -17,11 +21,15 @@ export default function ReturnSettings() {
   });
 
   const handleSave = async () => {
+    if (!shop) {
+      showToast('Shop parameter is missing', true);
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving return settings:', settings);
+      await merchantsApi.updateSettings(shop, 'logistics', settings);
       showToast('Return settings saved!');
     } catch (error) {
       showToast('Failed to save return settings', true);
