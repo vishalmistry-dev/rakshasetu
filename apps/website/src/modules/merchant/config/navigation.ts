@@ -3,10 +3,8 @@ import {
   AlertTriangle,
   BarChart,
   Bell,
-  Boxes,
   Building,
   Calendar,
-  ChevronRight,
   Clock,
   CreditCard,
   DollarSign,
@@ -19,88 +17,86 @@ import {
   Landmark,
   Layers,
   ListChecks,
-  Lock,
-  Mail,
   Package,
-  Palette,
   Receipt,
-  RefreshCw,
+  ReceiptIndianRupee,
   RotateCcw,
   Scale,
   Search,
   Settings,
   ShieldCheck,
-  ShoppingCart,
-  Star,
   Store,
-  Tag,
   TrendingUp,
   Truck,
-  Upload,
-  Users,
-  Warehouse,
+  User2,
   Zap,
 } from 'lucide-react'
 
-// Topbar tabs
+// ================================
+// TOPBAR TABS (Main Navigation)
+// ================================
 export const merchantTopbarTabs = [
   { label: 'Dashboard', href: '/merchant/dashboard', icon: Home },
-  { label: 'Shop', href: '/merchant/shop', icon: Store },
-  { label: 'Logistics', href: '/merchant/logistics', icon: Truck },
+  { label: 'Stores', href: '/merchant/stores', icon: Store },
+  { label: 'Orders', href: '/merchant/orders', icon: Package },
+  { label: 'Shipments', href: '/merchant/shipments', icon: Truck },
+  { label: 'Payouts', href: '/merchant/payouts', icon: ReceiptIndianRupee },
 ]
 
 // ================================
 // GLOBAL LINKS (Accessible from all sections)
 // ================================
 export const merchantGlobalLinks: SidebarLink[] = [
-  { title: 'Profile', url: '/merchant/profile', icon: Users },
-  { title: '2FA Security', url: '/merchant/2fa', icon: ShieldCheck },
+  { title: 'Profile', url: '/merchant/profile', icon: User2 },
+  { title: '2FA Security', url: '/merchant/security', icon: ShieldCheck },
   { title: 'KYC Verification', url: '/merchant/kyc', icon: FileText },
-  { title: 'Bank & GST Details', url: '/merchant/bank', icon: Landmark },
-  { title: 'API Keys', url: '/merchant/api-keys', icon: Lock },
-  { title: 'Webhooks', url: '/merchant/webhooks', icon: Zap },
   { title: 'Account Settings', url: '/merchant/settings', icon: Settings },
 ]
 
-// Search index
+// ================================
+// SEARCH INDEX
+// ================================
 export const merchantSearchIndex = [
   // Dashboard
   { title: 'Dashboard Overview', source: 'Dashboard', href: '/merchant/dashboard' },
   { title: 'Analytics', source: 'Dashboard', href: '/merchant/analytics' },
-  { title: 'Reports', source: 'Dashboard', href: '/merchant/reports' },
-  { title: 'Revenue', source: 'Dashboard', href: '/merchant/financial/revenue' },
 
-  // shop/Shop
-  { title: 'My Shop', source: 'Shop', href: '/merchant/shop/shop' },
-  { title: 'All Products', source: 'Shop', href: '/merchant/shop/products/all' },
-  { title: 'Add Product', source: 'Shop', href: '/merchant/shop/products/add' },
-  { title: 'Inventory', source: 'Shop', href: '/merchant/shop/inventory/stock' },
-  { title: 'All Orders', source: 'Orders', href: '/merchant/shop/orders/all' },
-  { title: 'Pending Orders', source: 'Orders', href: '/merchant/shop/orders/pending' },
-  {
-    title: 'Unfulfilled Orders',
-    source: 'Orders',
-    href: '/merchant/shop/orders/unfulfilled',
-  },
-  { title: 'Track Shipment', source: 'Logistics', href: '/merchant/shop/track/order' },
-  { title: 'Customers', source: 'Shop', href: '/merchant/shop/customers/all' },
-  { title: 'Shipping Charges', source: 'Billing', href: '/merchant/shop/billing/shipping' },
+  // Stores
+  { title: 'My Stores', source: 'Stores', href: '/merchant/stores' },
+  { title: 'Connect Store', source: 'Stores', href: '/merchant/stores/connect' },
+  { title: 'Store Analytics', source: 'Stores', href: '/merchant/stores/analytics' },
 
-  // Logistics
-  { title: 'All Shipments', source: 'Logistics', href: '/merchant/logistics/shipments/all' },
-  { title: 'Create Shipment', source: 'Logistics', href: '/merchant/logistics/shipments/create' },
-  { title: 'Track by AWB', source: 'Logistics', href: '/merchant/logistics/track/awb' },
-  { title: 'NDR Management', source: 'Logistics', href: '/merchant/logistics/ndr/failed' },
-  { title: 'Returns', source: 'Logistics', href: '/merchant/logistics/returns/requested' },
-  { title: 'Schedule Pickup', source: 'Logistics', href: '/merchant/logistics/pickups/schedule' },
+  // Orders
+  { title: 'All Orders', source: 'Orders', href: '/merchant/orders' },
+  { title: 'New Orders', source: 'Orders', href: '/merchant/orders?status=new' },
+  { title: 'Ready to Ship', source: 'Orders', href: '/merchant/orders?status=ready' },
+  { title: 'Shipped Orders', source: 'Orders', href: '/merchant/orders?status=shipped' },
+  { title: 'Disputes', source: 'Orders', href: '/merchant/orders/disputes' },
+  { title: 'Return Requests', source: 'Orders', href: '/merchant/orders/returns' },
+  { title: 'Bulk Operations', source: 'Orders', href: '/merchant/orders/bulk' },
 
-  // Global
-  { title: 'KYC Verification', source: 'Account', href: '/merchant/kyc' },
-  { title: 'Bank Details', source: 'Account', href: '/merchant/bank' },
-  { title: 'Settings', source: 'Settings', href: '/merchant/settings' },
+  // Shipments
+  { title: 'All Shipments', source: 'Shipments', href: '/merchant/shipments' },
+  { title: 'Track Shipment', source: 'Shipments', href: '/merchant/shipments/track' },
+  { title: 'NDR Management', source: 'Shipments', href: '/merchant/shipments/ndr' },
+  { title: 'Generate Labels', source: 'Shipments', href: '/merchant/shipments/labels' },
+  { title: 'Create Manifest', source: 'Shipments', href: '/merchant/shipments/manifest' },
+  { title: 'Courier Partners', source: 'Shipments', href: '/merchant/shipments/couriers' },
+  { title: 'Schedule Pickup', source: 'Shipments', href: '/merchant/shipments/pickups/schedule' },
+
+  // Payouts
+  { title: 'Settlements', source: 'Payouts', href: '/merchant/payouts/settlements' },
+  { title: 'Transaction History', source: 'Payouts', href: '/merchant/payouts/transactions' },
+
+  // Settings
+  { title: 'Profile Settings', source: 'Settings', href: '/merchant/profile' },
+  { title: 'KYC Verification', source: 'Settings', href: '/merchant/kyc' },
+  { title: 'Account Settings', source: 'Settings', href: '/merchant/settings' },
 ]
 
-// Sidebar links
+// ================================
+// SIDEBAR LINKS (Based on active tab)
+// ================================
 export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
   // ================================
   // 1️⃣ DASHBOARD SECTION
@@ -109,374 +105,298 @@ export const merchantSidebarLinks: Record<string, SidebarLink[]> = {
     // Overview
     { title: 'Overview', url: '/merchant/dashboard', icon: Home, group: 'Dashboard' },
     { title: 'Analytics', url: '/merchant/analytics', icon: BarChart, group: 'Dashboard' },
-    { title: 'Reports', url: '/merchant/reports', icon: FileText, group: 'Dashboard' },
 
-    // Financial
+    // Quick Stats - Open by default
     {
-      title: 'Financial',
-      url: '/merchant/financial',
-      icon: CreditCard,
+      title: 'Quick Stats',
+      url: '/merchant/stats',
+      icon: TrendingUp,
       group: 'Dashboard',
+      defaultOpen: true, // ← Open by default
       children: [
-        { title: 'Revenue', url: '/merchant/financial/revenue', icon: DollarSign },
-        { title: 'Expenses', url: '/merchant/financial/expenses', icon: Receipt },
-        { title: 'Profit & Loss', url: '/merchant/financial/pnl', icon: TrendingUp },
-        { title: 'Settlements', url: '/merchant/financial/settlements', icon: Landmark },
+        { title: 'Revenue', url: '/merchant/analytics?view=revenue', icon: DollarSign },
+        { title: 'Order Summary', url: '/merchant/orders?status=all', icon: Package },
+        { title: 'Shipment Status', url: '/merchant/shipments?tab=all', icon: Truck },
       ],
     },
 
     // Activity
-    { title: 'Notifications', url: '/merchant/notifications', icon: Bell, group: 'Dashboard' },
-    { title: 'Activity Log', url: '/merchant/activity', icon: Clock, group: 'Dashboard' },
-
-    // Dashboard Settings
-    {
-      title: 'Dashboard Settings',
-      url: '/merchant/dashboard/settings',
-      icon: Settings,
-      group: 'Settings',
-      children: [
-        {
-          title: 'Widget Configuration',
-          url: '/merchant/dashboard/settings/widgets',
-          icon: Layers,
-        },
-        { title: 'Alert Preferences', url: '/merchant/dashboard/settings/alerts', icon: Bell },
-        { title: 'Export Settings', url: '/merchant/dashboard/settings/export', icon: Download },
-      ],
-    },
+    { title: 'Notifications', url: '/merchant/notifications', icon: Bell, group: 'Activity' },
+    { title: 'Activity Log', url: '/merchant/activity', icon: Clock, group: 'Activity' },
   ],
 
   // ================================
-  // 2️⃣ STORES/shop SECTION (Shop-only)
+  // 2️⃣ STORES SECTION
   // ================================
-  shop: [
-    // Shop Management
-    { title: 'Overview', url: '/merchant/shop', icon: Home, group: 'Shop' },
-    { title: 'My Stores', url: '/merchant/shop/stores', icon: Store, group: 'Shop' },
-
-    // Products
+  stores: [
+    // Store management
     {
-      title: 'Products',
-      url: '/merchant/shop/products',
-      icon: Boxes,
-      group: 'Shop',
-      children: [
-        { title: 'All Products', url: '/merchant/shop/products/all', icon: Boxes },
-        { title: 'Add Product', url: '/merchant/shop/products/add', icon: Upload },
-        { title: 'Bulk Upload', url: '/merchant/shop/products/bulk', icon: Upload },
-        {
-          title: 'Out of Stock',
-          url: '/merchant/shop/products/out-of-stock',
-          icon: AlertTriangle,
-        },
-        {
-          title: 'Low Stock',
-          url: '/merchant/shop/products/low-stock',
-          icon: AlertTriangle,
-        },
-      ],
+      title: 'All Stores',
+      url: '/merchant/stores',
+      icon: Store,
+      group: 'Stores',
+    },
+    {
+      title: 'Connect New Store',
+      url: '/merchant/stores/connect',
+      icon: Globe,
+      group: 'Stores',
     },
 
-    // Inventory
-    {
-      title: 'Inventory',
-      url: '/merchant/shop/inventory',
-      icon: Warehouse,
-      group: 'Shop',
-      children: [
-        {
-          title: 'Stock Management',
-          url: '/merchant/shop/inventory/stock',
-          icon: Warehouse,
-        },
-        {
-          title: 'Stock Adjustments',
-          url: '/merchant/shop/inventory/adjustments',
-          icon: RefreshCw,
-        },
-        { title: 'Warehouses', url: '/merchant/shop/inventory/warehouses', icon: Building },
-        { title: 'Transfers', url: '/merchant/shop/inventory/transfers', icon: Truck },
-      ],
-    },
-
-    // Categories
-    {
-      title: 'Categories',
-      url: '/merchant/shop/categories',
-      icon: Tag,
-      group: 'Shop',
-      children: [
-        { title: 'All Categories', url: '/merchant/shop/categories/all', icon: Tag },
-        { title: 'Collections', url: '/merchant/shop/categories/collections', icon: Layers },
-        { title: 'Brands', url: '/merchant/shop/categories/brands', icon: Star },
-      ],
-    },
-
-    // Orders (Shop view - focusing on order management, not logistics)
-    {
-      title: 'Orders',
-      url: '/merchant/shop/orders',
-      icon: ShoppingCart,
-      group: 'Shop',
-      children: [
-        { title: 'All Orders', url: '/merchant/shop/orders/all', icon: ListChecks },
-        { title: 'Pending', url: '/merchant/shop/orders/pending', icon: Clock },
-        { title: 'Processing', url: '/merchant/shop/orders/processing', icon: Package },
-        { title: 'Completed', url: '/merchant/shop/orders/completed', icon: FileCheck },
-        { title: 'Cancelled', url: '/merchant/shop/orders/cancelled', icon: FileX },
-      ],
-    },
-
-    // Customers
-    {
-      title: 'Customers',
-      url: '/merchant/shop/customers',
-      icon: Users,
-      group: 'Shop',
-      children: [
-        { title: 'All Customers', url: '/merchant/shop/customers/all', icon: Users },
-        { title: 'Customer Groups', url: '/merchant/shop/customers/groups', icon: Layers },
-        { title: 'Reviews & Ratings', url: '/merchant/shop/customers/reviews', icon: Star },
-      ],
-    },
-
-    // Marketing
-    {
-      title: 'Marketing',
-      url: '/merchant/shop/marketing',
-      icon: TrendingUp,
-      group: 'Shop',
-      children: [
-        { title: 'Campaigns', url: '/merchant/shop/marketing/campaigns', icon: Mail },
-        {
-          title: 'Discounts & Coupons',
-          url: '/merchant/shop/marketing/discounts',
-          icon: Tag,
-        },
-        { title: 'Promotions', url: '/merchant/shop/marketing/promotions', icon: Zap },
-      ],
-    },
-
-    // Store Analytics
-    {
-      title: 'Analytics',
-      url: '/merchant/shop/analytics',
-      icon: BarChart,
-      group: 'Shop',
-      children: [
-        {
-          title: 'Sales Analytics',
-          url: '/merchant/shop/analytics/sales',
-          icon: TrendingUp,
-        },
-        {
-          title: 'Product Performance',
-          url: '/merchant/shop/analytics/products',
-          icon: Boxes,
-        },
-        {
-          title: 'Customer Insights',
-          url: '/merchant/shop/analytics/customers',
-          icon: Users,
-        },
-      ],
-    },
-
-    // Store Settings
+    // Store settings - Closed by default
     {
       title: 'Store Settings',
-      url: '/merchant/shop/settings',
+      url: '/merchant/stores/settings',
       icon: Settings,
       group: 'Settings',
+      defaultOpen: false,
       children: [
-        { title: 'Store Information', url: '/merchant/shop/settings/info', icon: Store },
-        { title: 'Store Theme', url: '/merchant/shop/settings/theme', icon: Palette },
+        {
+          title: 'Shipping Preferences',
+          url: '/merchant/stores/settings?tab=shipping',
+          icon: Truck,
+        },
         {
           title: 'Payment Methods',
-          url: '/merchant/shop/settings/payment',
+          url: '/merchant/stores/settings?tab=payment',
           icon: CreditCard,
         },
-        { title: 'Shipping Zones', url: '/merchant/shop/settings/shipping', icon: Globe },
-        { title: 'Taxes', url: '/merchant/shop/settings/taxes', icon: Receipt },
-        { title: 'Policies', url: '/merchant/shop/settings/policies', icon: FileText },
+        { title: 'Notifications', url: '/merchant/stores/settings?tab=notifications', icon: Bell },
+        { title: 'Webhooks', url: '/merchant/stores/settings?tab=webhooks', icon: Zap },
+      ],
+    },
+
+    // Analytics per store
+    {
+      title: 'Store Analytics',
+      url: '/merchant/stores/analytics',
+      icon: BarChart,
+      group: 'Analytics',
+    },
+  ],
+
+  // ================================
+  // 3️⃣ ORDERS SECTION
+  // ================================
+  orders: [
+    // Main view
+    {
+      title: 'All Orders',
+      url: '/merchant/orders',
+      icon: ListChecks,
+      group: 'Orders',
+    },
+
+    // Quick filters - Open by default (most used)
+    {
+      title: 'Order Status',
+      url: '/merchant/orders/status',
+      icon: Package,
+      group: 'Filters',
+      defaultOpen: true, // ← Open by default
+      children: [
+        { title: 'New Orders', url: '/merchant/orders?status=new', icon: Clock },
+        { title: 'Processing', url: '/merchant/orders?status=processing', icon: Package },
+        { title: 'In Transit', url: '/merchant/orders?status=transit', icon: Truck },
+        { title: 'Delivered', url: '/merchant/orders?status=delivered', icon: FileCheck },
+        { title: 'Returns & RTO', url: '/merchant/orders?status=returns', icon: RotateCcw },
+        { title: 'Cancelled', url: '/merchant/orders?status=cancelled', icon: FileX },
+        { title: 'Disputed', url: '/merchant/orders?status=disputed', icon: AlertTriangle },
+      ],
+    },
+
+    // Problems - Closed by default
+    {
+      title: 'Issues',
+      url: '/merchant/orders/issues',
+      icon: AlertTriangle,
+      group: 'Issues',
+      defaultOpen: false,
+      children: [
+        { title: 'Disputes', url: '/merchant/orders/disputes', icon: AlertTriangle },
+        { title: 'Return Requests', url: '/merchant/orders/returns', icon: RotateCcw },
+        { title: 'Refunds', url: '/merchant/orders/refunds', icon: Receipt },
+      ],
+    },
+
+    // Bulk actions
+    {
+      title: 'Bulk Operations',
+      url: '/merchant/orders/bulk',
+      icon: Layers,
+      group: 'Tools',
+    },
+
+    // Order settings - Closed by default
+    {
+      title: 'Order Settings',
+      url: '/merchant/orders/settings',
+      icon: Settings,
+      group: 'Settings',
+      defaultOpen: false,
+      children: [
+        {
+          title: 'Auto-Assignment Rules',
+          url: '/merchant/orders/settings?tab=auto-assign',
+          icon: Zap,
+        },
+        {
+          title: 'Order Notifications',
+          url: '/merchant/orders/settings?tab=notifications',
+          icon: Bell,
+        },
+        {
+          title: 'Return Policies',
+          url: '/merchant/orders/settings?tab=returns',
+          icon: RotateCcw,
+        },
       ],
     },
   ],
 
   // ================================
-  // 3️⃣ LOGISTICS SECTION
+  // 4️⃣ SHIPMENTS SECTION
   // ================================
-  logistics: [
-    // Overview
-    { title: 'Overview', url: '/merchant/logistics', icon: Home, group: 'Logistics' },
+  shipments: [
+    // Main view
     {
-      title: 'Dashboard',
-      url: '/merchant/logistics/dashboard',
-      icon: BarChart,
-      group: 'Logistics',
-    },
-
-    // Shipments
-    {
-      title: 'Shipments',
-      url: '/merchant/logistics/shipments',
+      title: 'All Shipments',
+      url: '/merchant/shipments',
       icon: Package,
-      group: 'Logistics',
-      children: [
-        { title: 'All Shipments', url: '/merchant/logistics/shipments/all', icon: ListChecks },
-        { title: 'Create Shipment', url: '/merchant/logistics/shipments/create', icon: Upload },
-        { title: 'Bulk Create', url: '/merchant/logistics/shipments/bulk', icon: Upload },
-        { title: 'In Transit', url: '/merchant/logistics/shipments/in-transit', icon: Truck },
-        {
-          title: 'Out for Delivery',
-          url: '/merchant/logistics/shipments/out-for-delivery',
-          icon: Package,
-        },
-        { title: 'Delivered', url: '/merchant/logistics/shipments/delivered', icon: FileCheck },
-      ],
+      group: 'Shipments',
     },
-
-    // Orders
     {
-      title: 'Orders',
-      url: '/merchant/logistics/orders',
-      icon: Package,
-      group: 'Logistics',
-      children: [
-        { title: 'Ready to Ship', url: '/merchant/logistics/orders/ready', icon: Package },
-        { title: 'Awaiting Pickup', url: '/merchant/logistics/orders/pickup', icon: Clock },
-        { title: 'Unfulfilled', url: '/merchant/logistics/orders/unfulfilled', icon: FileText },
-        { title: 'SLA Breached', url: '/merchant/logistics/orders/sla', icon: AlertTriangle },
-      ],
-    },
-
-    // Track & Trace
-    {
-      title: 'Track & Trace',
-      url: '/merchant/logistics/track',
+      title: 'Track Shipment',
+      url: '/merchant/shipments/track',
       icon: Search,
-      group: 'Logistics',
-      children: [
-        { title: 'Track by Order ID', url: '/merchant/logistics/track/order', icon: ChevronRight },
-        { title: 'Track by AWB', url: '/merchant/logistics/track/awb', icon: Search },
-        { title: 'Track by Phone', url: '/merchant/logistics/track/phone', icon: Search },
-        { title: 'Batch Tracking', url: '/merchant/logistics/track/batch', icon: Layers },
-      ],
+      group: 'Shipments',
     },
 
-    // NDR
+    // Delivery issues - Open by default (important alerts)
     {
-      title: 'NDR',
-      url: '/merchant/logistics/ndr',
+      title: 'Delivery Issues',
+      url: '/merchant/shipments/issues',
       icon: AlertTriangle,
-      group: 'Logistics',
+      group: 'Issues',
+      defaultOpen: true,
       children: [
-        { title: 'Failed Deliveries', url: '/merchant/logistics/ndr/failed', icon: AlertTriangle },
-        { title: 'Action Required', url: '/merchant/logistics/ndr/action', icon: Clock },
-        { title: 'Customer Unavailable', url: '/merchant/logistics/ndr/unavailable', icon: Users },
-        { title: 'RTO Cases', url: '/merchant/logistics/ndr/rto', icon: RotateCcw },
-        { title: 'Resolved', url: '/merchant/logistics/ndr/resolved', icon: FileCheck },
+        {
+          title: 'NDR (Failed Delivery)',
+          url: '/merchant/shipments/issues?tab=ndr',
+          icon: AlertTriangle,
+        },
+        {
+          title: 'RTO (Return to Origin)',
+          url: '/merchant/shipments/issues?tab=rto',
+          icon: RotateCcw,
+        },
+        { title: 'Delayed Shipments', url: '/merchant/shipments/issues?tab=delayed', icon: Clock },
       ],
     },
 
-    // Returns
+    // Documents - Closed by default
     {
-      title: 'Returns',
-      url: '/merchant/logistics/returns',
-      icon: RotateCcw,
-      group: 'Logistics',
+      title: 'Documents',
+      url: '/merchant/shipments/documents',
+      icon: FileText,
+      group: 'Documents',
+      defaultOpen: false,
       children: [
-        { title: 'Requested Returns', url: '/merchant/logistics/returns/requested', icon: Clock },
-        { title: 'Approved Returns', url: '/merchant/logistics/returns/approved', icon: FileCheck },
-        { title: 'Rejected Returns', url: '/merchant/logistics/returns/rejected', icon: FileX },
-        { title: 'In Transit (RTO)', url: '/merchant/logistics/returns/in-transit', icon: Truck },
-        { title: 'Received', url: '/merchant/logistics/returns/received', icon: Warehouse },
+        { title: 'Generate Labels', url: '/merchant/shipments/labels', icon: FileText },
+        { title: 'Create Manifest', url: '/merchant/shipments/manifest', icon: Layers },
+        { title: 'Invoices', url: '/merchant/shipments/invoices', icon: Receipt },
+        { title: 'Shipping Reports', url: '/merchant/shipments/reports', icon: Download },
       ],
     },
 
-    // Couriers
+    // Couriers - Closed by default
     {
       title: 'Couriers',
-      url: '/merchant/logistics/couriers',
+      url: '/merchant/shipments/couriers',
       icon: Truck,
-      group: 'Logistics',
+      group: 'Couriers',
+      defaultOpen: false,
       children: [
-        { title: 'All Couriers', url: '/merchant/logistics/couriers/all', icon: Truck },
-        {
-          title: 'Courier Assignment',
-          url: '/merchant/logistics/couriers/assign',
-          icon: ChevronRight,
-        },
-        { title: 'Performance', url: '/merchant/logistics/couriers/performance', icon: BarChart },
-        { title: 'Rate Card', url: '/merchant/logistics/couriers/rates', icon: DollarSign },
+        { title: 'Courier Partners', url: '/merchant/shipments/couriers/partners', icon: Truck },
+        { title: 'Rate Comparison', url: '/merchant/shipments/couriers/rates', icon: DollarSign },
+        { title: 'Performance', url: '/merchant/shipments/couriers/performance', icon: BarChart },
       ],
     },
 
-    // Billing
-    {
-      title: 'Billing',
-      url: '/merchant/logistics/billing',
-      icon: Receipt,
-      group: 'Logistics',
-      children: [
-        { title: 'Shipping Charges', url: '/merchant/logistics/billing/shipping', icon: Truck },
-        { title: 'Weight Reconciliation', url: '/merchant/logistics/billing/weight', icon: Scale },
-        { title: 'COD Remittance', url: '/merchant/logistics/billing/cod', icon: DollarSign },
-        { title: 'Invoices', url: '/merchant/logistics/billing/invoices', icon: Receipt },
-        { title: 'Disputes', url: '/merchant/logistics/billing/disputes', icon: AlertTriangle },
-      ],
-    },
-
-    // Pickups
+    // Pickups - Closed by default
     {
       title: 'Pickups',
-      url: '/merchant/logistics/pickups',
+      url: '/merchant/shipments/pickups',
       icon: Calendar,
-      group: 'Logistics',
+      group: 'Pickups',
+      defaultOpen: false,
       children: [
-        { title: 'Schedule Pickup', url: '/merchant/logistics/pickups/schedule', icon: Calendar },
-        { title: 'Pickup History', url: '/merchant/logistics/pickups/history', icon: Clock },
-        { title: 'Pickup Locations', url: '/merchant/logistics/pickups/locations', icon: Building },
+        { title: 'Schedule Pickup', url: '/merchant/shipments/pickups/schedule', icon: Calendar },
+        { title: 'Pickup History', url: '/merchant/shipments/pickups/history', icon: Clock },
+        { title: 'Pickup Locations', url: '/merchant/shipments/pickups/locations', icon: Building },
       ],
     },
 
-    // Reports
+    // Shipment settings - Closed by default
     {
-      title: 'Reports',
-      url: '/merchant/logistics/reports',
-      icon: FileText,
-      group: 'Logistics',
-      children: [
-        { title: 'Shipment Report', url: '/merchant/logistics/reports/shipments', icon: Package },
-        {
-          title: 'Delivery Performance',
-          url: '/merchant/logistics/reports/delivery',
-          icon: TrendingUp,
-        },
-        { title: 'NDR Report', url: '/merchant/logistics/reports/ndr', icon: AlertTriangle },
-        { title: 'RTO Report', url: '/merchant/logistics/reports/rto', icon: RotateCcw },
-        { title: 'Cost Analysis', url: '/merchant/logistics/reports/cost', icon: DollarSign },
-      ],
-    },
-
-    // Logistics Settings
-    {
-      title: 'Logistics Settings',
-      url: '/merchant/logistics/settings',
+      title: 'Shipping Settings',
+      url: '/merchant/shipments/settings',
       icon: Settings,
       group: 'Settings',
+      defaultOpen: false,
       children: [
-        { title: 'Shipping Rules', url: '/merchant/logistics/settings/rules', icon: Layers },
         {
-          title: 'Packaging Preferences',
-          url: '/merchant/logistics/settings/packaging',
+          title: 'Courier Preferences',
+          url: '/merchant/shipments/settings?tab=preferences',
+          icon: Truck,
+        },
+        {
+          title: 'Packaging Config',
+          url: '/merchant/shipments/settings?tab=packaging',
           icon: Package,
         },
-        { title: 'Courier Preferences', url: '/merchant/logistics/settings/courier', icon: Truck },
-        { title: 'Auto-assignment', url: '/merchant/logistics/settings/auto-assign', icon: Zap },
-        { title: 'Notifications', url: '/merchant/logistics/settings/notifications', icon: Bell },
-        { title: 'SLA Configuration', url: '/merchant/logistics/settings/sla', icon: Clock },
+        { title: 'Weight Rules', url: '/merchant/shipments/settings?tab=weight', icon: Scale },
+        { title: 'Shipping Zones', url: '/merchant/shipments/settings?tab=zones', icon: Globe },
+      ],
+    },
+  ],
+
+  // ================================
+  // 5️⃣ PAYOUTS SECTION
+  // ================================
+  payouts: [
+    // Overview
+    {
+      title: 'Overview',
+      url: '/merchant/payouts',
+      icon: Home,
+      group: 'Payouts',
+    },
+    {
+      title: 'Settlements',
+      url: '/merchant/payouts/settlements',
+      icon: DollarSign,
+      group: 'Payouts',
+    },
+    {
+      title: 'Transaction History',
+      url: '/merchant/payouts/transactions',
+      icon: Receipt,
+      group: 'Payouts',
+    },
+
+    // Payout settings - Closed by default
+    {
+      title: 'Payout Settings',
+      url: '/merchant/payouts/settings',
+      icon: Settings,
+      group: 'Settings',
+      defaultOpen: false,
+      children: [
+        { title: 'Bank Details', url: '/merchant/payouts/settings/bank', icon: Landmark },
+        { title: 'GST Details', url: '/merchant/payouts/settings/gst', icon: FileText },
+        { title: 'KYC Verification', url: '/merchant/payouts/settings/kyc', icon: ShieldCheck },
+        { title: 'Payout Schedule', url: '/merchant/payouts/settings/schedule', icon: Calendar },
       ],
     },
   ],

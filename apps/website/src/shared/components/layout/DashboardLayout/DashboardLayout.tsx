@@ -1,6 +1,7 @@
 "use client"
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { useEffect } from "react"
 import { Notification } from "./NotificationsDropdown"
 import { Sidebar, SidebarLink } from "./Sidebar"
 import { Topbar } from "./Topbar"
@@ -67,12 +68,33 @@ export function DashboardLayout({
   loading,
   children,
 }: DashboardLayoutProps) {
+  // Apply overflow hidden only when dashboard is mounted
+  useEffect(() => {
+    const htmlElement = document.documentElement
+    const bodyElement = document.body
+
+    // Store original values
+    const originalHtmlOverflow = htmlElement.style.overflow
+    const originalBodyOverflow = bodyElement.style.overflow
+
+    // Apply overflow hidden
+    htmlElement.removeAttribute('scroll')
+    htmlElement.style.overflow = 'hidden'
+    bodyElement.style.overflow = 'hidden'
+
+    // Cleanup - restore original values when component unmounts
+    return () => {
+      htmlElement.style.overflow = originalHtmlOverflow
+      bodyElement.style.overflow = originalBodyOverflow
+    }
+  }, [])
+
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
+    <SidebarProvider style={{ height: '100vh', overflow: 'hidden' }}>
+      <div className="flex h-full w-full overflow-hidden">
         <Sidebar links={sidebarLinks} globalLinks={globalLinks} tenant={tenant} />
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
           <Topbar
             user={user}
             tenant={tenant}
@@ -92,9 +114,11 @@ export function DashboardLayout({
             sidebarTrigger={<SidebarTrigger />}
           />
 
-          <main className="flex-1 overflow-y-auto bg-gray-50">
-            {children}
-          </main>
+          <div className="flex-1 overflow-y-auto bg-gray-50">
+            <main className="p-5">
+              {children}
+            </main>
+          </div>
         </div>
       </div>
     </SidebarProvider>

@@ -5,6 +5,6 @@ interface CustomCardProps extends Omit<CardProps, 'children'> {
   children?: ReactNode
 }
 
-export function CustomCard({ children, ...props }: CustomCardProps) {
+export function Card({ children, ...props }: CustomCardProps) {
   return <PolarisCard {...props}>{children}</PolarisCard>
 }
