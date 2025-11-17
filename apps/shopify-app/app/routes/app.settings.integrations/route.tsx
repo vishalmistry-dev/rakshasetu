@@ -1,10 +1,14 @@
 import { BlockStack, Button, Card, Text } from '@shopify/polaris';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { TextField } from '../../components/ui/TextField';
 import { useToast } from '../../components/ui/Toast';
+import { merchantsApi } from '../../lib/api/merchants';
 
 export default function IntegrationSettings() {
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const shop = searchParams.get('shop') || '';
   const [isSaving, setIsSaving] = useState(false);
 
   const [integrations, setIntegrations] = useState({
@@ -14,11 +18,15 @@ export default function IntegrationSettings() {
   });
 
   const handleSave = async () => {
+    if (!shop) {
+      showToast('Shop parameter is missing', true);
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving integrations:', integrations);
+      await merchantsApi.updateSettings(shop, 'preferences', integrations);
       showToast('Integration settings saved!');
     } catch (error) {
       showToast('Failed to save integration settings', true);

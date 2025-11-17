@@ -14,4 +14,6 @@ export interface CookieMerchantType {
   id: string
   email: string
   businessName: string
+  is2FAVerified?: boolean
+  is2FAEnabled?: boolean
 }

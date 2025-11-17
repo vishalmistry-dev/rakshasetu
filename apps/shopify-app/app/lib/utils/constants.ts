@@ -1,5 +1,5 @@
 export const APP_CONFIG = {
-  API_URL: process.env.API_URL || 'http://localhost:4000',
+  API_URL: process.env.API_URL || 'https://unpitiable-rylan-fluffily.ngrok-free.dev/api/v1',
   DASHBOARD_URL: process.env.DASHBOARD_URL || 'http://localhost:3001',
   CHECKOUT_URL: process.env.CHECKOUT_URL || 'http://localhost:3002',
 }

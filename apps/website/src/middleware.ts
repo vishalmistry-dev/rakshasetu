@@ -1,4 +1,5 @@
 import { ROUTE_CONFIG } from '@/config/routes'
+import { showToast } from '@/shared/components/common/Toast'
 import { APP_CONFIG } from '@/shared/config/app.config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -199,6 +200,10 @@ export async function middleware(request: NextRequest) {
       console.log('❌ Token invalid/expired, clearing cookie and redirecting to login')
       const response = NextResponse.redirect(new URL(`${internalPath}/login`, request.url))
       response.cookies.delete(cookie)
+      showToast('info', {
+        title: 'Session expired',
+        description: 'Your login session is expired please login again.',
+      })
       return response
     }
   }

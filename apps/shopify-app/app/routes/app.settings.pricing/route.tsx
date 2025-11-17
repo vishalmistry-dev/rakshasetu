@@ -1,10 +1,14 @@
 import { BlockStack, Button, Card, InlineGrid, Text } from '@shopify/polaris';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { TextField } from '../../components/ui/TextField';
 import { useToast } from '../../components/ui/Toast';
+import { merchantsApi } from '../../lib/api/merchants';
 
 export default function PricingSettings() {
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const shop = searchParams.get('shop') || '';
   const [isSaving, setIsSaving] = useState(false);
 
   const [fees, setFees] = useState({
@@ -15,11 +19,15 @@ export default function PricingSettings() {
   });
 
   const handleSave = async () => {
+    if (!shop) {
+      showToast('Shop parameter is missing', true);
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving pricing:', fees);
+      await merchantsApi.updateSettings(shop, 'preferences', fees);
       showToast('Pricing updated successfully!');
     } catch (error) {
       showToast('Failed to update pricing', true);

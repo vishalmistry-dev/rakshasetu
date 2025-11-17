@@ -22,7 +22,6 @@ export default async function handleRequest(
   return new Promise((resolve, reject) => {
     const { pipe, abort } = renderToPipeableStream(
       <>
-        {/* @ts-expect-error - React Router type compatibility */}
         <ServerRouter
           context={reactRouterContext}
           url={request.url}

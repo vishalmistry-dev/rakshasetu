@@ -1,38 +1,40 @@
 import type { Merchant, MerchantProfile, OnboardingFormData } from '~/types/merchant'
+import { apiClient } from './client'
 
 export const merchantsApi = {
   async get(shop: string): Promise<Merchant & { profile: MerchantProfile }> {
-    return {
-      id: 'merchant_1',
-      businessName: shop.split('.')[0],
-      email: 'merchant@example.com',
-      phone: '+919876543210',
-      status: 'ACTIVE',
-      isActive: true,
-      mode: 'TEST',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      profile: {
-        id: 'profile_1',
-        onboardingStatus: 'PENDING',
-        kycStatus: 'PENDING',
-        gstVerified: 'PENDING',
-        bankVerified: 'PENDING',
-      },
-    }
+    const response = await apiClient<Merchant & { profile: MerchantProfile }>(
+      `/integrations/shopify/merchants/profile?shop=${shop}`
+    )
+
+    return response.data
   },
 
-  async onboard(data: OnboardingFormData): Promise<{ success: boolean }> {
-    console.log('Onboarding data:', data)
-    return { success: true }
+  async onboard(shop: string, data: OnboardingFormData): Promise<{ success: boolean }> {
+    const response = await apiClient<{ message: string }>(
+      `/integrations/shopify/merchants/onboard?shop=${shop}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    )
+
+    return { success: response.success }
   },
 
   async updateSettings(
     shop: string,
+    type: 'general' | 'notifications' | 'preferences' | 'logistics',
     settings: Record<string, unknown>
   ): Promise<{ success: boolean }> {
-    // Changed from any
-    console.log('Updating settings for', shop, ':', settings) // Use shop
-    return { success: true }
+    const response = await apiClient<{ message: string }>(
+      `/integrations/shopify/merchants/settings/${type}?shop=${shop}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(settings),
+      }
+    )
+
+    return { success: response.success }
   },
 }
