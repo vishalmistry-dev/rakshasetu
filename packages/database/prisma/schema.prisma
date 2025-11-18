@@ -1,3 +1,7 @@
+// ============================================
+// PRISMA CONFIGURATION
+// ============================================
+
 generator client {
     provider = "prisma-client-js"
 }
@@ -8,11 +12,10 @@ datasource db {
 }
 
 // ============================================
-// SECTION 1: AUTHENTICATION & USER MANAGEMENT
+// GLOBAL ENUMS
 // ============================================
 
-// --- Enums for User Management ---
-
+// User & Authentication
 enum USER_TYPE {
     BUYER
     SELLER
@@ -30,238 +33,70 @@ enum USER_VERIFICATION_STATUS {
     REJECTED
 }
 
+enum USER_ROLE {
+    BUYER
+    SELLER
+    MERCHANT
+    ADMIN
+    GUEST
+}
+
 enum ADMIN_STATUS {
     ACTIVE
     INACTIVE
 }
 
+// Merchant & Store
 enum MERCHANT_MODE {
     TEST
     LIVE
 }
 
-// --- User Models ---
-
-model User {
-    id                  String                   @id
-    firstName           String
-    lastName            String
-    userName            String                   @unique
-    email               String                   @unique
-    business            String
-    type                USER_TYPE                @default(BUYER)
-    mobile              String
-    password            String
-    image               String?
-    status              USER_STATUS              @default(ACTIVE)
-    address             Json?
-    emailVerified       Boolean                  @default(false)
-    smsVerified         Boolean                  @default(false)
-    kycVerified         USER_VERIFICATION_STATUS @default(DEFAULT)
-    bankVerified        USER_VERIFICATION_STATUS @default(DEFAULT)
-    gstVerified         USER_VERIFICATION_STATUS @default(DEFAULT)
-    verificationCode    String?
-    verificationSentAt  DateTime?
-    twoFactorVerified   Boolean                  @default(false)
-    twoFactorSecret     String?
-    twoFactorQrCode     String?
-    twoFactorStatus     Boolean                  @default(false)
-    deviceId            String?
-    emailVerifiedAt     DateTime?
-    rememberToken       String?
-    refreshToken        String?
-    refreshTokenExpires DateTime?
-    hasSoldBefore       Boolean                  @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    UserKycDetails   UserKycDetails?
-    SellerAccount    SellerAccount?
-    notifications    Notification[]
-    listings         Listing[]
-    userConnects     Connects[]       @relation("user")
-    sellerConnects   Connects[]       @relation("seller")
-    ordersBought     Order[]          @relation("order_buyer")
-    ordersSold       Order[]          @relation("order_seller")
-    PaymentsAsBuyer  Payment[]        @relation("PaymentBuyer")
-    PaymentsAsSeller Payment[]        @relation("PaymentSeller")
-    DisputeTicket    DisputeTicket[]
-    Logistics        Logistics[]
-    ShopCart         ShopCart[]
-    ShopOrderGroup   ShopOrderGroup[]
-    ShopPayment      ShopPayment[]
-
-    @@map("users")
+enum STORE_TYPE {
+    SHOPIFY
+    WOOCOMMERCE
 }
 
-model UserKycDetails {
-    id         String  @id
-    userId     String? @unique
-    merchantId String? @unique
-
-    // PAN Details
-    panNumber             String?
-    dateOfBirth           String?
-    fullNameAsPerPan      String?
-    panVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
-    panRejectionReason    String?
-
-    // Aadhaar Details
-    aadharNumber             String?
-    fullNameAsPerAadhar      String?
-    aadhaarReferenceId       String?
-    aadharVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
-    aadharRejectionReason    String?
-
-    // GST Details
-    gstNumber             String?
-    gstStatus             String?
-    constitution          String?
-    registrationDate      String?
-    businessName          String?
-    businessAddress       Json?
-    tradeName             String?
-    gstVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
-    gstRejectionReason    String?
-
-    // Bank Details
-    bankAccountNumber      String?
-    bankIfscCode           String?
-    fullNameAsPerBank      String?
-    bankVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
-    bankRejectionReason    String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    user     User?     @relation(fields: [userId], references: [id])
-    Merchant Merchant? @relation(fields: [merchantId], references: [id])
-
-    @@map("user_kyc_details")
+enum STORE_CONNECTION_TYPE {
+    OAUTH
+    MANUAL
 }
 
-model Admin {
-    id        String       @id
-    firstName String
-    lastName  String
-    userName  String       @unique
-    email     String       @unique
-    password  String
-    image     String?
-    status    ADMIN_STATUS @default(ACTIVE)
-
-    emailVerified       Boolean   @default(false)
-    emailVerifiedAt     DateTime?
-    verificationCode    String?
-    verificationSentAt  DateTime?
-    refreshToken        String?
-    refreshTokenExpires DateTime?
-
-    roleId String
-    role   AdminRole @relation(fields: [roleId], references: [id])
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    DisputeTickets    DisputeTicket[]     @relation("AdminDisputes")
-    ShopDisputeTicket ShopDisputeTicket[]
-
-    @@map("admins")
+enum STORE_STATUS {
+    ACTIVE
+    INACTIVE
+    BLOCKED
 }
 
-model AdminRole {
-    id          String  @id
-    name        String  @unique
-    description String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    admins      Admin[]
-    permissions AdminPermission[] @relation("RolePermissions")
-
-    @@map("admin_roles")
+enum ONBOARDING_STATUS {
+    PENDING
+    SKIPPED
+    COMPLETED
 }
 
-model AdminPermission {
-    id    String  @id
-    name  String  @unique
-    label String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    roles AdminRole[] @relation("RolePermissions")
-
-    @@map("admin_permissions")
+enum API_STATUS {
+    ENABLED
+    DISABLED
+    REVOKED
 }
 
-model Merchant {
-    id                  String                   @id
-    firstName           String
-    lastName            String
-    userName            String                   @unique
-    email               String                   @unique
-    business            String
-    mobile              String
-    password            String
-    image               String?
-    status              USER_STATUS              @default(ACTIVE)
-    address             Json?
-    emailVerified       Boolean                  @default(false)
-    smsVerified         Boolean                  @default(false)
-    kycVerified         USER_VERIFICATION_STATUS @default(DEFAULT)
-    bankVerified        USER_VERIFICATION_STATUS @default(DEFAULT)
-    gstVerified         USER_VERIFICATION_STATUS @default(DEFAULT)
-    verificationCode    String?
-    verificationSentAt  DateTime?
-    twoFactorVerified   Boolean                  @default(false)
-    twoFactorQrCode     String?
-    twoFactorSecret     String?
-    twoFactorStatus     Boolean                  @default(false)
-    deviceId            String?
-    emailVerifiedAt     DateTime?
-    rememberToken       String?
-    refreshToken        String?
-    refreshTokenExpires DateTime?
-    mode                MERCHANT_MODE            @default(TEST)
-
-    lastRotatedAt DateTime?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
-
-    // Relations
-    MerchantKycDetails        UserKycDetails?
-    apiKeys                   MerchantApiKey[]
-    webhooks                  MerchantWebhook[]
-    ShopProduct               ShopProduct[]
-    MerchantStore             MerchantStore[]
-    ShopifyState              ShopifyState[]
-    ShopOrder                 ShopOrder[]
-    ShopPayment               ShopPayment[]
-    MerchantPreferences       MerchantPreferences?
-    MerchantCourierConfig     MerchantCourierConfig[]
-    MerchantAccount           MerchantAccount?
-    MerchantPlatformFee       MerchantPlatformFee[]
-    BulkLogisticsJob          BulkLogisticsJob[]
-    CourierPerformanceMetrics CourierPerformanceMetrics[]
-    Manifest                  Manifest[]
-    PickupAddresses           Address[]
-    PackageProfiles           PackageProfile[]
+enum PLAN_TYPE {
+    FREE
+    STARTER
+    PROFESSIONAL
+    ENTERPRISE
+    CUSTOM
 }
 
-// ============================================
-// SECTION 2: SELLER & MERCHANT FINANCIAL MANAGEMENT
-// ============================================
+enum SUBSCRIPTION_STATUS {
+    ACTIVE
+    TRIAL
+    CANCELLED
+    PAST_DUE
+    EXPIRED
+}
 
-// --- Enums for Financial Management ---
-
+// Financial & Account
 enum ACCOUNT_STATUS {
     ACTIVE
     SUSPENDED
@@ -309,112 +144,7 @@ enum DEDUCTION_SOURCE {
     MERCHANT
 }
 
-// --- Seller Account Models (Marketplace) ---
-
-model SellerAccount {
-    id     String @id
-    userId String @unique
-    user   User   @relation(fields: [userId], references: [id])
-
-    earningsBalance Float @default(0.0)
-    creditBalance   Float @default(0.0)
-    totalEarnings   Float @default(0.0)
-    totalWithdrawn  Float @default(0.0)
-    totalCharges    Float @default(0.0)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    SellerDeduction SellerDeduction[]
-}
-
-model SellerDeduction {
-    id              String           @id
-    sellerAccountId String
-    sellerAccount   SellerAccount    @relation(fields: [sellerAccountId], references: [id])
-    orderId         String
-    type            DEDUCTION_TYPE
-    amount          Float
-    status          DEDUCTION_STATUS
-
-    createdAt DateTime @default(now())
-}
-
-// --- Merchant Account Models (E-commerce) ---
-
-model MerchantAccount {
-    id         String   @id
-    merchantId String   @unique
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-
-    availableBalance Float          @default(0.0)
-    pendingCharges   Float          @default(0.0)
-    totalEarnings    Float          @default(0.0)
-    totalWithdrawn   Float          @default(0.0)
-    totalCharges     Float          @default(0.0)
-    currency         String         @default("INR")
-    status           ACCOUNT_STATUS @default(ACTIVE)
-
-    payoutMethod    PAYOUT_METHOD?
-    lastPayoutAt    DateTime?
-    payoutFrequency PAYOUT_FREQUENCY @default(MANUAL)
-
-    auditTrail Json?
-    notes      String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    deductions        MerchantDeduction[]
-    PayoutTransaction PayoutTransaction[]
-}
-
-model MerchantDeduction {
-    id                String          @id
-    merchantAccountId String
-    merchantAccount   MerchantAccount @relation(fields: [merchantAccountId], references: [id])
-
-    referenceId String // Order ID or Shipping ID
-    type        DEDUCTION_TYPE
-    amount      Float
-    status      DEDUCTION_STATUS @default(PENDING)
-    remarks     String?
-
-    triggeredBy DEDUCTION_SOURCE @default(SYSTEM)
-    settledAt   DateTime?
-    waivedBy    String?
-
-    // ===== RTO LINK (NEW) ===== //
-    shippingId String? // Link to Shipping if RTO-related
-
-    createdAt DateTime @default(now())
-}
-
-model PayoutTransaction {
-    id                String          @id
-    merchantAccountId String
-    merchantAccount   MerchantAccount @relation(fields: [merchantAccountId], references: [id])
-
-    amount        Float
-    method        PAYOUT_METHOD
-    status        PAYOUT_STATUS @default(PENDING)
-    externalTxnId String?
-    referenceNote String?
-    failureReason String?
-    initiatedBy   String
-
-    createdAt   DateTime  @default(now())
-    processedAt DateTime?
-}
-
-// ============================================
-// SECTION 3: MARKETPLACE (P2P TRADING)
-// ============================================
-
-// --- Enums for Marketplace ---
-
+// Marketplace
 enum LISTING_TYPE {
     PRODUCT
     SERVICE
@@ -437,6 +167,12 @@ enum ORDER_TYPE {
     CUSTOM
     PRODUCT
     SERVICE
+}
+
+enum ORDER_FLOW_STATUS {
+    PENDING
+    APPROVED
+    REJECTED
 }
 
 enum PLATFORM_FEE_PAYER {
@@ -462,1017 +198,7 @@ enum MARKETPLACE_ORDER_STATUS {
     CANCELLED
 }
 
-enum ORDER_FLOW_STATUS {
-    PENDING
-    APPROVED
-    REJECTED
-}
-
-// --- Listing Models ---
-
-model Listing {
-    id           String         @id
-    sellerId     String
-    type         LISTING_TYPE
-    title        String
-    description  String
-    category     String
-    subCategory  String?
-    price        Float
-    status       LISTING_STATUS @default(ACTIVE)
-    tags         String[]
-    metadata     Json?
-    media        Json?
-    externalLink String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    seller       User           @relation(fields: [sellerId], references: [id])
-    connects     Connects[]
-    conversation Conversation[]
-    Order        Order[]
-    OrderDetails OrderDetails[]
-
-    @@index([sellerId])
-    @@index([status])
-    @@index([type])
-    @@map("listings")
-}
-
-model Connects {
-    id        String         @id
-    userId    String
-    listingId String?
-    sellerId  String
-    message   String?        @db.VarChar(500)
-    status    CONNECT_STATUS @default(PENDING)
-
-    rejectReason String? @db.VarChar(500)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    user    User     @relation("user", fields: [userId], references: [id])
-    seller  User     @relation("seller", fields: [sellerId], references: [id])
-    listing Listing? @relation(fields: [listingId], references: [id])
-
-    @@index([userId])
-    @@index([sellerId])
-    @@index([listingId])
-    @@map("connects")
-}
-
-// --- Order Models ---
-
-model Order {
-    id        String                   @id
-    orderType ORDER_TYPE
-    buyerId   String
-    sellerId  String
-    status    MARKETPLACE_ORDER_STATUS @default(PENDING)
-    notes     String?
-
-    orderStatus  ORDER_FLOW_STATUS @default(PENDING)
-    rejectReason String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    listingId String?
-
-    // Relations
-    buyer         User           @relation("order_buyer", fields: [buyerId], references: [id])
-    seller        User           @relation("order_seller", fields: [sellerId], references: [id])
-    listing       Listing?       @relation(fields: [listingId], references: [id])
-    details       OrderDetails?
-    transaction   Transaction?
-    conversations Conversation[]
-    payments      Payment[]
-    dispute       DisputeTicket?
-    refunds       Refund[]
-}
-
-model OrderDetails {
-    id String @id
-
-    orderType ORDER_TYPE
-
-    listingId      String?
-    listingDetails Json?
-    customDetails  Json?
-
-    totalAmount      Float
-    platformFee      Float
-    platformFeePayer PLATFORM_FEE_PAYER @default(BUYER)
-    sellerReceives   Float
-    buyerAmount      Float
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    orderId String @unique
-
-    // Relations
-    listing          Listing?           @relation(fields: [listingId], references: [id])
-    order            Order              @relation(fields: [orderId], references: [id])
-    orderAttachments orderAttachments[]
-}
-
-model orderAttachments {
-    id             String       @id
-    orderDetailsId String
-    OrderDetails   OrderDetails @relation(fields: [orderDetailsId], references: [id])
-
-    type     String
-    url      String
-    name     String
-    publicId String
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-// --- Transaction & Payment Models ---
-
-enum TRANSACTION_STATUS {
-    INITIATED
-    ON_HOLD
-    AWAITING_RELEASE
-    RELEASED_TO_SELLER
-    REFUND_PENDING
-    REFUNDED_TO_BUYER
-    DISPUTED
-    CANCELLED
-    FAILED
-}
-
-enum PAYMENT_METHOD {
-    PREPAID
-    POD
-    COD
-}
-
-enum PAYMENT_STATUS {
-    INITIATED
-    AUTHORIZED
-    CAPTURED
-    FAILED
-    REFUNDED
-    PARTIALLY_REFUNDED
-    COD_PENDING
-    COD_COLLECTED
-    COD_FAILED
-}
-
-enum USER_ROLE {
-    BUYER
-    SELLER
-    MERCHANT
-    ADMIN
-    GUEST
-}
-
-model Transaction {
-    id      String @id
-    orderId String @unique
-
-    buyerPaid       Float
-    chargesDeducted Float
-    sellerReceives  Float
-
-    status                   TRANSACTION_STATUS @default(INITIATED)
-    releaseRequested         Boolean            @default(false)
-    releaseRequestedAt       DateTime?
-    releaseRequestedByType   USER_ROLE?
-    releaseRequestedById     String?
-    releaseRequestedMeta     Json?
-    releaseApprovedByAdmin   Boolean            @default(false)
-    releaseApprovedAt        DateTime?
-    releaseApprovedByAdminId String?
-    releaseNotes             String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    order    Order     @relation(fields: [orderId], references: [id])
-    payments Payment[]
-    refunds  Refund[]
-}
-
-model Payment {
-    id String @id
-
-    orderId       String
-    transactionId String
-    buyerId       String
-    sellerId      String
-
-    amount   Float
-    currency String @default("INR")
-
-    method PAYMENT_METHOD @default(PREPAID)
-    status PAYMENT_STATUS @default(INITIATED)
-
-    razorpayOrderId   String?
-    razorpayPaymentId String?
-    providerTxnId     String?
-
-    errorCode    String?
-    errorMessage String?
-
-    metadata Json?
-
-    paidAt  DateTime?
-    attempt Int       @default(1)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    transaction Transaction @relation(fields: [transactionId], references: [id])
-    order       Order       @relation(fields: [orderId], references: [id])
-    buyer       User?       @relation("PaymentBuyer", fields: [buyerId], references: [id])
-    seller      User?       @relation("PaymentSeller", fields: [sellerId], references: [id])
-
-    @@index([orderId, transactionId])
-}
-
-// ============================================
-// SECTION 4: E-COMMERCE STORE MANAGEMENT
-// ============================================
-
-// --- Enums for Store Management ---
-
-enum STORE_TYPE {
-    SHOPIFY
-    WOOCOMMERCE
-}
-
-enum STORE_CONNECTION_TYPE {
-    OAUTH
-    MANUAL
-}
-
-enum STORE_STATUS {
-    ACTIVE
-    INACTIVE
-    BLOCKED
-}
-
-enum SYNC_STATUS {
-    IDLE
-    SYNCING
-    ERROR
-    COMPLETED
-}
-
-enum API_STATUS {
-    ENABLED
-    DISABLED
-    REVOKED
-}
-
-enum NotificationEvent {
-    PAYMENT_SUCCESS
-    PAYMENT_FAILED
-    ORDER_CREATED
-    ORDER_DISPUTE
-    REFUND_PROCESSED
-}
-
-enum REMITTANCE_CYCLE {
-    DAILY
-    WEEKLY
-    ON_DELIVERY
-}
-
-enum WEBHOOK_TOPIC {
-    ORDERS_CREATE
-    ORDERS_UPDATE
-    ORDERS_CANCELLED
-    ORDERS_PAID
-    PRODUCTS_CREATE
-    PRODUCTS_UPDATE
-    PRODUCTS_DELETE
-    INVENTORY_UPDATE
-    CHECKOUTS_CREATE
-    CHECKOUTS_UPDATE
-    APP_UNINSTALLED
-    SHOP_UPDATE
-    CUSTOMERS_CREATE
-    CUSTOMERS_UPDATE
-}
-
-enum WEBHOOK_STATUS {
-    ACTIVE
-    INACTIVE
-    FAILED
-}
-
-enum SESSION_STATUS {
-    ACTIVE
-    COMPLETED
-    ABANDONED
-    EXPIRED
-}
-
-enum SYNC_TYPE {
-    PRODUCTS
-    ORDERS
-    INVENTORY
-    CUSTOMERS
-    WEBHOOKS
-    FULL_SYNC
-}
-
-enum SYNC_RESULT {
-    SUCCESS
-    PARTIAL
-    FAILED
-}
-
-enum SUBSCRIPTION_STATUS {
-    ACTIVE
-    TRIAL
-    CANCELLED
-    PAST_DUE
-    EXPIRED
-}
-
-enum PLAN_TYPE {
-    FREE
-    STARTER
-    PROFESSIONAL
-    ENTERPRISE
-    CUSTOM
-}
-
-// --- Store Models ---
-
-model MerchantStore {
-    id         String   @id
-    merchantId String
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-
-    // ===== STORE IDENTIFICATION ===== //
-    storeType    STORE_TYPE
-    storeName    String
-    storeUrl     String // myshop.myshopify.com
-    customDomain String? // www.myshop.com
-    storeSlug    String?    @unique // for RakshaSetu URLs (checkout.rakshasetu.com/store-slug)
-    externalId   String? // Shopify's store ID
-
-    // ===== CONNECTION & AUTH ===== //
-    connectionType STORE_CONNECTION_TYPE
-    status         STORE_STATUS          @default(ACTIVE)
-    isActive       Boolean               @default(true)
-
-    // OAuth credentials (encrypted)
-    apiKey      String?
-    apiSecret   String?
-    scopes      String?
-    accessToken String?
-
-    // ===== INSTALLATION TRACKING ===== //
-    installedAt       DateTime?
-    uninstalledAt     DateTime?
-    lastActiveAt      DateTime? // Last API call or webhook received
-    installationCount Int       @default(1) // Track reinstalls
-
-    // ===== SHOPIFY SPECIFIC ===== //
-    shopifyPlan        String? // "basic", "shopify", "advanced", "plus"
-    shopifyPlanName    String?
-    isTestStore        Boolean @default(false)
-    isPartnerTestStore Boolean @default(false)
-
-    // ===== STORE INFO ===== //
-    storeOwnerName   String?
-    storeOwnerEmail  String?
-    storePhone       String?
-    storeTimezone    String? @default("Asia/Kolkata")
-    storeCurrency    String  @default("INR")
-    storeCountryCode String? @default("IN")
-    storeLanguage    String  @default("en")
-    storeAddress     Json? // Full address object
-
-    // ===== SYNC STATUS ===== //
-    syncStatus            SYNC_STATUS @default(IDLE)
-    connectedAt           DateTime?
-    lastProductsSyncedAt  DateTime?
-    lastOrdersSyncedAt    DateTime?
-    lastStoreSyncedAt     DateTime?
-    lastWebhookReceivedAt DateTime?
-
-    // Sync settings
-    autoSyncProducts  Boolean @default(true)
-    autoSyncOrders    Boolean @default(true)
-    autoSyncInventory Boolean @default(false)
-    syncInterval      Int     @default(30) // Minutes
-
-    // Sync health
-    syncErrorCount  Int       @default(0)
-    lastSyncError   String?
-    lastSyncErrorAt DateTime?
-
-    // ===== CUSTOM CHECKOUT ===== //
-    customCheckoutEnabled Boolean @default(false)
-    checkoutUrl           String? // checkout.rakshasetu.com/store-slug
-    checkoutSettings      Json?
-    // {
-    //   "theme": "light",
-    //   "primaryColor": "#000000",
-    //   "logo": "https://...",
-    //   "showBranding": true,
-    //   "requiredFields": ["phone"],
-    //   "enableGuestCheckout": true,
-    //   "thankYouPageUrl": "https://...",
-    //   "enableCOD": true,
-    //   "codCharge": 50
-    // }
-
-    // Script injection
-    scriptTagId      String? // Shopify script tag ID
-    scriptInjectedAt DateTime?
-    scriptActive     Boolean   @default(false)
-    scriptVersion    String?   @default("1.0.0")
-
-    // ===== FEATURES & LIMITS ===== //
-    features Json? // Enabled features
-    // {
-    //   "bulkShipping": true,
-    //   "autoAssign": true,
-    //   "advancedAnalytics": false,
-    //   "whiteLabel": false
-    // }
-
-    // Quotas
-    orderQuotaLimit   Int? // Max orders per billing cycle
-    orderQuotaUsed    Int       @default(0)
-    orderQuotaResetAt DateTime?
-
-    // ===== CUSTOMIZATION ===== //
-    metadata        Json?
-    dashboardLayout Json?
-    themeColor      String?
-    customLabels    Json?
-
-    // ===== COMPLIANCE & LEGAL ===== //
-    gdprCompliant     Boolean   @default(false)
-    privacyPolicyUrl  String?
-    termsAcceptedAt   DateTime?
-    dataRetentionDays Int?      @default(90)
-
-    // ===== PERFORMANCE METRICS ===== //
-    totalOrders       Int   @default(0)
-    totalRevenue      Float @default(0)
-    averageOrderValue Float @default(0)
-    conversionRate    Float @default(0)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    products                    ShopProduct[]
-    ShopOrder                   ShopOrder[]
-    preferences                 MerchantStorePreferences?
-    MerchantStorePickupAddress  MerchantStorePickupAddress[]
-    MerchantStorePackageProfile MerchantStorePackageProfile[]
-    MerchantStoreCourierConfig  MerchantStoreCourierConfig[]
-    StorePlatformFee            StorePlatformFee[]
-    BulkLogisticsJob            BulkLogisticsJob[]
-    CourierPerformanceMetrics   CourierPerformanceMetrics[]
-    Manifest                    Manifest[]
-    StoreWebhook                StoreWebhook[]
-    StoreSession                StoreSession[]
-    StoreAnalytics              StoreAnalytics[]
-    StoreNotificationSettings   StoreNotificationSettings?
-    StoreSubscription           StoreSubscription?
-    StoreSyncLog                StoreSyncLog[]
-
-    @@index([merchantId])
-    @@index([storeUrl])
-    @@index([storeSlug])
-    @@index([externalId])
-    @@index([status, isActive])
-    @@index([lastActiveAt])
-}
-
-model StoreWebhook {
-    id      String        @id
-    storeId String
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-
-    topic     WEBHOOK_TOPIC
-    webhookId String? // Shopify's webhook ID
-    address   String // Our webhook URL
-    status    WEBHOOK_STATUS @default(ACTIVE)
-
-    lastFiredAt   DateTime?
-    lastSuccessAt DateTime?
-    failureCount  Int       @default(0)
-    lastFailureAt DateTime?
-    lastError     String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@unique([storeId, topic])
-    @@index([storeId, status])
-}
-
-model StoreSession {
-    id      String        @id
-    storeId String
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-
-    sessionToken String  @unique
-    cartId       String? // Shopify cart ID
-    checkoutId   String? // Shopify checkout ID
-    customerId   String? // Shopify customer ID
-
-    cartData     Json? // Cart contents snapshot
-    customerData Json? // Customer info
-    checkoutUrl  String? // RakshaSetu checkout URL
-
-    status SESSION_STATUS @default(ACTIVE)
-
-    // Analytics
-    ipAddress   String?
-    userAgent   String?
-    referrer    String?
-    utmSource   String?
-    utmMedium   String?
-    utmCampaign String?
-
-    // Timestamps
-    startedAt   DateTime  @default(now())
-    completedAt DateTime?
-    abandonedAt DateTime?
-    expiresAt   DateTime
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([storeId, status])
-    @@index([sessionToken])
-    @@index([expiresAt])
-    @@index([startedAt])
-}
-
-model StoreAnalytics {
-    id      String        @id
-    storeId String
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-    date    DateTime // Day bucket
-
-    // Orders
-    totalOrders       Int   @default(0)
-    completedOrders   Int   @default(0)
-    cancelledOrders   Int   @default(0)
-    totalRevenue      Float @default(0)
-    averageOrderValue Float @default(0)
-
-    // Checkout
-    checkoutSessions    Int   @default(0)
-    checkoutCompletions Int   @default(0)
-    checkoutAbandonment Int   @default(0)
-    conversionRate      Float @default(0)
-
-    // Products
-    totalProducts      Int @default(0)
-    productsOutOfStock Int @default(0)
-    productsSynced     Int @default(0)
-
-    // Logistics
-    ordersShipped   Int @default(0)
-    ordersDelivered Int @default(0)
-    ordersReturned  Int @default(0)
-
-    // Webhooks
-    webhooksReceived Int @default(0)
-    webhooksFailed   Int @default(0)
-
-    // Traffic
-    uniqueVisitors Int @default(0)
-    pageViews      Int @default(0)
-
-    calculatedAt DateTime @default(now())
-
-    @@unique([storeId, date])
-    @@index([storeId])
-    @@index([date])
-}
-
-model StoreNotificationSettings {
-    id      String        @id
-    storeId String        @unique
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-
-    // Email notifications
-    emailOnNewOrder  Boolean @default(true)
-    emailOnShipment  Boolean @default(true)
-    emailOnDelivery  Boolean @default(true)
-    emailOnReturn    Boolean @default(true)
-    emailOnLowStock  Boolean @default(false)
-    emailOnSyncError Boolean @default(true)
-
-    // Additional recipients
-    notificationEmails String[] // Extra emails to notify
-
-    // Webhook notifications
-    webhookUrl    String?
-    webhookEvents Json? // Which events to send
-
-    // Slack/Discord
-    slackWebhook   String?
-    discordWebhook String?
-
-    // SMS (future)
-    smsEnabled      Boolean  @default(false)
-    smsPhoneNumbers String[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-model StoreSubscription {
-    id      String        @id
-    storeId String        @unique
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-
-    planType        PLAN_TYPE @default(FREE)
-    billingInterval String    @default("MONTHLY") // MONTHLY, YEARLY
-    price           Float     @default(0)
-    currency        String    @default("INR")
-
-    // Limits
-    orderLimit    Int? // Max orders per billing cycle
-    featureAccess Json // Which features enabled
-
-    // Billing cycle
-    currentPeriodStart DateTime
-    currentPeriodEnd   DateTime
-    nextBillingDate    DateTime?
-
-    // Status
-    status             SUBSCRIPTION_STATUS @default(TRIAL)
-    trialEndsAt        DateTime?
-    cancelledAt        DateTime?
-    cancellationReason String?
-
-    // Payment
-    razorpaySubscriptionId String?
-    lastPaymentAt          DateTime?
-    lastPaymentAmount      Float?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([storeId])
-    @@index([status])
-}
-
-model StoreSyncLog {
-    id      String        @id
-    storeId String
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-
-    syncType SYNC_TYPE
-    result   SYNC_RESULT
-
-    // Stats
-    totalItems   Int
-    successItems Int
-    failedItems  Int
-
-    // Details
-    startedAt   DateTime  @default(now())
-    completedAt DateTime?
-    durationMs  Int?
-
-    errorMessage String?
-    errorDetails Json?
-
-    // Metadata
-    triggeredBy     String? // "AUTO", "MANUAL", "WEBHOOK"
-    triggeredByUser String? // User ID if manual
-
-    createdAt DateTime @default(now())
-
-    @@index([storeId, syncType])
-    @@index([startedAt])
-}
-
-model MerchantStorePreferences {
-    id      String        @id
-    storeId String        @unique
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-
-    // 🔄 Override Control
-    overrideMerchantPrefs Boolean @default(false)
-
-    // ===== PACKAGE SETTINGS (CHANGED) ===== //
-    useCustomPackageProfile Boolean         @default(false) // If true, use MerchantStorePackageProfile (isDefault)
-    customPackageProfileId  String? // OR link to specific PackageProfile
-    customPackageProfile    PackageProfile? @relation("StoreCustomPackage", fields: [customPackageProfileId], references: [id])
-
-    // ===== PICKUP ADDRESS SETTINGS ===== //
-    useCustomPickupAddress Boolean  @default(false)
-    customPickupAddressId  String?
-    customPickupAddress    Address? @relation("StoreCustomPickup", fields: [customPickupAddressId], references: [id])
-
-    // ===== QUOTE SETTINGS ===== //
-    sortQuotesBy       String?
-    quoteCacheDuration Int?
-
-    // ===== COD SETTINGS ===== //
-    codEnabled       Boolean?
-    codMinOrderValue Float?
-
-    // ===== OTHER SETTINGS ===== //
-    slaThresholdDays    Int?
-    returnPolicy        Json?
-    remittanceCycle     REMITTANCE_CYCLE @default(WEEKLY)
-    // 🛠️ Admin
-    allowManualOverride Boolean          @default(true)
-    updatedBy           String?
-    updatedAt           DateTime         @updatedAt
-    createdAt           DateTime         @default(now())
-}
-
-model MerchantStorePickupAddress {
-    id        String  @id
-    storeId   String
-    addressId String
-    isDefault Boolean @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    store   MerchantStore @relation(fields: [storeId], references: [id])
-    address Address       @relation(fields: [addressId], references: [id])
-}
-
-model MerchantStorePackageProfile {
-    id               String  @id
-    storeId          String
-    packageProfileId String
-    isDefault        Boolean @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    store          MerchantStore  @relation(fields: [storeId], references: [id])
-    packageProfile PackageProfile @relation(fields: [packageProfileId], references: [id])
-
-    @@unique([storeId, packageProfileId]) // Store can't link same profile twice
-}
-
-// --- Integration Models ---
-
-model MerchantApiKey {
-    id         String   @id
-    merchantId String
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-
-    publicKey  String        @unique
-    secretHash String
-    scopes     String[]
-    mode       MERCHANT_MODE
-    status     API_STATUS
-
-    createdAt  DateTime  @default(now())
-    lastUsedAt DateTime?
-    revokedAt  DateTime?
-}
-
-model MerchantWebhook {
-    id         String   @id
-    merchantId String
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-
-    url    String
-    events NotificationEvent[]
-
-    createdAt DateTime @default(now())
-}
-
-model MerchantPreferences {
-    id         String   @id
-    merchantId String   @unique
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-
-    // 📦 Default Package Profile (CHANGED)
-    defaultPackageProfileId String?
-    defaultPackageProfile   PackageProfile? @relation("MerchantDefaultPackage", fields: [defaultPackageProfileId], references: [id])
-
-    // 📍 Default Pickup Address
-    defaultPickupAddressId String?
-    defaultPickupAddress   Address? @relation("MerchantDefaultPickup", fields: [defaultPickupAddressId], references: [id])
-
-    // 🚚 Quote Settings
-    sortQuotesBy       String @default("PRICE")
-    quoteCacheDuration Int    @default(15)
-
-    // 💰 COD Settings
-    codEnabled       Boolean @default(true)
-    codMinOrderValue Float?  @default(0)
-
-    // 📦 Return Policy
-    returnPolicy Json?
-
-    // 📈 SLA & Remittance
-    slaThresholdDays Int?
-    remittanceCycle  REMITTANCE_CYCLE
-
-    // 🛠️ Admin
-    allowManualOverride Boolean  @default(true)
-    updatedBy           String?
-    updatedAt           DateTime @updatedAt
-    createdAt           DateTime @default(now())
-}
-
-// --- Shopify Integration Models ---
-
-model ShopifyState {
-    id         String   @id
-    merchantId String
-    shopUrl    String
-    state      String   @unique
-    expiresAt  DateTime
-
-    merchant  Merchant @relation(fields: [merchantId], references: [id])
-    createdAt DateTime @default(now())
-}
-
-model ShopifyTempSession {
-    id          String    @id @default(cuid())
-    shop        String    @unique
-    accessToken String
-    scope       String?
-    expiresAt   DateTime?
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
-}
-
-model ShopifyCheckoutSession {
-    id              String   @id @default(cuid())
-    storeDomain     String
-    ownerEmail      String
-    cartPayload     Json
-    customerPayload Json
-    createdAt       DateTime @default(now())
-    expiresAt       DateTime
-
-    @@index([storeDomain])
-    @@index([ownerEmail])
-    @@index([expiresAt])
-}
-
-// ============================================
-// SECTION 5: SHOPPING CART & PRODUCTS
-// ============================================
-
-// --- Enums for Cart & Products ---
-
-enum CartStatus {
-    ACTIVE
-    CHECKED_OUT
-    ABANDONED
-    EXPIRED
-}
-
-// --- Product Models ---
-model ShopProduct {
-    id          String  @id
-    merchantId  String
-    storeId     String
-    externalId  String  @unique
-    source      String
-    title       String
-    description String?
-    imageUrl    String?
-    price       Float
-    currency    String  @default("INR")
-
-    // ===== ADD THESE FIELDS ===== //
-    weight Float? // grams
-    length Float? // cm
-    width  Float? // cm
-    height Float? // cm
-
-    // ===== EXISTING FIELDS (keep as is) ===== //
-    inventoryQty  Int?
-    sku           String?
-    barcode       String?
-    isAvailable   Boolean   @default(true)
-    lastFetchedAt DateTime?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
-
-    // Relations
-    merchant            Merchant             @relation(fields: [merchantId], references: [id])
-    store               MerchantStore        @relation(fields: [storeId], references: [id])
-    cartItems           ShopCartItem[]
-    ShopProductVariants ShopProductVariant[]
-    ShopOrderItem       ShopOrderItem[]
-}
-
-model ShopProductVariant {
-    id           String      @id
-    productId    String
-    product      ShopProduct @relation(fields: [productId], references: [id])
-    externalId   String      @unique
-    title        String
-    price        Float
-    sku          String?
-    barcode      String?
-    inventoryQty Int?
-    isAvailable  Boolean     @default(true)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    ShopOrderItem ShopOrderItem[]
-    ShopCartItem  ShopCartItem[]
-}
-
-// --- Cart Models ---
-
-model ShopCart {
-    id     String     @id @default(cuid())
-    status CartStatus @default(ACTIVE)
-
-    userId String? @unique
-    user   User?   @relation(fields: [userId], references: [id])
-
-    guestSessionTokenId String?            @unique
-    guestSessionToken   GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id])
-
-    expiresAt   DateTime?
-    totalItems  Int       @default(0)
-    totalAmount Float     @default(0)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    items ShopCartItem[]
-}
-
-model ShopCartItem {
-    id     String   @id
-    cartId String
-    cart   ShopCart @relation(fields: [cartId], references: [id], onDelete: Cascade)
-
-    shopProductId        String
-    shopProduct          ShopProduct        @relation(fields: [shopProductId], references: [id], onDelete: Cascade)
-    shopProductVariantId String
-    variant              ShopProductVariant @relation(fields: [shopProductVariantId], references: [id])
-
-    quantity      Int
-    priceSnapshot Float
-    metadata      Json?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-// --- Guest Session Model ---
-
-model GuestSessionToken {
-    id      String @id @default(cuid())
-    token   String @unique
-    guestId String
-
-    guestInfo Json?
-    expiresAt DateTime?
-    revoked   Boolean   @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    shopCart        ShopCart?
-    ShopPayment     ShopPayment[]
-    ShopOrder       ShopOrder[]
-    ShopTransaction ShopTransaction[]
-    ShopOrderGroup  ShopOrderGroup[]
-}
-
-// ============================================
-// SECTION 6: E-COMMERCE ORDERS
-// ============================================
-
-// --- Enums for E-commerce Orders ---
-
+// E-commerce Orders
 enum SHOP_ORDER_SOURCE {
     SHOPIFY
     RAKSHASETU
@@ -1499,33 +225,11 @@ enum ORDER_STATUS {
     REFUND_COMPLETED
 }
 
-enum ESCROW_STATUS {
-    INITIATED
-    HELD
-    RELEASE_REQUESTED
-    RELEASED
-    DISPUTE_OPEN
-    DISPUTE_RESOLVED
-    REFUNDED
-}
-
-enum SHOP_PLATFORM_FEE_PAYER {
-    MERCHANT
-    CUSTOMER
-}
-
 enum FULFILLMENT_STATUS {
     UNFULFILLED
     PARTIALLY_FULFILLED
     FULFILLED
     CANCELLED
-}
-
-enum PAYMENT_ORDER_SOURCE {
-    CHECKOUT
-    API
-    MARKETPLACE
-    SHOP
 }
 
 enum ORDER_GROUP_SOURCE {
@@ -1549,219 +253,60 @@ enum ORDER_GROUP_TYPE {
     BULK_IMPORT
 }
 
-// --- Order Group Models ---
-
-model ShopOrderGroup {
-    id      String  @id
-    buyerId String?
-    buyer   User?   @relation(fields: [buyerId], references: [id])
-
-    guestSessionTokenId String?
-    guestSessionToken   GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id])
-
-    createdAt  DateTime           @default(now())
-    externalId String?            @unique
-    source     ORDER_GROUP_SOURCE @default(RAKSHASETU)
-
-    status          ORDER_GROUP_STATUS @default(PENDING)
-    totalAmount     Float              @default(0)
-    currency        String             @default("INR")
-    groupType       ORDER_GROUP_TYPE   @default(MARKETPLACE)
-    groupNotes      String?
-    deliverySummary Json?
-
-    // Relations
-    orders      ShopOrder[]
-    ShopPayment ShopPayment[]
-
-    @@index([buyerId])
-    @@index([guestSessionTokenId])
-    @@index([createdAt])
+// Payment & Transaction
+enum PAYMENT_METHOD {
+    PREPAID
+    POD
+    COD
 }
 
-// --- Order Models ---
-
-model ShopOrder {
-    id         String            @id
-    externalId String?           @unique
-    source     SHOP_ORDER_SOURCE
-    merchantId String
-    storeId    String
-
-    name        String?
-    createdAt   DateTime  @default(now())
-    processedAt DateTime?
-    syncedAt    DateTime?
-
-    currency       String @default("INR")
-    totalPrice     Float
-    subtotalPrice  Float?
-    totalTax       Float?
-    totalDiscounts Float?
-
-    financialStatus   PAYMENT_STATUS?
-    fulfillmentStatus FULFILLMENT_STATUS?
-    sourceName        String?
-
-    paymentGateway String?
-    discountCodes  Json?
-    shippingLines  Json?
-
-    note String?
-    tags String?
-
-    customerId    String?
-    customerName  String?
-    customerEmail String?
-    customerPhone String?
-
-    shippingAddress Json?
-    billingAddress  Json?
-
-    packageDetails Json?
-
-    guestSessionTokenId String?
-    guestSessionToken   GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id])
-
-    status ORDER_STATUS @default(CREATED)
-
-    paymentType    PAYMENT_METHOD?
-    shippingCharge Float?
-    codCharge      Float?
-    platformFee    Float?
-
-    isEscrowed   Boolean        @default(false)
-    escrowStatus ESCROW_STATUS?
-    escrowMeta   Json?
-
-    shopOrderGroupId String?
-
-    // Relations
-    merchant       Merchant           @relation(fields: [merchantId], references: [id])
-    store          MerchantStore      @relation(fields: [storeId], references: [id])
-    ShopOrderGroup ShopOrderGroup?    @relation(fields: [shopOrderGroupId], references: [id])
-    lineItems      ShopOrderItem[]
-    transaction    ShopTransaction?
-    dispute        ShopDisputeTicket?
-    refunds        ShopRefund[]
-    ReturnRequest  ReturnRequest[]
-    Shipping       Shipping[]
-    Logistics      Logistics[]
+enum PAYMENT_STATUS {
+    INITIATED
+    AUTHORIZED
+    CAPTURED
+    FAILED
+    REFUNDED
+    PARTIALLY_REFUNDED
+    COD_PENDING
+    COD_COLLECTED
+    COD_FAILED
 }
 
-model ShopOrderItem {
-    id        String  @id
-    orderId   String
-    productId String
-    variantId String?
-
-    externalId        String
-    title             String
-    quantity          Int
-    price             Float
-    sku               String?
-    fulfillmentStatus String?
-
-    isReturnable     Boolean @default(true)
-    returnWindowDays Int?
-
-    // Relations
-    order         ShopOrder           @relation(fields: [orderId], references: [id])
-    product       ShopProduct         @relation(fields: [productId], references: [id])
-    variant       ShopProductVariant? @relation(fields: [variantId], references: [id])
-    ReturnRequest ReturnRequest[]
+enum PAYMENT_ORDER_SOURCE {
+    CHECKOUT
+    API
+    MARKETPLACE
+    SHOP
 }
 
-// --- Transaction Models ---
-
-model ShopTransaction {
-    id      String @id
-    orderId String @unique
-
-    buyerPaid       Float
-    chargesDeducted Float
-    sellerReceives  Float
-
-    platformFee      Float?
-    platformFeePayer SHOP_PLATFORM_FEE_PAYER @default(MERCHANT)
-    shippingCharge   Float?
-    codCharge        Float?
-
-    status                   TRANSACTION_STATUS @default(INITIATED)
-    releaseRequested         Boolean            @default(false)
-    releaseRequestedAt       DateTime?
-    releaseRequestedByType   USER_ROLE?
-    releaseRequestedById     String?
-    releaseRequestedMeta     Json?
-    releaseApprovedByAdmin   Boolean            @default(false)
-    releaseApprovedAt        DateTime?
-    releaseApprovedByAdminId String?
-    releaseNotes             String?
-
-    releaseRequestedByGuestTokenId String?
-    releaseRequestedByGuestToken   GuestSessionToken? @relation(fields: [releaseRequestedByGuestTokenId], references: [id])
-
-    codRemittanceDueAt DateTime?
-    codRemittedAt      DateTime?
-    codRemittanceNotes String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Relations
-    order   ShopOrder    @relation(fields: [orderId], references: [id])
-    refunds ShopRefund[]
+enum TRANSACTION_STATUS {
+    INITIATED
+    ON_HOLD
+    AWAITING_RELEASE
+    RELEASED_TO_SELLER
+    REFUND_PENDING
+    REFUNDED_TO_BUYER
+    DISPUTED
+    CANCELLED
+    FAILED
 }
 
-// --- Payment Models ---
-
-model ShopPayment {
-    id String @id
-
-    buyerId    String?
-    merchantId String?
-
-    amount   Float
-    currency String @default("INR")
-
-    method PAYMENT_METHOD
-    status PAYMENT_STATUS       @default(INITIATED)
-    source PAYMENT_ORDER_SOURCE @default(SHOP)
-
-    razorpayOrderId   String?
-    razorpayPaymentId String?
-    providerTxnId     String?
-
-    errorCode    String?
-    errorMessage String?
-    metadata     Json?
-
-    paidAt  DateTime?
-    attempt Int       @default(1)
-
-    codCollected   Boolean   @default(false)
-    codCollectedAt DateTime?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    guestSessionTokenId String?
-    guestSessionToken   GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id])
-
-    orderGroupId   String         @unique
-    shopOrderGroup ShopOrderGroup @relation(fields: [orderGroupId], references: [id])
-
-    // Relations
-    buyer    User?     @relation(fields: [buyerId], references: [id])
-    merchant Merchant? @relation(fields: [merchantId], references: [id])
+enum ESCROW_STATUS {
+    INITIATED
+    HELD
+    RELEASE_REQUESTED
+    RELEASED
+    DISPUTE_OPEN
+    DISPUTE_RESOLVED
+    REFUNDED
 }
 
-// ============================================
-// SECTION 7: LOGISTICS & SHIPPING
-// ============================================
+enum SHOP_PLATFORM_FEE_PAYER {
+    MERCHANT
+    CUSTOMER
+}
 
-// --- Enums for Logistics ---
-
+// Logistics & Shipping
 enum AUTH_TYPE {
     API_KEY
     OAUTH
@@ -1820,13 +365,13 @@ enum LOGISTICS_STATUS {
 }
 
 enum DOCUMENT_TYPE {
-    LABEL // Shipping label with barcode
-    INVOICE // Tax invoice
-    PICKLIST // Warehouse picking list
-    MANIFEST // Bulk handover manifest
-    POD // Proof of Delivery (signed by customer)
-    PACKING_SLIP // Packing slip (goes inside package)
-    RETURN_LABEL // Return label (for returns)
+    LABEL
+    INVOICE
+    PICKLIST
+    MANIFEST
+    POD
+    PACKING_SLIP
+    RETURN_LABEL
 }
 
 enum BULK_JOB_STATUS {
@@ -1845,73 +390,1238 @@ enum MANIFEST_STATUS {
 }
 
 enum NDR_STATUS {
-    REPORTED // NDR reported by courier
-    CUSTOMER_CONTACTED // Merchant contacted customer
-    REATTEMPT_SCHEDULED // Reattempt scheduled
-    RESOLVED // Customer received delivery
-    RTO_INITIATED // Converting to RTO
+    REPORTED
+    CUSTOMER_CONTACTED
+    REATTEMPT_SCHEDULED
+    RESOLVED
+    RTO_INITIATED
 }
 
-// --- Courier Partner Models ---
+// Returns & Disputes
+enum RETURN_REASON {
+    DAMAGED
+    WRONG_ITEM
+    NO_LONGER_NEEDED
+    OTHER
+}
 
-model Address {
-    id         String @id
-    merchantId String
+enum RETURN_STATUS {
+    REQUESTED
+    APPROVED
+    PICKED_UP
+    REFUNDED
+    REJECTED
+}
 
-    label     String?
-    name      String?
-    phone     String?
-    email     String?
-    line1     String
-    line2     String?
-    landmark  String?
-    city      String
-    state     String
-    pincode   String
-    country   String  @default("India")
-    latitude  Float?
-    longitude Float?
-    metadata  Json?
+enum DISPUTE_ROLE {
+    BUYER
+    SELLER
+}
+
+enum DISPUTE_STATUS {
+    PENDING
+    IN_PROGRESS
+    RESOLVED
+    REJECTED
+}
+
+enum REFUND_METHOD {
+    RAZORPAY
+    RAZORPAYX
+    UPI
+    BANK_TRANSFER
+}
+
+enum REFUND_STATUS {
+    NONE
+    PENDING
+    APPROVED
+    REJECTED
+    PROCESSED
+}
+
+enum REFUND_AMOUNT_STATUS {
+    NONE
+    PARTIALLY_REFUNDED
+    FULLY_REFUNDED
+}
+
+// Communication
+enum CONVERSATION_TYPE {
+    CUSTOM
+    CONNECTION
+    DISPUTE
+}
+
+enum CONVERSATION_STAGE {
+    LISTING
+    ORDER
+    DISPUTE
+}
+
+enum CONVERSATION_STATUS {
+    ACTIVE
+    ARCHIVED
+    CLOSED
+}
+
+enum PARTICIPANT_TYPE {
+    BUYER
+    SELLER
+    MERCHANT
+    ADMIN
+    GUEST
+}
+
+// Cart & Products
+enum CartStatus {
+    ACTIVE
+    CHECKED_OUT
+    ABANDONED
+    EXPIRED
+}
+
+// Webhooks & Integration
+enum WEBHOOK_TOPIC {
+    ORDERS_CREATE
+    ORDERS_UPDATE
+    ORDERS_CANCELLED
+    ORDERS_PAID
+    PRODUCTS_CREATE
+    PRODUCTS_UPDATE
+    PRODUCTS_DELETE
+    INVENTORY_UPDATE
+    CHECKOUTS_CREATE
+    CHECKOUTS_UPDATE
+    APP_UNINSTALLED
+    SHOP_UPDATE
+    CUSTOMERS_CREATE
+    CUSTOMERS_UPDATE
+}
+
+// Notification System
+enum NOTIFICATION_TYPE {
+    ORDER_CREATED
+    ORDER_UPDATED
+    ORDER_CANCELLED
+    ORDER_DELIVERED
+    PAYMENT_RECEIVED
+    PAYMENT_FAILED
+    SHIPMENT_CREATED
+    SHIPMENT_PICKED_UP
+    SHIPMENT_DELIVERED
+    DISPUTE_RAISED
+    DISPUTE_RESOLVED
+    MERCHANT_APPROVED
+    MERCHANT_REJECTED
+    RETURN_REQUESTED
+    RETURN_APPROVED
+    REFUND_PROCESSED
+    HIGH_VALUE_ORDER
+    MERCHANT_PENDING
+    SYSTEM_ALERT
+}
+
+enum NOTIFICATION_EVENT {
+    ORDER
+    PAYMENT
+    SHIPMENT
+    DISPUTE
+    MERCHANT
+    RETURN
+    REFUND
+    SYSTEM
+}
+
+enum NOTIFICATION_PRIORITY {
+    LOW
+    NORMAL
+    HIGH
+    URGENT
+}
+
+// Financial System
+enum FEE_CONFIG_TYPE {
+    PLATFORM
+    COD
+    LOGISTICS
+    ESCROW
+    PAYMENT_GATEWAY
+}
+
+enum APPLICABLE_FOR {
+    ALL
+    MERCHANT
+    CUSTOMER
+    STORE
+}
+
+// File System
+enum FILE_TYPE {
+    INVOICE
+    LABEL
+    DOCUMENT
+    IMAGE
+    PDF
+    EXCEL
+    CSV
+}
+
+enum RESOURCE_TYPE {
+    ORDER
+    SHIPMENT
+    PRODUCT
+    MERCHANT
+    USER
+    DISPUTE
+    PAYMENT
+}
+
+// Email System
+enum EMAIL_CATEGORY {
+    AUTH
+    ORDER
+    SHIPMENT
+    PAYMENT
+    DISPUTE
+    MERCHANT
+    SYSTEM
+}
+
+// Courier System
+enum COURIER_STATUS {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+}
+
+enum WEBHOOK_STATUS {
+    ACTIVE
+    INACTIVE
+    FAILED
+}
+
+enum NotificationEvent {
+    PAYMENT_SUCCESS
+    PAYMENT_FAILED
+    ORDER_CREATED
+    ORDER_DISPUTE
+    REFUND_PROCESSED
+}
+
+// Sync & Session
+enum SYNC_STATUS {
+    IDLE
+    SYNCING
+    ERROR
+    COMPLETED
+}
+
+enum SESSION_STATUS {
+    ACTIVE
+    COMPLETED
+    ABANDONED
+    EXPIRED
+}
+
+enum SYNC_TYPE {
+    PRODUCTS
+    ORDERS
+    INVENTORY
+    CUSTOMERS
+    WEBHOOKS
+    FULL_SYNC
+}
+
+enum SYNC_RESULT {
+    SUCCESS
+    PARTIAL
+    FAILED
+}
+
+// Platform Fees & Settings
+enum PLATFORM_FEE_TYPE {
+    PERCENTAGE
+    FIXED
+}
+
+enum FEE_CATEGORY {
+    PLATFORM
+    LOGISTICS
+    COD
+    PACKAGING
+    INSURANCE
+    TRANSACTION
+}
+
+enum FEE_SOURCE_LEVEL {
+    PLATFORM
+    MERCHANT
+    STORE
+}
+
+enum FEE_SOURCE {
+    GLOBAL
+    MERCHANT_SPECIFIC
+    SHOP
+}
+
+enum FEE_TYPE {
+    PERCENTAGE
+    FIXED
+}
+
+enum REMITTANCE_CYCLE {
+    DAILY
+    WEEKLY
+    ON_DELIVERY
+}
+
+// ============================================
+// SECTION 1: USER & AUTHENTICATION MANAGEMENT
+// ============================================
+
+model User {
+    id                  String                   @id
+    firstName           String
+    lastName            String
+    userName            String                   @unique
+    email               String                   @unique
+    business            String
+    type                USER_TYPE                @default(BUYER)
+    mobile              String
+    password            String
+    image               String?
+    status              USER_STATUS              @default(ACTIVE)
+    address             Json?
+    emailVerified       Boolean                  @default(false)
+    smsVerified         Boolean                  @default(false)
+    kycVerified         USER_VERIFICATION_STATUS @default(DEFAULT)
+    bankVerified        USER_VERIFICATION_STATUS @default(DEFAULT)
+    gstVerified         USER_VERIFICATION_STATUS @default(DEFAULT)
+    verificationCode    String?
+    verificationSentAt  DateTime?
+    twoFactorVerified   Boolean                  @default(false)
+    twoFactorSecret     String?
+    twoFactorQrCode     String?
+    twoFactorStatus     Boolean                  @default(false)
+    deviceId            String?
+    emailVerifiedAt     DateTime?
+    rememberToken       String?
+    refreshToken        String?
+    refreshTokenExpires DateTime?
+    hasSoldBefore       Boolean                  @default(false)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     // Relations
-    merchant                Merchant                     @relation(fields: [merchantId], references: [id])
-    merchantPickupAddresses MerchantStorePickupAddress[]
-    merchantDefaultPrefs    MerchantPreferences[]        @relation("MerchantDefaultPickup")
-    storeCustomPickupPrefs  MerchantStorePreferences[]   @relation("StoreCustomPickup")
-    manifestPickups         Manifest[]
+    UserKycDetails   UserKycDetails?
+    SellerAccount    SellerAccount?
+    notifications    Notification[]
+    listings         Listing[]
+    userConnects     Connects[]       @relation("user")
+    sellerConnects   Connects[]       @relation("seller")
+    ordersBought     Order[]          @relation("order_buyer")
+    ordersSold       Order[]          @relation("order_seller")
+    PaymentsAsBuyer  Payment[]        @relation("PaymentBuyer")
+    PaymentsAsSeller Payment[]        @relation("PaymentSeller")
+    DisputeTicket    DisputeTicket[]
+    Logistics        Logistics[]
+    ShopCart         ShopCart[]
+    ShopOrderGroup   ShopOrderGroup[]
+    ShopPayment      ShopPayment[]
+    files            File[]
+
+    @@map("users")
+}
+
+model UserKycDetails {
+    id     String  @id
+    userId String? @unique
+
+    // PAN Details
+    panNumber             String?
+    dateOfBirth           String?
+    fullNameAsPerPan      String?
+    panVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
+    panRejectionReason    String?
+
+    // Aadhaar Details
+    aadharNumber             String?
+    fullNameAsPerAadhar      String?
+    aadhaarReferenceId       String?
+    aadharVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
+    aadharRejectionReason    String?
+
+    // GST Details
+    gstNumber             String?
+    gstStatus             String?
+    constitution          String?
+    registrationDate      String?
+    businessName          String?
+    businessAddress       Json?
+    tradeName             String?
+    gstVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
+    gstRejectionReason    String?
+
+    // Bank Details
+    bankAccountNumber      String?
+    bankIfscCode           String?
+    fullNameAsPerBank      String?
+    bankVerificationStatus USER_VERIFICATION_STATUS @default(DEFAULT)
+    bankRejectionReason    String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("user_kyc_details")
+}
+
+model Admin {
+    id        String       @id
+    firstName String
+    lastName  String
+    userName  String       @unique
+    email     String       @unique
+    password  String
+    image     String?
+    status    ADMIN_STATUS @default(ACTIVE)
+
+    emailVerified       Boolean   @default(false)
+    emailVerifiedAt     DateTime?
+    verificationCode    String?
+    verificationSentAt  DateTime?
+    refreshToken        String?
+    refreshTokenExpires DateTime?
+
+    roleId String
+    role   AdminRole @relation(fields: [roleId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    DisputeTickets    DisputeTicket[]     @relation("AdminDisputes")
+    ShopDisputeTicket ShopDisputeTicket[]
+    AdminActivityLog  AdminActivityLog[]
+    AdminNotification AdminNotification[]
+
+    @@map("admins")
+}
+
+model AdminRole {
+    id          String  @id
+    name        String  @unique
+    description String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    admins      Admin[]
+    permissions AdminPermission[] @relation("RolePermissions")
+
+    @@map("admin_roles")
+}
+
+model AdminPermission {
+    id    String  @id
+    name  String  @unique
+    label String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    roles AdminRole[] @relation("RolePermissions")
+
+    @@map("admin_permissions")
+}
+
+// ============================================
+// SECTION 2: MERCHANT & STORE MANAGEMENT
+// ============================================
+
+model Merchant {
+    id           String @id
+    businessName String
+    email        String @unique
+    phone        String
+
+    // Dashboard Authentication
+    password            String?
+    emailVerified       Boolean   @default(false)
+    emailVerifiedAt     DateTime?
+    refreshToken        String?
+    refreshTokenExpires DateTime?
+
+    // Status & Mode
+    status      String    @default("ACTIVE")
+    isActive    Boolean   @default(true)
+    mode        String    @default("TEST")
+    image       String?
+    lastLoginAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Core Relations
+    profile     MerchantProfile?
+    account     MerchantAccount?
+    logistics   MerchantLogistics?
+    preferences MerchantPreferences?
+
+    // Infrastructure
+    stores          MerchantStore[]
+    addresses       Address[]
+    packageProfiles PackageProfile[]
+    courierConfigs  MerchantCourierConfig[]
+
+    // Financial
+    deductions   MerchantDeduction[]
+    platformFees MerchantPlatformFee[]
+
+    // Operations
+    products           ShopProduct[]
+    orders             ShopOrder[]
+    payments           ShopPayment[]
+    bulkJobs           BulkLogisticsJob[]
+    manifests          Manifest[]
+    performanceMetrics CourierPerformanceMetrics[]
+
+    // Integration
+    apiKeys       MerchantApiKey[]
+    webhooks      MerchantWebhook[]
+    shopifyStates ShopifyState[]
+
+    // New Relations
+    files                 File[]
+    notificationsList     Notification[]         @relation("MerchantNotifications")
+    merchantNotifications MerchantNotification[] @relation("MerchantNotificationsList")
+
+    @@index([email])
+    @@index([status])
+    @@map("merchants")
+}
+
+model MerchantProfile {
+    id         String   @id
+    merchantId String   @unique
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    // Business Details
+    businessType String?
+    gstNumber    String?
+    panNumber    String?
+    aadharNumber String?
+
+    // Bank Details
+    bankAccount   String?
+    ifscCode      String?
+    accountHolder String?
+
+    // Verification Status
+    kycStatus        USER_VERIFICATION_STATUS @default(PENDING)
+    gstVerified      USER_VERIFICATION_STATUS @default(PENDING)
+    panVerified      USER_VERIFICATION_STATUS @default(PENDING)
+    aadharVerified   USER_VERIFICATION_STATUS @default(PENDING)
+    bankVerified     USER_VERIFICATION_STATUS @default(PENDING)
+    onboardingStatus ONBOARDING_STATUS        @default(PENDING)
+
+    // Documents
+    kycDocuments Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("merchant_profiles")
+}
+
+model MerchantPreferences {
+    id         String   @id
+    merchantId String   @unique
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    // Default Package Profile
+    defaultPackageProfileId String?
+    defaultPackageProfile   PackageProfile? @relation("MerchantDefaultPackage", fields: [defaultPackageProfileId], references: [id])
+
+    // Default Pickup Address
+    defaultPickupAddressId String?
+    defaultPickupAddress   Address? @relation("MerchantDefaultPickup", fields: [defaultPickupAddressId], references: [id])
+
+    // Quote Settings
+    sortQuotesBy       String @default("PRICE")
+    quoteCacheDuration Int    @default(15)
+
+    // COD Settings
+    codEnabled       Boolean @default(true)
+    codMinOrderValue Float?  @default(0)
+
+    // Policies
+    returnPolicy     Json?
+    slaThresholdDays Int?
+    remittanceCycle  REMITTANCE_CYCLE
+
+    // Admin Controls
+    allowManualOverride Boolean  @default(true)
+    updatedBy           String?
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+
+    @@map("merchant_preferences")
+}
+
+model MerchantStore {
+    id         String   @id
+    merchantId String
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    // Store Identity
+    storeType    String
+    storeName    String
+    storeUrl     String
+    customDomain String?
+    storeSlug    String? @unique
+    externalId   String?
+
+    // Connection & Auth
+    connectionType String
+    status         STORE_STATUS @default(ACTIVE)
+    isActive       Boolean      @default(true)
+
+    // OAuth Credentials
+    apiKey      String?
+    apiSecret   String?
+    scopes      String?
+    accessToken String?
+
+    // Installation Tracking
+    installedAt       DateTime?
+    uninstalledAt     DateTime?
+    lastActiveAt      DateTime  @updatedAt
+    installationCount Int       @default(1)
+
+    // Store Info
+    storeInfo Json?
+
+    // Sync Status
+    syncStatus            SYNC_STATUS @default(IDLE)
+    connectedAt           DateTime?
+    lastProductsSyncedAt  DateTime?
+    lastOrdersSyncedAt    DateTime?
+    lastStoreSyncedAt     DateTime?
+    lastWebhookReceivedAt DateTime?
+
+    autoSyncProducts  Boolean @default(true)
+    autoSyncOrders    Boolean @default(true)
+    autoSyncInventory Boolean @default(false)
+    syncInterval      Int     @default(30)
+
+    syncErrorCount  Int       @default(0)
+    lastSyncError   String?
+    lastSyncErrorAt DateTime?
+
+    // Marketplace
+    showOnMarketplace Boolean @default(false)
+    marketplaceListed Boolean @default(false)
+
+    // Onboarding
+    onboardingComplete Boolean @default(false)
+    extensionInstalled Boolean @default(false)
+
+    // Features & Limits
+    features          Json?
+    orderQuotaLimit   Int?
+    orderQuotaUsed    Int       @default(0)
+    orderQuotaResetAt DateTime?
+
+    // Performance
+    totalOrders       Int   @default(0)
+    totalRevenue      Float @default(0)
+    averageOrderValue Float @default(0)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    config        StoreConfig?
+    logistics     StoreLogistics?
+    subscription  StoreSubscription?
+    notifications StoreNotificationSettings?
+    preferences   MerchantStorePreferences?
+
+    products           ShopProduct[]
+    orders             ShopOrder[]
+    webhooks           StoreWebhook[]
+    sessions           StoreSession[]
+    analytics          StoreAnalytics[]
+    syncLogs           StoreSyncLog[]
+    platformFees       StorePlatformFee[]
+    bulkJobs           BulkLogisticsJob[]
+    manifests          Manifest[]
+    performanceMetrics CourierPerformanceMetrics[]
+    pickupAddresses    MerchantStorePickupAddress[]
+    packageProfiles    MerchantStorePackageProfile[]
+    courierConfigs     MerchantStoreCourierConfig[]
+
+    @@unique([merchantId, storeUrl])
+    @@index([merchantId])
+    @@index([storeUrl])
+    @@index([storeSlug])
+    @@index([status])
+    @@map("merchant_stores")
+}
+
+model MerchantStorePreferences {
+    id      String        @id
+    storeId String        @unique
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    // Override Control
+    overrideMerchantPrefs Boolean @default(false)
+
+    // Package Settings
+    useCustomPackageProfile Boolean         @default(false)
+    customPackageProfileId  String?
+    customPackageProfile    PackageProfile? @relation("StoreCustomPackage", fields: [customPackageProfileId], references: [id])
+
+    // Pickup Address Settings
+    useCustomPickupAddress Boolean  @default(false)
+    customPickupAddressId  String?
+    customPickupAddress    Address? @relation("StoreCustomPickup", fields: [customPickupAddressId], references: [id])
+
+    // Quote Settings
+    sortQuotesBy       String?
+    quoteCacheDuration Int?
+
+    // COD Settings
+    codEnabled       Boolean?
+    codMinOrderValue Float?
+
+    // Other Settings
+    slaThresholdDays Int?
+    returnPolicy     Json?
+    remittanceCycle  REMITTANCE_CYCLE @default(WEEKLY)
+
+    // Admin Controls
+    allowManualOverride Boolean  @default(true)
+    updatedBy           String?
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+
+    @@map("merchant_store_preferences")
+}
+
+model StoreConfig {
+    id      String        @id
+    storeId String        @unique
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    // Pricing Overrides
+    codFee     Float?
+    podFee     Float?
+    prepaidFee Float?
+    partialFee Float?
+
+    // Notifications
+    notifyOnNewOrder Boolean?
+    notifyOnShipment Boolean?
+
+    // UI Customization
+    customLogo   String?
+    primaryColor String?
+
+    // Extra Settings
+    extraSettings Json? @default("{}")
+
+    updatedAt DateTime @updatedAt
+
+    @@map("store_configs")
+}
+
+model StoreLogistics {
+    id      String        @id
+    storeId String        @unique
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    // Override Control
+    useCustomSettings Boolean @default(false)
+
+    // Address Overrides
+    customPickupAddressId String?
+    customPickupAddress   Address? @relation("StorePickupLogistics", fields: [customPickupAddressId], references: [id])
+
+    customReturnAddressId String?
+    customReturnAddress   Address? @relation("StoreReturnLogistics", fields: [customReturnAddressId], references: [id])
+
+    // Package Override
+    customPackageProfileId String?
+    customPackageProfile   PackageProfile? @relation("StorePackageLogistics", fields: [customPackageProfileId], references: [id])
+
+    // Courier Override
+    customDefaultCourier String?
+
+    // COD Override
+    customCodEnabled       Boolean?
+    customCodMinOrderValue Float?
+
+    // Return Policy Override
+    customReturnWindowDays     Int?
+    customReturnShippingPaidBy String?
+    customExchangesEnabled     Boolean?
+    customExchangeWindowDays   Int?
+
+    updatedAt DateTime @updatedAt
+
+    @@map("store_logistics")
+}
+
+model StoreNotificationSettings {
+    id      String        @id
+    storeId String        @unique
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    // Email Notifications
+    emailOnNewOrder  Boolean @default(true)
+    emailOnShipment  Boolean @default(true)
+    emailOnDelivery  Boolean @default(true)
+    emailOnReturn    Boolean @default(true)
+    emailOnLowStock  Boolean @default(false)
+    emailOnSyncError Boolean @default(true)
+
+    notificationEmails String[]
+
+    // Webhook Notifications
+    webhookUrl    String?
+    webhookEvents Json?
+
+    // Integrations
+    slackWebhook   String?
+    discordWebhook String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("store_notification_settings")
+}
+
+model StoreSubscription {
+    id      String        @id
+    storeId String        @unique
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    planType        PLAN_TYPE @default(FREE)
+    billingInterval String    @default("MONTHLY")
+    price           Float     @default(0)
+    currency        String    @default("INR")
+
+    // Limits
+    orderLimit    Int?
+    featureAccess Json?
+
+    // Billing Cycle
+    currentPeriodStart DateTime
+    currentPeriodEnd   DateTime
+    nextBillingDate    DateTime?
+
+    // Status
+    status             SUBSCRIPTION_STATUS @default(TRIAL)
+    trialEndsAt        DateTime?
+    cancelledAt        DateTime?
+    cancellationReason String?
+
+    // Payment
+    razorpaySubscriptionId String?
+    lastPaymentAt          DateTime?
+    lastPaymentAmount      Float?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([storeId])
+    @@index([status])
+    @@map("store_subscriptions")
+}
+
+// ============================================
+// SECTION 3: INTEGRATION & SYNC MANAGEMENT
+// ============================================
+
+model MerchantApiKey {
+    id         String   @id
+    merchantId String
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    publicKey  String        @unique
+    secretHash String
+    scopes     String[]
+    mode       MERCHANT_MODE
+    status     API_STATUS
+
+    createdAt  DateTime  @default(now())
+    lastUsedAt DateTime?
+    revokedAt  DateTime?
 
     @@index([merchantId])
+    @@map("merchant_api_keys")
+}
+
+model MerchantWebhook {
+    id         String   @id
+    merchantId String
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    url    String
+    events NotificationEvent[]
+
+    createdAt DateTime @default(now())
+
+    @@index([merchantId])
+    @@map("merchant_webhooks")
+}
+
+model ShopifyState {
+    id         String    @id
+    merchantId String?
+    merchant   Merchant? @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    shopUrl   String
+    state     String   @unique
+    expiresAt DateTime
+
+    createdAt DateTime @default(now())
+
+    @@index([merchantId])
+    @@map("shopify_states")
+}
+
+model ShopifyTempSession {
+    id          String    @id @default(cuid())
+    shop        String    @unique
+    accessToken String
+    scope       String?
+    expiresAt   DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("shopify_temp_sessions")
+}
+
+model ShopifyCheckoutSession {
+    id              String   @id @default(cuid())
+    storeDomain     String
+    ownerEmail      String
+    cartPayload     Json
+    customerPayload Json
+    createdAt       DateTime @default(now())
+    expiresAt       DateTime
+
+    @@index([storeDomain])
+    @@index([ownerEmail])
+    @@index([expiresAt])
+    @@map("shopify_checkout_sessions")
+}
+
+model StoreWebhook {
+    id      String        @id
+    storeId String
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    topic     WEBHOOK_TOPIC
+    webhookId String?
+    address   String
+    status    WEBHOOK_STATUS @default(ACTIVE)
+
+    lastFiredAt   DateTime?
+    lastSuccessAt DateTime?
+    failureCount  Int       @default(0)
+    lastFailureAt DateTime?
+    lastError     String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([storeId, topic])
+    @@index([storeId, status])
+    @@map("store_webhooks")
+}
+
+model StoreSession {
+    id      String        @id
+    storeId String
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    sessionToken String  @unique
+    cartId       String?
+    checkoutId   String?
+    customerId   String?
+
+    cartData     Json?
+    customerData Json?
+    checkoutUrl  String?
+
+    status SESSION_STATUS @default(ACTIVE)
+
+    // Analytics
+    ipAddress   String?
+    userAgent   String?
+    referrer    String?
+    utmSource   String?
+    utmMedium   String?
+    utmCampaign String?
+
+    startedAt   DateTime  @default(now())
+    completedAt DateTime?
+    abandonedAt DateTime?
+    expiresAt   DateTime
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([storeId, status])
+    @@index([sessionToken])
+    @@index([expiresAt])
+    @@map("store_sessions")
+}
+
+model StoreAnalytics {
+    id      String        @id
+    storeId String
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    date    DateTime
+
+    // Orders
+    totalOrders       Int   @default(0)
+    completedOrders   Int   @default(0)
+    cancelledOrders   Int   @default(0)
+    totalRevenue      Float @default(0)
+    averageOrderValue Float @default(0)
+
+    // Checkout
+    checkoutSessions    Int   @default(0)
+    checkoutCompletions Int   @default(0)
+    checkoutAbandonment Int   @default(0)
+    conversionRate      Float @default(0)
+
+    // Products
+    totalProducts      Int @default(0)
+    productsOutOfStock Int @default(0)
+    productsSynced     Int @default(0)
+
+    // Logistics
+    ordersShipped   Int @default(0)
+    ordersDelivered Int @default(0)
+    ordersReturned  Int @default(0)
+
+    // Webhooks
+    webhooksReceived Int @default(0)
+    webhooksFailed   Int @default(0)
+
+    calculatedAt DateTime @default(now())
+
+    @@unique([storeId, date])
+    @@index([storeId])
+    @@index([date])
+    @@map("store_analytics")
+}
+
+model StoreSyncLog {
+    id      String        @id
+    storeId String
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    syncType String
+    result   String
+
+    // Stats
+    totalItems   Int
+    successItems Int
+    failedItems  Int
+
+    // Details
+    startedAt   DateTime  @default(now())
+    completedAt DateTime?
+    durationMs  Int?
+
+    errorMessage String?
+    errorDetails Json?
+
+    // Metadata
+    triggeredBy     String?
+    triggeredByUser String?
+
+    createdAt DateTime @default(now())
+
+    @@index([storeId, syncType])
+    @@index([startedAt])
+    @@map("store_sync_logs")
+}
+
+// ============================================
+// SECTION 4: LOGISTICS INFRASTRUCTURE
+// ============================================
+
+model Address {
+    id         String   @id
+    merchantId String
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    label String?
+    type  String
+
+    name     String?
+    phone    String?
+    line1    String
+    line2    String?
+    city     String
+    state    String
+    pincode  String
+    country  String  @default("India")
+    landmark String?
+
+    isDefault Boolean @default(false)
+
+    latitude  Float?
+    longitude Float?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    merchantDefaultLogisticsAsPickup MerchantLogistics[]          @relation("MerchantLogisticsDefaultPickup")
+    merchantDefaultPreferencesPickup MerchantPreferences[]        @relation("MerchantDefaultPickup")
+    storeCustomPreferencesPickup     MerchantStorePreferences[]   @relation("StoreCustomPickup")
+    storePickupLogistics             StoreLogistics[]             @relation("StorePickupLogistics")
+    storeReturnLogistics             StoreLogistics[]             @relation("StoreReturnLogistics")
+    manifestPickups                  Manifest[]
+    storePickupAddresses             MerchantStorePickupAddress[]
+
+    @@index([merchantId])
+    @@index([merchantId, type])
+    @@index([isDefault])
+    @@map("addresses")
 }
 
 model PackageProfile {
-    id         String @id
+    id         String   @id
     merchantId String
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
 
-    label       String // "Small Box", "Standard", "Large Package"
+    label       String
     lengthCm    Float
     widthCm     Float
     heightCm    Float
     weightGrams Int
 
-    // Optional fields
     description String?
+    isDefault   Boolean @default(false)
     isReusable  Boolean @default(true)
-    metadata    Json?
+
+    metadata Json?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     // Relations
-    merchant                     Merchant                      @relation(fields: [merchantId], references: [id])
-    merchantStorePackageProfiles MerchantStorePackageProfile[]
-    merchantDefaultPrefs         MerchantPreferences[]         @relation("MerchantDefaultPackage")
-    storeCustomPackagePrefs      MerchantStorePreferences[]    @relation("StoreCustomPackage")
+    merchantDefaultLogistics   MerchantLogistics[]           @relation("MerchantLogisticsDefaultPackage")
+    merchantDefaultPreferences MerchantPreferences[]         @relation("MerchantDefaultPackage")
+    storeCustomPreferences     MerchantStorePreferences[]    @relation("StoreCustomPackage")
+    storePackageLogistics      StoreLogistics[]              @relation("StorePackageLogistics")
+    storePackageProfiles       MerchantStorePackageProfile[]
 
     @@index([merchantId])
+    @@index([isDefault])
+    @@map("package_profiles")
 }
+
+model MerchantLogistics {
+    id         String   @id
+    merchantId String   @unique
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    // Default Settings
+    defaultPickupAddressId  String?
+    defaultPackageProfileId String?
+    defaultCourier          String?
+
+    // Quote Preferences
+    sortQuotesBy       String @default("PRICE")
+    quoteCacheDuration Int    @default(15)
+
+    // COD Settings
+    codEnabled       Boolean @default(true)
+    codMinOrderValue Float   @default(0)
+
+    // Return Policy
+    returnsEnabled       Boolean  @default(true)
+    returnWindowDays     Int      @default(7)
+    returnConditions     String[] @default([])
+    returnShippingPaidBy String   @default("MERCHANT")
+    qcRequired           Boolean  @default(false)
+    qcTimeframeDays      Int      @default(2)
+
+    exchangesEnabled   Boolean @default(false)
+    exchangeWindowDays Int     @default(7)
+
+    // Settlement
+    remittanceCycle  String @default("WEEKLY")
+    slaThresholdDays Int    @default(7)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    defaultPickupAddress  Address?        @relation("MerchantLogisticsDefaultPickup", fields: [defaultPickupAddressId], references: [id])
+    defaultPackageProfile PackageProfile? @relation("MerchantLogisticsDefaultPackage", fields: [defaultPackageProfileId], references: [id])
+
+    @@map("merchant_logistics")
+}
+
+model MerchantStorePickupAddress {
+    id        String  @id
+    storeId   String
+    addressId String
+    isDefault Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    store   MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    address Address       @relation(fields: [addressId], references: [id], onDelete: Cascade)
+
+    @@unique([storeId, addressId])
+    @@index([storeId])
+    @@map("merchant_store_pickup_addresses")
+}
+
+model MerchantStorePackageProfile {
+    id               String  @id
+    storeId          String
+    packageProfileId String
+    isDefault        Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    store          MerchantStore  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    packageProfile PackageProfile @relation(fields: [packageProfileId], references: [id], onDelete: Cascade)
+
+    @@unique([storeId, packageProfileId])
+    @@index([storeId])
+    @@map("merchant_store_package_profiles")
+}
+
+// ============================================
+// SECTION 5: COURIER & SHIPPING PARTNERS
+// ============================================
 
 model CourierPartner {
     id         String @id
@@ -1929,7 +1639,7 @@ model CourierPartner {
     webhookUrl       String?
 
     isActive Boolean @default(true)
-    isGlobal Boolean @default(true) // 🔥 NEW: Admin-added global partners
+    isGlobal Boolean @default(true)
 
     imageUrl       String?
     customMappings Json?
@@ -1938,8 +1648,12 @@ model CourierPartner {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    courierServices CourierService[]
-    courierQuotes   CourierQuote[]
+    // Relations
+    services CourierService[]
+    quotes   CourierQuote[]
+
+    @@index([isActive])
+    @@map("courier_partners")
 }
 
 model CourierService {
@@ -1952,7 +1666,7 @@ model CourierService {
     serviceLevel     String
 
     isActive              Boolean @default(true)
-    isGlobal              Boolean @default(true) // 🔥 NEW: Admin-added global services
+    isGlobal              Boolean @default(true)
     estimatedDeliveryDays Int?
     maxCodAmount          Float?
     minWeight             Float?
@@ -1961,29 +1675,37 @@ model CourierService {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    courierPartner            CourierPartner               @relation(fields: [courierPartnerId], references: [id])
-    courierQuotes             CourierQuote[]
-    merchantEnabledServices   MerchantCourierConfig[] // Merchant enables these
-    storeEnabledServices      MerchantStoreCourierConfig[] // Store overrides
-    PickupSlot                PickupSlot[]
-    CourierPerformanceMetrics CourierPerformanceMetrics[]
-    Manifest                  Manifest[]
+    // Relations
+    courierPartner     CourierPartner               @relation(fields: [courierPartnerId], references: [id], onDelete: Cascade)
+    quotes             CourierQuote[]
+    merchantConfigs    MerchantCourierConfig[]
+    storeConfigs       MerchantStoreCourierConfig[]
+    pickupSlots        PickupSlot[]
+    performanceMetrics CourierPerformanceMetrics[]
+    manifests          Manifest[]
+
+    @@index([courierPartnerId])
+    @@index([isActive])
+    @@map("courier_services")
 }
 
 model MerchantCourierConfig {
-    id               String  @id
-    merchantId       String
+    id         String   @id
+    merchantId String
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
     courierServiceId String
-    isEnabled        Boolean @default(true)
-    labelOverride    String?
+    courierService   CourierService @relation(fields: [courierServiceId], references: [id], onDelete: Cascade)
+
+    isEnabled Boolean @default(true)
+    priority  Int     @default(0)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    merchant       Merchant       @relation(fields: [merchantId], references: [id])
-    courierService CourierService @relation(fields: [courierServiceId], references: [id])
-
-    @@unique([merchantId, courierServiceId]) // 🔥 NEW: One config per service per merchant
+    @@unique([merchantId, courierServiceId])
+    @@index([merchantId])
+    @@map("merchant_courier_configs")
 }
 
 model MerchantStoreCourierConfig {
@@ -1996,13 +1718,82 @@ model MerchantStoreCourierConfig {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    store          MerchantStore  @relation(fields: [storeId], references: [id])
-    courierService CourierService @relation(fields: [courierServiceId], references: [id])
+    // Relations
+    store          MerchantStore  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    courierService CourierService @relation(fields: [courierServiceId], references: [id], onDelete: Cascade)
 
-    @@unique([storeId, courierServiceId]) // 🔥 NEW: One config per service per store
+    @@unique([storeId, courierServiceId])
+    @@index([storeId])
+    @@map("merchant_store_courier_configs")
 }
 
-// --- Logistics Models ---
+model PickupSlot {
+    id               String @id
+    courierServiceId String
+
+    dayOfWeek String?
+    startTime String
+    endTime   String
+    slotLabel String
+
+    isActive         Boolean @default(true)
+    maxPickupsPerDay Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    courierService CourierService @relation(fields: [courierServiceId], references: [id], onDelete: Cascade)
+
+    @@index([courierServiceId])
+    @@map("pickup_slots")
+}
+
+model CourierPerformanceMetrics {
+    id               String  @id
+    courierServiceId String
+    merchantId       String?
+    storeId          String?
+    region           String?
+
+    // Time Period
+    periodStart DateTime
+    periodEnd   DateTime
+
+    // Performance Data
+    totalShipments        Int
+    successfulDeliveries  Int
+    failedDeliveries      Int
+    rtoCount              Int
+    avgDeliveryDays       Float
+    onTimeDeliveryPercent Float
+
+    // Financial
+    totalShippingCost Float
+    avgShippingCost   Float
+    totalRTOCharges   Float
+
+    // Calculated Rates
+    successRate Float
+    rtoRate     Float
+
+    calculatedAt DateTime @default(now())
+
+    // Relations
+    courierService CourierService @relation(fields: [courierServiceId], references: [id], onDelete: Cascade)
+    merchant       Merchant?      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    store          MerchantStore? @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    @@unique([courierServiceId, merchantId, storeId, region, periodStart])
+    @@index([courierServiceId])
+    @@index([merchantId])
+    @@index([storeId])
+    @@map("courier_performance_metrics")
+}
+
+// ============================================
+// SECTION 6: LOGISTICS OPERATIONS
+// ============================================
 
 model Logistics {
     id              String  @id
@@ -2023,44 +1814,49 @@ model Logistics {
 
     quoteFetchStatus Json?
 
-    // ===== AUTO-ASSIGNMENT (NEW) ===== //
+    // Auto-Assignment
     autoAssigned       Boolean   @default(false)
-    assignmentStrategy String? // "CHEAPEST", "FASTEST", "PREFERRED", "MANUAL"
+    assignmentStrategy String?
     autoAssignedAt     DateTime?
-    autoAssignReason   String? // Why this courier was selected
+    autoAssignReason   String?
 
-    // Bulk job tracking
+    // Bulk Job Tracking
     bulkJobId String?
-    bulkJob   BulkLogisticsJob? @relation(fields: [bulkJobId], references: [id])
 
-    // ===== PICKUP SCHEDULING (NEW) ===== //
+    // Pickup Scheduling
     preferredPickupDate DateTime?
-    preferredPickupTime String? // "10:00-12:00", "14:00-16:00", "ANYTIME"
+    preferredPickupTime String?
     pickupScheduledAt   DateTime?
     pickupConfirmedAt   DateTime?
-    pickupInstructions  String? // Special instructions for pickup
+    pickupInstructions  String?
 
-    // ===== EXISTING FIELDS ===== //
-    selectedCourierId String?       @unique
-    selectedCourier   CourierQuote? @relation("SelectedCourier", fields: [selectedCourierId], references: [id])
-    orderId           String?       @unique
-    order             ShopOrder?    @relation(fields: [orderId], references: [id])
-    createdAt         DateTime      @default(now())
-    updatedAt         DateTime      @updatedAt
+    selectedCourierId String? @unique
+    orderId           String? @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     // Relations
-    customer  User?          @relation(fields: [customerId], references: [id])
-    quotes    CourierQuote[]
-    shippings Shipping[]     @relation("logisticsToShipping")
+    customer        User?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+    bulkJob         BulkLogisticsJob? @relation(fields: [bulkJobId], references: [id], onDelete: SetNull)
+    selectedCourier CourierQuote?     @relation("SelectedCourier", fields: [selectedCourierId], references: [id])
+    order           ShopOrder?        @relation(fields: [orderId], references: [id])
+    quotes          CourierQuote[]
+    shippings       Shipping[]
+
+    @@index([customerId])
+    @@index([status])
+    @@index([bulkJobId])
+    @@map("logistics")
 }
 
 model BulkLogisticsJob {
     id         String  @id
     merchantId String
     storeId    String?
-    createdBy  String // Admin/Merchant user ID
+    createdBy  String
 
-    // Job details
+    // Job Details
     totalOrders      Int
     processedOrders  Int @default(0)
     successfulOrders Int @default(0)
@@ -2068,47 +1864,32 @@ model BulkLogisticsJob {
 
     status BULK_JOB_STATUS @default(PENDING)
 
-    // Assignment strategy
-    courierServiceId  String? // If specific courier selected
-    autoSelect        Boolean @default(false) // Auto-select best quote
-    selectionStrategy String? // "CHEAPEST", "FASTEST", "PREFERRED"
+    // Assignment Strategy
+    courierServiceId  String?
+    autoSelect        Boolean @default(false)
+    selectionStrategy String?
 
-    // Filters applied
-    filters Json? // { "paymentType": "COD", "city": "Mumbai", etc. }
+    // Filters
+    filters Json?
 
     // Results
-    orderIds String[] // Array of order IDs
-    results  Json? // Detailed results per order
-    errorLog Json? // Errors encountered
+    orderIds String[]
+    results  Json?
+    errorLog Json?
 
     startedAt   DateTime?
     completedAt DateTime?
     createdAt   DateTime  @default(now())
 
     // Relations
-    merchant  Merchant       @relation(fields: [merchantId], references: [id])
-    store     MerchantStore? @relation(fields: [storeId], references: [id])
-    Logistics Logistics[]
-}
+    merchant  Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    store     MerchantStore? @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    logistics Logistics[]
 
-model PickupSlot {
-    id               String @id
-    courierServiceId String
-
-    // Slot details
-    dayOfWeek String? // "MONDAY", "TUESDAY", "ANY"
-    startTime String // "10:00"
-    endTime   String // "12:00"
-    slotLabel String // "Morning Slot", "Evening Slot"
-
-    isActive         Boolean @default(true)
-    maxPickupsPerDay Int? // Courier capacity limit
-
-    // Relations
-    courierService CourierService @relation(fields: [courierServiceId], references: [id])
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    @@index([merchantId])
+    @@index([storeId])
+    @@index([status])
+    @@map("bulk_logistics_jobs")
 }
 
 model CourierQuote {
@@ -2125,13 +1906,13 @@ model CourierQuote {
     estimatedPickupDate   DateTime?
     validTill             DateTime?
 
-    // ===== ADD THESE FIELDS ===== //
+    // Fetch Metadata
     fetchedAt   DateTime  @default(now())
-    cacheExpiry DateTime? // fetchedAt + cache duration
-    fetchStatus String? // "success" or "failed"
-    errorReason String? // Error message if failed
+    cacheExpiry DateTime?
+    fetchStatus String?
+    errorReason String?
 
-    // ===== EXISTING FIELDS (keep as is) ===== //
+    // Delivery Details
     pickupTimeWindow     Json?
     expectedDeliveryDate String?
     expectedPODDate      String?
@@ -2148,72 +1929,41 @@ model CourierQuote {
     groundAdditionalDays Int?
     edlMessage           Boolean?
     transitErrorMessage  String?
-    actualWeight         Float?
-    volumetricWeight     Float?
-    chargeableWeight     Float?
-    chargedBy            String?
-    baseRate             Float?
-    fuelSurcharge        Float?
-    codCharge            Float?
-    totalCharge          Float?
-    codSupported         Boolean  @default(true)
-    trackingSupport      Boolean  @default(true)
-    labelOverride        String?
-    rating               Float?
-    courierPartnerId     String?
-    courierServiceId     String?
-    createdAt            DateTime @default(now())
-    updatedAt            DateTime @updatedAt
+
+    // Weight & Charges
+    actualWeight     Float?
+    volumetricWeight Float?
+    chargeableWeight Float?
+    chargedBy        String?
+    baseRate         Float?
+    fuelSurcharge    Float?
+    codCharge        Float?
+    totalCharge      Float?
+
+    // Features
+    codSupported    Boolean @default(true)
+    trackingSupport Boolean @default(true)
+    labelOverride   String?
+    rating          Float?
+
+    courierPartnerId String?
+    courierServiceId String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     // Relations
-    logistics      Logistics       @relation(fields: [logisticsId], references: [id])
+    logistics      Logistics       @relation(fields: [logisticsId], references: [id], onDelete: Cascade)
     selectedBy     Logistics?      @relation("SelectedCourier")
-    CourierPartner CourierPartner? @relation(fields: [courierPartnerId], references: [id])
-    CourierService CourierService? @relation(fields: [courierServiceId], references: [id])
-    Shipping       Shipping[]
+    courierPartner CourierPartner? @relation(fields: [courierPartnerId], references: [id], onDelete: SetNull)
+    courierService CourierService? @relation(fields: [courierServiceId], references: [id], onDelete: SetNull)
+    shippings      Shipping[]
 
     @@index([logisticsId])
+    @@index([courierPartnerId])
+    @@index([courierServiceId])
+    @@map("courier_quotes")
 }
-
-model CourierPerformanceMetrics {
-    id               String  @id
-    courierServiceId String
-    merchantId       String? // null = platform-wide metrics
-    storeId          String? // null = merchant-wide metrics
-    region           String? // "Mumbai", "Delhi", "PAN India"
-
-    // Time period
-    periodStart DateTime
-    periodEnd   DateTime
-
-    // Performance data
-    totalShipments        Int
-    successfulDeliveries  Int
-    failedDeliveries      Int
-    rtoCount              Int
-    avgDeliveryDays       Float
-    onTimeDeliveryPercent Float
-
-    // Financial
-    totalShippingCost Float
-    avgShippingCost   Float
-    totalRTOCharges   Float
-
-    // Calculated
-    successRate Float // successfulDeliveries / totalShipments
-    rtoRate     Float // rtoCount / totalShipments
-
-    calculatedAt DateTime @default(now())
-
-    // Relations
-    courierService CourierService @relation(fields: [courierServiceId], references: [id])
-    merchant       Merchant?      @relation(fields: [merchantId], references: [id])
-    store          MerchantStore? @relation(fields: [storeId], references: [id])
-
-    @@unique([courierServiceId, merchantId, storeId, region, periodStart])
-}
-
-// --- Shipping Models ---
 
 model Shipping {
     id                     String  @id
@@ -2249,34 +1999,36 @@ model Shipping {
     trackingUrl    String?
     trackingStatus DELIVERY_STATUS?
 
-    // ===== RTO TRACKING (NEW) ===== //
+    // RTO Tracking
     isRTO                   Boolean   @default(false)
-    rtoReason               String? // "Customer refused", "Wrong address", etc.
-    rtoStatus               String? // "INITIATED", "IN_TRANSIT", "DELIVERED_TO_ORIGIN"
+    rtoReason               String?
+    rtoStatus               String?
     rtoCompletedAt          DateTime?
-    rtoCharges              Float? // Charges for RTO
-    rtoChargesPaidBy        String? // "MERCHANT", "CUSTOMER", "WAIVED"
+    rtoCharges              Float?
+    rtoChargesPaidBy        String?
     rtoDeductedFromMerchant Boolean   @default(false)
-    rtoDeductionId          String? // Link to MerchantDeduction record
+    rtoDeductionId          String?
 
-    orderId String    @unique
-    order   ShopOrder @relation(fields: [orderId], references: [id])
+    orderId String @unique
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     // Relations
-    logistics            Logistics?             @relation(name: "logisticsToShipping", fields: [logisticsId], references: [id])
-    selectedCourierQuote CourierQuote?          @relation(fields: [selectedCourierQuoteId], references: [id])
+    logistics            Logistics?             @relation(fields: [logisticsId], references: [id], onDelete: SetNull)
+    selectedCourierQuote CourierQuote?          @relation(fields: [selectedCourierQuoteId], references: [id], onDelete: SetNull)
+    order                ShopOrder              @relation(fields: [orderId], references: [id], onDelete: Cascade)
     verifications        DeliveryVerification[]
-    ShippingDocument     ShippingDocument[]
-    TrackingEvent        TrackingEvent[]
-    NDRAttempt           NDRAttempt[]
-    ManifestShipment     ManifestShipment[]
+    documents            ShippingDocument[]
+    trackingEvents       TrackingEvent[]
+    ndrAttempts          NDRAttempt[]
+    manifestShipments    ManifestShipment[]
 
     @@index([logisticsId])
     @@index([trackingId])
     @@index([selectedCourierQuoteId])
+    @@index([status])
+    @@map("shippings")
 }
 
 model DeliveryVerification {
@@ -2291,9 +2043,10 @@ model DeliveryVerification {
     updatedAt DateTime @updatedAt
 
     // Relations
-    shipping Shipping @relation(fields: [shippingId], references: [id])
+    shipping Shipping @relation(fields: [shippingId], references: [id], onDelete: Cascade)
 
     @@index([shippingId])
+    @@map("delivery_verifications")
 }
 
 model ShippingDocument {
@@ -2307,7 +2060,10 @@ model ShippingDocument {
     metadata Json?
 
     // Relations
-    shipping Shipping @relation(fields: [shippingId], references: [id])
+    shipping Shipping @relation(fields: [shippingId], references: [id], onDelete: Cascade)
+
+    @@index([shippingId])
+    @@map("shipping_documents")
 }
 
 model TrackingEvent {
@@ -2322,18 +2078,22 @@ model TrackingEvent {
     actor     String?
 
     // Relations
-    shipping Shipping @relation(fields: [shippingId], references: [id])
+    shipping Shipping @relation(fields: [shippingId], references: [id], onDelete: Cascade)
+
+    @@index([shippingId])
+    @@index([timestamp])
+    @@map("tracking_events")
 }
 
 model NDRAttempt {
     id            String @id
     shippingId    String
-    attemptNumber Int    @default(1) // 1st, 2nd, 3rd attempt
+    attemptNumber Int    @default(1)
 
     // NDR Details
     ndrDate        DateTime @default(now())
-    ndrReason      String // "Customer not available", "Wrong address"
-    ndrReasonCode  String? // Courier's internal code
+    ndrReason      String
+    ndrReasonCode  String?
     courierRemarks String?
 
     status NDR_STATUS @default(REPORTED)
@@ -2341,30 +2101,32 @@ model NDRAttempt {
     // Customer Response
     customerContacted   Boolean   @default(false)
     customerContactedAt DateTime?
-    customerResponse    Json? // { action: "REDELIVER", preferredTime: "..." }
+    customerResponse    Json?
 
     // Reattempt
     reattemptScheduledAt DateTime?
     reattemptDate        DateTime?
-    reattemptTimeSlot    String? // "10:00-12:00"
-    reattemptAddress     Json? // If customer wants delivery elsewhere
+    reattemptTimeSlot    String?
+    reattemptAddress     Json?
 
     // Resolution
     resolvedAt     DateTime?
-    resolutionType String? // "DELIVERED", "RTO", "CANCELLED"
-
-    // Relations
-    shipping Shipping @relation(fields: [shippingId], references: [id])
+    resolutionType String?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@index([shippingId, attemptNumber])
+    // Relations
+    shipping Shipping @relation(fields: [shippingId], references: [id], onDelete: Cascade)
+
+    @@unique([shippingId, attemptNumber])
+    @@index([shippingId])
+    @@map("ndr_attempts")
 }
 
 model Manifest {
     id               String  @id
-    manifestNumber   String  @unique // MAN-20250118-001
+    manifestNumber   String  @unique
     merchantId       String
     storeId          String?
     courierServiceId String
@@ -2380,27 +2142,29 @@ model Manifest {
     status MANIFEST_STATUS @default(DRAFT)
 
     // Document
-    manifestUrl String? // PDF URL
+    manifestUrl String?
     generatedAt DateTime?
 
-    // Handover tracking
+    // Handover Tracking
     handedOverAt     DateTime?
-    handedOverBy     String? // Merchant employee name
-    receivedBy       String? // Courier person name
-    courierSignature String? // Image/signature URL
-
-    // Relations
-    merchant       Merchant           @relation(fields: [merchantId], references: [id])
-    store          MerchantStore?     @relation(fields: [storeId], references: [id])
-    courierService CourierService     @relation(fields: [courierServiceId], references: [id])
-    pickupAddress  Address            @relation(fields: [pickupAddressId], references: [id])
-    shipments      ManifestShipment[]
+    handedOverBy     String?
+    receivedBy       String?
+    courierSignature String?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    // Relations
+    merchant       Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    store          MerchantStore?     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    courierService CourierService     @relation(fields: [courierServiceId], references: [id], onDelete: Cascade)
+    pickupAddress  Address            @relation(fields: [pickupAddressId], references: [id])
+    shipments      ManifestShipment[]
+
     @@index([manifestNumber])
     @@index([merchantId, pickupDate])
+    @@index([status])
+    @@map("manifests")
 }
 
 model ManifestShipment {
@@ -2413,34 +2177,385 @@ model ManifestShipment {
     weight        Float
     codAmount     Float?
 
-    manifest Manifest @relation(fields: [manifestId], references: [id])
-    shipping Shipping @relation(fields: [shippingId], references: [id])
+    // Relations
+    manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+    shipping Shipping @relation(fields: [shippingId], references: [id], onDelete: Cascade)
 
     @@unique([manifestId, shippingId])
+    @@index([manifestId])
+    @@map("manifest_shipments")
 }
 
 // ============================================
-// SECTION 8: RETURNS MANAGEMENT
+// SECTION 7: PRODUCT & CART MANAGEMENT
 // ============================================
 
-// --- Enums for Returns ---
+model ShopProduct {
+    id          String  @id
+    merchantId  String
+    storeId     String
+    externalId  String  @unique
+    source      String
+    title       String
+    description String?
+    imageUrl    String?
+    price       Float
+    currency    String  @default("INR")
 
-enum RETURN_REASON {
-    DAMAGED
-    WRONG_ITEM
-    NO_LONGER_NEEDED
-    OTHER
+    // Dimensions
+    weight Float?
+    length Float?
+    width  Float?
+    height Float?
+
+    // Inventory
+    inventoryQty  Int?
+    sku           String?
+    barcode       String?
+    isAvailable   Boolean   @default(true)
+    lastFetchedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    merchant   Merchant             @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    store      MerchantStore        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    variants   ShopProductVariant[]
+    cartItems  ShopCartItem[]
+    orderItems ShopOrderItem[]
+
+    @@index([merchantId])
+    @@index([storeId])
+    @@index([externalId])
+    @@map("shop_products")
 }
 
-enum RETURN_STATUS {
-    REQUESTED
-    APPROVED
-    PICKED_UP
-    REFUNDED
-    REJECTED
+model ShopProductVariant {
+    id           String  @id
+    productId    String
+    externalId   String  @unique
+    title        String
+    price        Float
+    sku          String?
+    barcode      String?
+    inventoryQty Int?
+    isAvailable  Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    product    ShopProduct     @relation(fields: [productId], references: [id], onDelete: Cascade)
+    orderItems ShopOrderItem[]
+    cartItems  ShopCartItem[]
+
+    @@index([productId])
+    @@index([externalId])
+    @@map("shop_product_variants")
 }
 
-// --- Return Models ---
+model ShopCart {
+    id     String     @id @default(cuid())
+    status CartStatus @default(ACTIVE)
+
+    userId String? @unique
+    user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    guestSessionTokenId String?            @unique
+    guestSessionToken   GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id], onDelete: Cascade)
+
+    expiresAt   DateTime?
+    totalItems  Int       @default(0)
+    totalAmount Float     @default(0)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    items ShopCartItem[]
+
+    @@index([status])
+    @@index([userId])
+    @@index([guestSessionTokenId])
+    @@map("shop_carts")
+}
+
+model ShopCartItem {
+    id     String @id
+    cartId String
+
+    shopProductId        String
+    shopProductVariantId String
+
+    quantity      Int
+    priceSnapshot Float
+    metadata      Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    cart    ShopCart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+    product ShopProduct        @relation(fields: [shopProductId], references: [id], onDelete: Cascade)
+    variant ShopProductVariant @relation(fields: [shopProductVariantId], references: [id], onDelete: Cascade)
+
+    @@index([cartId])
+    @@index([shopProductId])
+    @@map("shop_cart_items")
+}
+
+model GuestSessionToken {
+    id      String @id @default(cuid())
+    token   String @unique
+    guestId String
+
+    guestInfo Json?
+    expiresAt DateTime?
+    revoked   Boolean   @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    shopCart         ShopCart?
+    shopPayments     ShopPayment[]
+    shopOrders       ShopOrder[]
+    shopTransactions ShopTransaction[]
+    shopOrderGroups  ShopOrderGroup[]
+
+    @@index([token])
+    @@index([guestId])
+    @@map("guest_session_tokens")
+}
+
+// ============================================
+// SECTION 8: ORDER MANAGEMENT
+// ============================================
+
+model ShopOrderGroup {
+    id      String  @id
+    buyerId String?
+
+    guestSessionTokenId String?
+
+    createdAt  DateTime           @default(now())
+    externalId String?            @unique
+    source     ORDER_GROUP_SOURCE @default(RAKSHASETU)
+
+    status          ORDER_GROUP_STATUS @default(PENDING)
+    totalAmount     Float              @default(0)
+    currency        String             @default("INR")
+    groupType       ORDER_GROUP_TYPE   @default(MARKETPLACE)
+    groupNotes      String?
+    deliverySummary Json?
+
+    // Relations
+    buyer             User?              @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+    guestSessionToken GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id], onDelete: SetNull)
+    orders            ShopOrder[]
+    payments          ShopPayment[]
+
+    @@index([buyerId])
+    @@index([guestSessionTokenId])
+    @@index([createdAt])
+    @@index([status])
+    @@map("shop_order_groups")
+}
+
+model ShopOrder {
+    id         String            @id
+    externalId String?           @unique
+    source     SHOP_ORDER_SOURCE
+    merchantId String
+    storeId    String
+
+    name        String?
+    createdAt   DateTime  @default(now())
+    processedAt DateTime?
+    syncedAt    DateTime?
+
+    currency       String @default("INR")
+    totalPrice     Float
+    subtotalPrice  Float?
+    totalTax       Float?
+    totalDiscounts Float?
+
+    financialStatus   PAYMENT_STATUS?
+    fulfillmentStatus FULFILLMENT_STATUS?
+    sourceName        String?
+
+    paymentGateway String?
+    discountCodes  Json?
+    shippingLines  Json?
+
+    note String?
+    tags String?
+
+    customerId    String?
+    customerName  String?
+    customerEmail String?
+    customerPhone String?
+
+    shippingAddress Json?
+    billingAddress  Json?
+
+    packageDetails Json?
+
+    guestSessionTokenId String?
+
+    status ORDER_STATUS @default(CREATED)
+
+    paymentType    PAYMENT_METHOD?
+    shippingCharge Float?
+    codCharge      Float?
+    platformFee    Float?
+
+    isEscrowed   Boolean        @default(false)
+    escrowStatus ESCROW_STATUS?
+    escrowMeta   Json?
+
+    shopOrderGroupId String?
+
+    // Relations
+    merchant          Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    store             MerchantStore      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+    guestSessionToken GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id], onDelete: SetNull)
+    orderGroup        ShopOrderGroup?    @relation(fields: [shopOrderGroupId], references: [id], onDelete: SetNull)
+    lineItems         ShopOrderItem[]
+    transaction       ShopTransaction?
+    dispute           ShopDisputeTicket?
+    refunds           ShopRefund[]
+    returnRequests    ReturnRequest[]
+    shipping          Shipping?
+    logistics         Logistics?
+
+    @@index([merchantId])
+    @@index([storeId])
+    @@index([externalId])
+    @@index([shopOrderGroupId])
+    @@index([status])
+    @@map("shop_orders")
+}
+
+model ShopOrderItem {
+    id        String  @id
+    orderId   String
+    productId String
+    variantId String?
+
+    externalId        String
+    title             String
+    quantity          Int
+    price             Float
+    sku               String?
+    fulfillmentStatus String?
+
+    isReturnable     Boolean @default(true)
+    returnWindowDays Int?
+
+    // Relations
+    order          ShopOrder           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    product        ShopProduct         @relation(fields: [productId], references: [id], onDelete: Cascade)
+    variant        ShopProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+    returnRequests ReturnRequest[]
+
+    @@index([orderId])
+    @@index([productId])
+    @@map("shop_order_items")
+}
+
+model ShopTransaction {
+    id      String @id
+    orderId String @unique
+
+    buyerPaid       Float
+    chargesDeducted Float
+    sellerReceives  Float
+
+    platformFee      Float?
+    platformFeePayer SHOP_PLATFORM_FEE_PAYER @default(MERCHANT)
+    shippingCharge   Float?
+    codCharge        Float?
+
+    status                   TRANSACTION_STATUS @default(INITIATED)
+    releaseRequested         Boolean            @default(false)
+    releaseRequestedAt       DateTime?
+    releaseRequestedByType   USER_ROLE?
+    releaseRequestedById     String?
+    releaseRequestedMeta     Json?
+    releaseApprovedByAdmin   Boolean            @default(false)
+    releaseApprovedAt        DateTime?
+    releaseApprovedByAdminId String?
+    releaseNotes             String?
+
+    releaseRequestedByGuestTokenId String?
+
+    codRemittanceDueAt DateTime?
+    codRemittedAt      DateTime?
+    codRemittanceNotes String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    order                        ShopOrder          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    releaseRequestedByGuestToken GuestSessionToken? @relation(fields: [releaseRequestedByGuestTokenId], references: [id], onDelete: SetNull)
+    refunds                      ShopRefund[]
+
+    @@index([orderId])
+    @@index([status])
+    @@map("shop_transactions")
+}
+
+model ShopPayment {
+    id String @id
+
+    buyerId    String?
+    merchantId String?
+
+    amount   Float
+    currency String @default("INR")
+
+    method PAYMENT_METHOD
+    status PAYMENT_STATUS       @default(INITIATED)
+    source PAYMENT_ORDER_SOURCE @default(SHOP)
+
+    razorpayOrderId   String?
+    razorpayPaymentId String?
+    providerTxnId     String?
+
+    errorCode    String?
+    errorMessage String?
+    metadata     Json?
+
+    paidAt  DateTime?
+    attempt Int       @default(1)
+
+    codCollected   Boolean   @default(false)
+    codCollectedAt DateTime?
+
+    guestSessionTokenId String?
+    orderGroupId        String  @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    buyer             User?              @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+    merchant          Merchant?          @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+    guestSessionToken GuestSessionToken? @relation(fields: [guestSessionTokenId], references: [id], onDelete: SetNull)
+    shopOrderGroup    ShopOrderGroup     @relation(fields: [orderGroupId], references: [id], onDelete: Cascade)
+
+    @@index([buyerId])
+    @@index([merchantId])
+    @@index([status])
+    @@map("shop_payments")
+}
+
+// ============================================
+// SECTION 9: RETURNS & DISPUTES
+// ============================================
 
 model ReturnRequest {
     id                String        @id
@@ -2455,201 +2570,17 @@ model ReturnRequest {
     pickupCourierCode String?
     refundSynced      Boolean   @default(false)
 
-    // Relations
-    order ShopOrder     @relation(fields: [orderId], references: [id])
-    item  ShopOrderItem @relation(fields: [itemId], references: [id])
-}
-
-// ============================================
-// SECTION 9: COMMUNICATION SYSTEM
-// ============================================
-
-// --- Enums for Communication ---
-
-enum CONVERSATION_TYPE {
-    CUSTOM
-    LISTING
-    ORDER
-    DISPUTE
-}
-
-enum CONVERSATION_STATUS {
-    ACTIVE
-    FINISHED
-    BLOCKED
-}
-
-enum PARTICIPANT_TYPE {
-    BUYER
-    SELLER
-    MERCHANT
-    ADMIN
-    GUEST
-}
-
-// --- Communication Models ---
-
-model Notification {
-    id        String  @id
-    userId    String
-    title     String
-    message   String
-    type      String
-    event     String
-    link      String?
-    data      Json?
-    priority  Int     @default(1)
-    delivered Boolean @default(false)
-    read      Boolean @default(false)
-
-    createdAt DateTime @default(now())
-
-    // Relations
-    user User @relation(fields: [userId], references: [id])
-
-    @@index([userId])
-    @@index([type])
-    @@index([event])
-}
-
-model Conversation {
-    id      String  @id
-    orderId String?
-    order   Order?  @relation(fields: [orderId], references: [id])
-
-    disputeId String?        @unique
-    dispute   DisputeTicket? @relation(fields: [disputeId], references: [id])
-
-    listingId String?
-    Listing   Listing? @relation(fields: [listingId], references: [id])
-
-    type   CONVERSATION_TYPE
-    status CONVERSATION_STATUS @default(ACTIVE)
-
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     // Relations
-    participants ConversationParticipant[]
-    messages     Message[]
+    order ShopOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    item  ShopOrderItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+    @@index([orderId])
+    @@index([status])
+    @@map("return_requests")
 }
-
-model ConversationParticipant {
-    id             String       @id
-    conversationId String
-    conversation   Conversation @relation(fields: [conversationId], references: [id])
-
-    participantType PARTICIPANT_TYPE
-    participantId   String?
-    customerInfo    Json?
-
-    joinedAt DateTime @default(now())
-
-    @@unique([conversationId, participantType, participantId])
-}
-
-model Message {
-    id             String       @id
-    conversationId String
-    conversation   Conversation @relation(fields: [conversationId], references: [id])
-
-    senderType   PARTICIPANT_TYPE
-    senderId     String?
-    customerInfo Json?
-
-    content     String
-    attachments Json?
-    createdAt   DateTime @default(now())
-}
-
-// ============================================
-// SECTION 10: DISPUTE RESOLUTION
-// ============================================
-
-// --- Enums for Disputes ---
-
-enum DISPUTE_ROLE {
-    BUYER
-    SELLER
-}
-
-enum DISPUTE_STATUS {
-    PENDING
-    IN_PROGRESS
-    RESOLVED
-    REJECTED
-}
-
-enum REFUND_METHOD {
-    RAZORPAY
-    RAZORPAYX
-    UPI
-    BANK_TRANSFER
-}
-
-enum REFUND_STATUS {
-    NONE
-    PENDING
-    APPROVED
-    REJECTED
-    PROCESSED
-}
-
-enum REFUND_AMOUNT_STATUS {
-    NONE
-    PARTIALLY_REFUNDED
-    FULLY_REFUNDED
-}
-
-// --- Marketplace Dispute Models ---
-
-model DisputeTicket {
-    id      String @id
-    orderId String @unique
-
-    raisedBy DISPUTE_ROLE
-
-    raisedById   String
-    raisedByUser User   @relation(fields: [userId], references: [id])
-
-    reason            String
-    status            DISPUTE_STATUS @default(PENDING)
-    resolution        String?
-    createdAt         DateTime       @default(now())
-    updatedAt         DateTime       @updatedAt
-    resolvedAt        DateTime?
-    resolvedByAdminId String?
-    resolvedByAdmin   Admin?         @relation("AdminDisputes", fields: [resolvedByAdminId], references: [id])
-    userId            String
-
-    // Relations
-    order        Order         @relation(fields: [orderId], references: [id])
-    conversation Conversation?
-    refund       Refund?
-}
-
-model Refund {
-    id            String  @id
-    disputeId     String? @unique
-    orderId       String?
-    transactionId String?
-
-    refundedAt         DateTime?
-    amount             Float
-    refundMethod       REFUND_METHOD
-    notes              String?
-    status             REFUND_STATUS        @default(PENDING)
-    refundAmountStatus REFUND_AMOUNT_STATUS @default(NONE)
-    createdAt          DateTime             @default(now())
-    updatedAt          DateTime             @updatedAt
-
-    // Relations
-    dispute     DisputeTicket? @relation(fields: [disputeId], references: [id])
-    order       Order?         @relation(fields: [orderId], references: [id])
-    transaction Transaction?   @relation(fields: [transactionId], references: [id])
-}
-
-// --- E-commerce Dispute Models ---
 
 model ShopDisputeTicket {
     id      String @id
@@ -2666,11 +2597,15 @@ model ShopDisputeTicket {
     updatedAt         DateTime       @updatedAt
     resolvedAt        DateTime?
     resolvedByAdminId String?
-    resolvedByAdmin   Admin?         @relation(fields: [resolvedByAdminId], references: [id])
 
     // Relations
-    order      ShopOrder   @relation(fields: [orderId], references: [id])
-    ShopRefund ShopRefund?
+    order           ShopOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    resolvedByAdmin Admin?      @relation(fields: [resolvedByAdminId], references: [id], onDelete: SetNull)
+    refund          ShopRefund?
+
+    @@index([orderId])
+    @@index([status])
+    @@map("shop_dispute_tickets")
 }
 
 model ShopRefund {
@@ -2690,94 +2625,562 @@ model ShopRefund {
     updatedAt DateTime @updatedAt
 
     // Relations
-    dispute     ShopDisputeTicket? @relation(fields: [disputeId], references: [id])
-    order       ShopOrder?         @relation(fields: [orderId], references: [id])
-    transaction ShopTransaction?   @relation(fields: [transactionId], references: [id])
+    dispute     ShopDisputeTicket? @relation(fields: [disputeId], references: [id], onDelete: SetNull)
+    order       ShopOrder?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    transaction ShopTransaction?   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+    @@index([disputeId])
+    @@index([orderId])
+    @@index([status])
+    @@map("shop_refunds")
 }
 
 // ============================================
-// SECTION 11: PLATFORM FEE MANAGEMENT
+// SECTION 10: MARKETPLACE (P2P TRADING)
 // ============================================
 
-// --- Enums for Platform Fees ---
+model SellerAccount {
+    id     String @id
+    userId String @unique
 
-enum PLATFORM_FEE_TYPE {
-    PERCENTAGE
-    FIXED
-}
-
-enum FEE_CATEGORY {
-    PLATFORM
-    LOGISTICS
-    COD
-    PACKAGING
-    INSURANCE
-    TRANSACTION
-}
-
-enum FEE_SOURCE_LEVEL {
-    PLATFORM
-    MERCHANT
-    STORE
-}
-
-enum FEE_SOURCE {
-    GLOBAL
-    MERCHANT_SPECIFIC
-    SHOP
-}
-
-enum FEE_TYPE {
-    PERCENTAGE
-    FIXED
-}
-
-// --- Platform Fee Models ---
-
-model PlatformFeeConfig {
-    id       String            @id @default(uuid())
-    category FEE_CATEGORY
-    label    String
-    feeType  PLATFORM_FEE_TYPE
-    feeValue Float
-    codFee   Float             @default(50)
-    currency String            @default("INR")
-    isActive Boolean           @default(true)
+    earningsBalance Float @default(0.0)
+    creditBalance   Float @default(0.0)
+    totalEarnings   Float @default(0.0)
+    totalWithdrawn  Float @default(0.0)
+    totalCharges    Float @default(0.0)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    // Relations
+    user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+    deductions SellerDeduction[]
+
+    @@map("seller_accounts")
+}
+
+model SellerDeduction {
+    id              String           @id
+    sellerAccountId String
+    orderId         String
+    type            DEDUCTION_TYPE
+    amount          Float
+    status          DEDUCTION_STATUS
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    sellerAccount SellerAccount @relation(fields: [sellerAccountId], references: [id], onDelete: Cascade)
+
+    @@index([sellerAccountId])
+    @@map("seller_deductions")
+}
+
+model Listing {
+    id           String         @id
+    sellerId     String
+    type         LISTING_TYPE
+    title        String
+    description  String
+    category     String
+    subCategory  String?
+    price        Float
+    status       LISTING_STATUS @default(ACTIVE)
+    tags         String[]
+    metadata     Json?
+    media        Json?
+    externalLink String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    seller        User           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+    connects      Connects[]
+    conversations Conversation[]
+    orders        Order[]
+    orderDetails  OrderDetails[]
+
+    @@index([sellerId])
+    @@index([status])
+    @@index([type])
+    @@map("listings")
+}
+
+model Connects {
+    id        String         @id
+    userId    String
+    listingId String?
+    sellerId  String
+    message   String?        @db.VarChar(500)
+    status    CONNECT_STATUS @default(PENDING)
+
+    rejectReason String? @db.VarChar(500)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    user    User     @relation("user", fields: [userId], references: [id], onDelete: Cascade)
+    seller  User     @relation("seller", fields: [sellerId], references: [id], onDelete: Cascade)
+    listing Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+    @@index([userId])
+    @@index([sellerId])
+    @@index([listingId])
+    @@map("connects")
+}
+
+model Order {
+    id        String                   @id
+    orderType ORDER_TYPE
+    buyerId   String
+    sellerId  String
+    status    MARKETPLACE_ORDER_STATUS @default(PENDING)
+    notes     String?
+
+    orderStatus  ORDER_FLOW_STATUS @default(PENDING)
+    rejectReason String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    listingId String?
+
+    // Relations
+    buyer         User           @relation("order_buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+    seller        User           @relation("order_seller", fields: [sellerId], references: [id], onDelete: Cascade)
+    listing       Listing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
+    details       OrderDetails?
+    transaction   Transaction?
+    conversations Conversation[]
+    payments      Payment[]
+    dispute       DisputeTicket?
+    refunds       Refund[]
+
+    @@index([buyerId])
+    @@index([sellerId])
+    @@index([listingId])
+    @@index([status])
+    @@map("orders")
+}
+
+model OrderDetails {
+    id String @id
+
+    orderType ORDER_TYPE
+
+    listingId      String?
+    listingDetails Json?
+    customDetails  Json?
+
+    totalAmount      Float
+    platformFee      Float
+    platformFeePayer PLATFORM_FEE_PAYER @default(BUYER)
+    sellerReceives   Float
+    buyerAmount      Float
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    orderId String @unique
+
+    // Relations
+    listing          Listing?           @relation(fields: [listingId], references: [id], onDelete: SetNull)
+    order            Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    orderAttachments orderAttachments[]
+
+    @@map("order_details")
+}
+
+model orderAttachments {
+    id             String @id
+    orderDetailsId String
+
+    type     String
+    url      String
+    name     String
+    publicId String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    OrderDetails OrderDetails @relation(fields: [orderDetailsId], references: [id], onDelete: Cascade)
+
+    @@index([orderDetailsId])
+    @@map("order_attachments")
+}
+
+model Transaction {
+    id      String @id
+    orderId String @unique
+
+    buyerPaid       Float
+    chargesDeducted Float
+    sellerReceives  Float
+
+    status                   TRANSACTION_STATUS @default(INITIATED)
+    releaseRequested         Boolean            @default(false)
+    releaseRequestedAt       DateTime?
+    releaseRequestedByType   USER_ROLE?
+    releaseRequestedById     String?
+    releaseRequestedMeta     Json?
+    releaseApprovedByAdmin   Boolean            @default(false)
+    releaseApprovedAt        DateTime?
+    releaseApprovedByAdminId String?
+    releaseNotes             String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    payments Payment[]
+    refunds  Refund[]
+
+    @@index([orderId])
+    @@index([status])
+    @@map("transactions")
+}
+
+model Payment {
+    id String @id
+
+    orderId       String
+    transactionId String
+    buyerId       String
+    sellerId      String
+
+    amount   Float
+    currency String @default("INR")
+
+    method PAYMENT_METHOD @default(PREPAID)
+    status PAYMENT_STATUS @default(INITIATED)
+
+    razorpayOrderId   String?
+    razorpayPaymentId String?
+    providerTxnId     String?
+
+    errorCode    String?
+    errorMessage String?
+
+    metadata Json?
+
+    paidAt  DateTime?
+    attempt Int       @default(1)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+    order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    buyer       User?       @relation("PaymentBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+    seller      User?       @relation("PaymentSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+    @@index([orderId, transactionId])
+    @@index([buyerId])
+    @@index([sellerId])
+    @@map("payments")
+}
+
+model DisputeTicket {
+    id      String @id
+    orderId String @unique
+
+    raisedBy DISPUTE_ROLE
+
+    raisedById   String
+    raisedByUser User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    reason            String
+    status            DISPUTE_STATUS @default(PENDING)
+    resolution        String?
+    createdAt         DateTime       @default(now())
+    updatedAt         DateTime       @updatedAt
+    resolvedAt        DateTime?
+    resolvedByAdminId String?
+    resolvedByAdmin   Admin?         @relation("AdminDisputes", fields: [resolvedByAdminId], references: [id], onDelete: SetNull)
+    userId            String
+
+    // Relations
+    order        Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    conversation Conversation?
+    refund       Refund?
+
+    @@index([orderId])
+    @@index([status])
+    @@map("dispute_tickets")
+}
+
+model Refund {
+    id            String  @id
+    disputeId     String? @unique
+    orderId       String?
+    transactionId String?
+
+    refundedAt         DateTime?
+    amount             Float
+    refundMethod       REFUND_METHOD
+    notes              String?
+    status             REFUND_STATUS        @default(PENDING)
+    refundAmountStatus REFUND_AMOUNT_STATUS @default(NONE)
+    createdAt          DateTime             @default(now())
+    updatedAt          DateTime             @updatedAt
+
+    // Relations
+    dispute     DisputeTicket? @relation(fields: [disputeId], references: [id], onDelete: SetNull)
+    order       Order?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    transaction Transaction?   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+    @@index([disputeId])
+    @@index([orderId])
+    @@index([status])
+    @@map("refunds")
+}
+
+// ============================================
+// SECTION 11: COMMUNICATION SYSTEM
+// ============================================
+
+model Notification {
+    id         String                @id
+    userId     String?
+    merchantId String?
+    title      String
+    message    String
+    type       NOTIFICATION_TYPE
+    event      NOTIFICATION_EVENT
+    link       String?
+    data       Json?
+    priority   NOTIFICATION_PRIORITY @default(NORMAL)
+    delivered  Boolean               @default(false)
+    read       Boolean               @default(false)
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    merchant Merchant? @relation("MerchantNotifications", fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([merchantId])
+    @@index([type])
+    @@index([event])
+    @@map("notifications")
+}
+
+model Conversation {
+    id     String              @id
+    type   CONVERSATION_TYPE
+    stage  CONVERSATION_STAGE  @default(LISTING)
+    status CONVERSATION_STATUS @default(ACTIVE)
+
+    listingId String?
+    orderId   String?
+    disputeId String? @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    listing      Listing?                  @relation(fields: [listingId], references: [id], onDelete: SetNull)
+    order        Order?                    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+    dispute      DisputeTicket?            @relation(fields: [disputeId], references: [id], onDelete: SetNull)
+    participants ConversationParticipant[]
+    messages     Message[]
+
+    @@index([listingId])
+    @@index([orderId])
+    @@index([disputeId])
+    @@map("conversations")
+}
+
+model ConversationParticipant {
+    id             String @id
+    conversationId String
+
+    participantType PARTICIPANT_TYPE
+    participantId   String?
+    customerInfo    Json?
+
+    joinedAt DateTime @default(now())
+
+    // Relations
+    conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+    @@unique([conversationId, participantType, participantId])
+    @@index([conversationId])
+    @@map("conversation_participants")
+}
+
+model Message {
+    id             String @id
+    conversationId String
+
+    senderType   PARTICIPANT_TYPE
+    senderId     String?
+    customerInfo Json?
+
+    content     String
+    attachments Json?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    deletedAt   DateTime?
+
+    // Relations
+    conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+    @@index([conversationId])
+    @@map("messages")
+}
+
+// ============================================
+// SECTION 12: FINANCIAL MANAGEMENT
+// ============================================
+
+model MerchantAccount {
+    id         String   @id
+    merchantId String   @unique
+    merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    availableBalance Float          @default(0.0)
+    pendingCharges   Float          @default(0.0)
+    totalEarnings    Float          @default(0.0)
+    totalWithdrawn   Float          @default(0.0)
+    totalCharges     Float          @default(0.0)
+    currency         String         @default("INR")
+    status           ACCOUNT_STATUS @default(ACTIVE)
+
+    payoutMethod    PAYOUT_METHOD?
+    lastPayoutAt    DateTime?
+    payoutFrequency PAYOUT_FREQUENCY @default(MANUAL)
+
+    auditTrail Json?
+    notes      String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    deductions         MerchantDeduction[]
+    payoutTransactions PayoutTransaction[]
+
+    @@map("merchant_accounts")
+}
+
+model MerchantDeduction {
+    id                String @id
+    merchantAccountId String
+    merchantId        String
+
+    referenceId String
+    type        DEDUCTION_TYPE
+    amount      Float
+    status      DEDUCTION_STATUS @default(PENDING)
+    remarks     String?
+
+    triggeredBy DEDUCTION_SOURCE @default(SYSTEM)
+    settledAt   DateTime?
+    waivedBy    String?
+
+    shippingId String?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    merchantAccount MerchantAccount @relation(fields: [merchantAccountId], references: [id], onDelete: Cascade)
+    merchant        Merchant        @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@index([merchantAccountId])
+    @@index([merchantId])
+    @@index([referenceId])
+    @@map("merchant_deductions")
+}
+
+model PayoutTransaction {
+    id                String @id
+    merchantAccountId String
+
+    amount        Float
+    method        PAYOUT_METHOD
+    status        PAYOUT_STATUS @default(PENDING)
+    externalTxnId String?
+    referenceNote String?
+    failureReason String?
+    initiatedBy   String
+
+    createdAt   DateTime  @default(now())
+    processedAt DateTime?
+
+    // Relations
+    merchantAccount MerchantAccount @relation(fields: [merchantAccountId], references: [id], onDelete: Cascade)
+
+    @@index([merchantAccountId])
+    @@index([status])
+    @@map("payout_transactions")
+}
+
+model PlatformFeeConfig {
+    id       String  @id
+    category String
+    label    String
+    feeType  String
+    feeValue Float
+    codFee   Float   @default(50)
+    currency String  @default("INR")
+    isActive Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([category])
+    @@map("platform_fee_configs")
 }
 
 model MerchantPlatformFee {
-    id         String   @id @default(uuid())
+    id         String @id
     merchantId String
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
 
-    category FEE_CATEGORY
+    category String
     label    String
-    feeType  PLATFORM_FEE_TYPE
+    feeType  String
     feeValue Float
-    currency String            @default("INR")
-    isActive Boolean           @default(true)
+    currency String  @default("INR")
+    isActive Boolean @default(true)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    // Relations
+    merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@index([merchantId])
+    @@index([category])
+    @@map("merchant_platform_fees")
 }
 
 model StorePlatformFee {
-    id      String        @id @default(uuid())
+    id      String @id
     storeId String
-    store   MerchantStore @relation(fields: [storeId], references: [id])
 
-    category FEE_CATEGORY
+    category String
     label    String
-    feeType  PLATFORM_FEE_TYPE
+    feeType  String
     feeValue Float
-    currency String            @default("INR")
-    isActive Boolean           @default(true)
+    currency String  @default("INR")
+    isActive Boolean @default(true)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    // Relations
+    store MerchantStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+    @@index([storeId])
+    @@index([category])
+    @@map("store_platform_fees")
 }
 
 model PlatformFeeLog {
@@ -2796,6 +3199,11 @@ model PlatformFeeLog {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([orderId])
+    @@index([merchantId])
+    @@index([storeId])
+    @@map("platform_fee_logs")
 }
 
 model PlatformSetting {
@@ -2804,6 +3212,242 @@ model PlatformSetting {
     feeType   FEE_TYPE   @default(PERCENTAGE)
     feeValue  Float      @default(10)
     updatedAt DateTime   @updatedAt
+
+    @@map("platform_settings")
+}
+
+// Admin Activity Log (Audit Trail)
+model AdminActivityLog {
+    id         String  @id
+    adminId    String
+    action     String // "APPROVED_MERCHANT", "RESOLVED_DISPUTE", etc
+    resource   String // "MERCHANT", "ORDER", "DISPUTE"
+    resourceId String?
+    metadata   Json? // Store details of action
+    ipAddress  String?
+    userAgent  String?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+    @@index([adminId])
+    @@index([action])
+    @@index([createdAt])
+    @@map("admin_activity_logs")
+}
+
+// Platform-wide Statistics
+model PlatformStats {
+    id   String   @id
+    date DateTime @unique
+
+    // Merchants
+    totalMerchants  Int @default(0)
+    activeMerchants Int @default(0)
+    newMerchants    Int @default(0)
+
+    // Stores
+    totalStores  Int @default(0)
+    activeStores Int @default(0)
+
+    // Orders
+    totalOrders     Int   @default(0)
+    completedOrders Int   @default(0)
+    cancelledOrders Int   @default(0)
+    totalRevenue    Float @default(0)
+    platformFee     Float @default(0)
+
+    // Shipments
+    totalShipments     Int @default(0)
+    shipmentsDelivered Int @default(0)
+    shipmentsInTransit Int @default(0)
+
+    // Payments
+    totalPayments      Int @default(0)
+    successfulPayments Int @default(0)
+    failedPayments     Int @default(0)
+    totalRefunds       Int @default(0)
+
+    // Disputes
+    totalDisputes    Int @default(0)
+    resolvedDisputes Int @default(0)
+    pendingDisputes  Int @default(0)
+
+    calculatedAt DateTime @default(now())
+
+    @@index([date])
+    @@map("platform_stats")
+}
+
+// Admin Notifications
+model AdminNotification {
+    id      String  @id
+    adminId String?
+
+    type     NOTIFICATION_TYPE
+    title    String
+    message  String
+    priority NOTIFICATION_PRIORITY @default(NORMAL)
+
+    isRead Boolean   @default(false)
+    readAt DateTime?
+
+    resourceType RESOURCE_TYPE?
+    resourceId   String?
+
+    metadata Json?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    admin Admin? @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+    @@index([adminId])
+    @@index([isRead])
+    @@index([createdAt])
+    @@map("admin_notifications")
+}
+
+// ============================================
+// SECTION 13: FILE MANAGEMENT & CONFIGURATION
+// ============================================
+
+model File {
+    id           String         @id
+    merchantId   String?
+    userId       String?
+    filename     String
+    originalName String
+    mimeType     String
+    size         Int
+    url          String
+    cloudinaryId String?
+    folder       String?
+    type         FILE_TYPE
+    resourceType RESOURCE_TYPE?
+    resourceId   String?
+    metadata     Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    merchant Merchant? @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([merchantId])
+    @@index([userId])
+    @@index([type])
+    @@index([resourceType, resourceId])
+    @@map("files")
+}
+
+model CourierConfiguration {
+    id          String  @id
+    courierCode String  @unique
+    courierName String
+    isActive    Boolean @default(true)
+    priority    Int     @default(0)
+
+    // Pricing
+    baseRate  Float
+    perKgRate Float
+    minWeight Float @default(0)
+    maxWeight Float @default(50)
+
+    // Coverage
+    serviceable   Json? // Array of pincodes/regions
+    deliveryTypes Json? // [STANDARD, EXPRESS, etc]
+
+    // Features
+    features Json? // {cod: true, reverse: true, etc}
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([courierCode])
+    @@index([isActive])
+    @@map("courier_configurations")
+}
+
+model FeeConfiguration {
+    id          String          @id
+    configType  FEE_CONFIG_TYPE
+    label       String
+    description String?
+
+    feeType   PLATFORM_FEE_TYPE
+    feeValue  Float
+    minAmount Float?            @default(0)
+    maxAmount Float?
+
+    applicableFor APPLICABLE_FOR @default(ALL)
+    category      String? // SHOP, MARKETPLACE
+
+    isActive Boolean @default(true)
+    priority Int     @default(0)
+
+    metadata Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([configType])
+    @@index([isActive])
+    @@map("fee_configurations")
+}
+
+model EmailTemplate {
+    id           String  @id
+    templateCode String  @unique
+    name         String
+    subject      String
+    htmlContent  String  @db.Text
+    textContent  String? @db.Text
+
+    category  EMAIL_CATEGORY
+    variables Json? // Available template variables
+
+    isActive Boolean @default(true)
+    isSystem Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([templateCode])
+    @@index([category])
+    @@index([isActive])
+    @@map("email_templates")
+}
+
+model MerchantNotification {
+    id         String @id
+    merchantId String
+
+    type     NOTIFICATION_TYPE
+    title    String
+    message  String
+    priority NOTIFICATION_PRIORITY @default(NORMAL)
+
+    isRead Boolean   @default(false)
+    readAt DateTime?
+
+    resourceType RESOURCE_TYPE?
+    resourceId   String?
+
+    metadata Json?
+
+    createdAt DateTime @default(now())
+
+    // Relations
+    merchant Merchant @relation("MerchantNotificationsList", fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@index([merchantId])
+    @@index([isRead])
+    @@index([createdAt])
+    @@map("merchant_notifications")
 }
 
 // ============================================

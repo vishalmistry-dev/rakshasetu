@@ -2,6 +2,10 @@
   "name": "rakshasetu",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "dev:api": "pnpm --filter @rakshasetu/api dev",
@@ -14,6 +18,14 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky install"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^18.3.26",
+      "@types/react-dom": "^18.3.5",
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1"
+    }
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
@@ -25,5 +37,6 @@
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
-  }
+  },
+  "packageManager": "pnpm@8.15.0"
 }
